@@ -120,14 +120,15 @@
     editor.create();
 
     function confirm() {
+        $('#output').val("");
         // 获取编辑器区域完整html代码
         var html = editor.$txt.html();
         // 获取编辑器纯文本内容
         var text = editor.$txt.text();
         // 获取格式化后的纯文本
         var formatText = editor.$txt.formatText();
-        var name = $('#name').val()
-        var title = $('#FRTitle').val()
+        var name = $('#name').val();
+        var title = $('#FRTitle').val();
         $.post('/index.do', {
             name: name,
             FRTitle: title,
