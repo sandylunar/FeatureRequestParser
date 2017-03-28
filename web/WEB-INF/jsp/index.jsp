@@ -67,8 +67,6 @@
 
 <script type="text/javascript">
 
-    $("#tree").treeview();
-
     var editor = new wangEditor('FRDes');
     // 关闭菜单栏fixed
     editor.config.menuFixed = false;
@@ -130,7 +128,7 @@
     editor.create();
 
     function confirm() {
-        document.getElementById('tree').innerHtml = "";
+        $('ul').html("");
         // 获取编辑器区域完整html代码
         var html = editor.$txt.html();
         // 获取编辑器纯文本内容
@@ -144,7 +142,10 @@
             FRTitle: title,
             FRDes: html
         }, function (data) {
-            document.getElementById('tree').innerHtml = data;
+            alert(data);
+            /*document.getElementById('tree').innerHtml = data;*/
+            $('ul').html(data);
+            $("#tree").treeview();
         })
     }
 </script>
