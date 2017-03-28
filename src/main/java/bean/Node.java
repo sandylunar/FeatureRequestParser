@@ -46,14 +46,14 @@ public class Node {
             result = "\t"+result;
 
         return result;*/
-        String result = "<li><span class=\"file\">"+"["+tag+"]<br>"+sentence+"\n"+"</span>";
+        String result = "<li><span class=\"file\"><strong>"+tag+"<br></strong>"+sentence+"\n"+"</span>";
         if (hasChildren()){
             result += "<ul>";
             for(Node node : children){
                 String tmp = node.toString();
                 //System.out.println(result);
                 if (node.parent.sentence.equals("")){
-                    tmp = tmp.replaceFirst("\\[.+?\\]<br>", "");
+                    tmp = tmp.replaceFirst("(?<=<strong>).+?(?=<\\/strong>)", "");
                 }
                 result += tmp;
             }
