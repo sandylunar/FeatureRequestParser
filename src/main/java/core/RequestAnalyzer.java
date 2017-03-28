@@ -23,8 +23,8 @@ public class RequestAnalyzer {
 	static String outputFile = "resource//precision_results_non-text.txt";
 	static boolean printResult = false;
 	static String[] rawAttributeNames;
-	public static String[] tagNames = new String[] { "explanation", "want", "useless" };
-	static int tagSize = 3;
+	public static String[] tagNames = new String[] { "explanation", "want", "useless" ,"benefit","drawback","example"};
+	static int tagSize = tagNames.length;
 
 	// TODO
 	public static boolean classifyAsUseless(String content, double verbsAllInvalid) {
@@ -97,52 +97,75 @@ public class RequestAnalyzer {
 		// createPrintWriter("resource//precision_results_non-text.txt");
 
 		Attribute tag = data.attribute("tag");
+		int count = 0;
+		int[][] matrix = new int[tagSize][tagSize];
+		ListIterator<Instance> list = data.listIterator();
+		StringBuffer buffer[] = new StringBuffer[tagSize];
+		
 		data.setClassIndex(tag.index());
 
-		ListIterator<Instance> list = data.listIterator();
-
 		System.out.println("Negitive predictions: ");
-		int count = 0;
-		int[][] matrix = new int[3][3];
+		
+		for(int i = 0; i < tagSize; i++){
+			buffer[i] = new StringBuffer();
+		}
+		
 		while (list.hasNext()) {
 			Instance item = list.next();
 			int index = (int) item.classValue();
 			String sentence = item.stringValue(0);
 
-			int predict = predictTagIndex(item, data);
-
+			int predict = predictTagIndex(item, data,null,-1);
+			matrix[index][predict]++;
 			if (index == predict) {
-				matrix[index][index]++;
 				continue;
 			}
 
+			count++;
+			String output = String.format("%d - %s - predict to be %s : %s\n",count, tagNames[index], tagNames[predict], sentence);
+			buffer[index].append(output);
+			
 			if (index == 1) {
-				count++;
-				matrix[index][predict]++;
+				
 				// if(predict == 2)
-				System.out.println(count + " - WANT - predict to be " + tagNames[predict] + ":" + sentence);
+				//System.out.println(count + " - WANT - predict to be " + tagNames[predict] + ":" + sentence);
 			}
 
 			if (index == 0) {
-				matrix[index][predict]++;
-				count++;
 				// if(predict==2)
-				System.out.println(count + " - EXP - predict to be " + tagNames[predict] + ":" + sentence);
+				//System.out.println(count + " - EXP - predict to be " + tagNames[predict] + ":" + sentence);
 			}
 			if (index == 2) {
-				matrix[index][predict]++;
-				count++;
 				// if(predict==1)
-				System.out.println(count + " - USELESS - predict to be " + tagNames[predict] + ":" + sentence);
+				//System.out.println(count + " - USELESS - predict to be " + tagNames[predict] + ":" + sentence);
 			}
+			//if(index >2 && (predict==0||predict>2))
+				//System.out.printf("%d - %s - predict to be %s : %s\n",count, tagNames[index], tagNames[predict], sentence);
+			
+		
+			
+			
+		}
+		
+		for(int i = 0; i < tagSize; i++){
+			System.out.println("\nActual tag  = "+tagNames[i]);
+			System.out.print(buffer[i]);
 		}
 
 		System.out.println(matrix);
 
-		double[][] evaluation = new double[3][2];
-		for (int i = 0; i < 3; i++) {
-			evaluation[i][0] = matrix[i][i] / (double) (matrix[0][i] + matrix[1][i] + matrix[2][i]);
-			evaluation[i][1] = matrix[i][i] / (double) (matrix[i][0] + matrix[i][1] + matrix[i][2]);
+		double[][] evaluation = new double[tagNames.length][2];
+		for (int i = 0; i < tagNames.length; i++) {
+			double sump=0;
+			double sumr=0;
+			
+			for(int j = 0; j < tagNames.length; j++ ){
+				sump+=matrix[j][i];
+				sumr+=matrix[i][j];
+			}
+			
+			evaluation[i][0] = matrix[i][i] /  sump;
+			evaluation[i][1] = matrix[i][i] / sumr;
 			System.out.printf("Class=%s precision=%.2f recall=%.2f\n", tagNames[i], evaluation[i][0], evaluation[i][1]);
 		}
 
@@ -249,7 +272,7 @@ public class RequestAnalyzer {
 		}
 
 		if (content.toLowerCase().contains("there should be") || content.toLowerCase().contains("would like to")
-				|| content.toLowerCase().contains("i’d like") || content.toLowerCase().contains("the request is:")) {
+				|| content.toLowerCase().contains("i'd like") || content.toLowerCase().contains("the request is:")) {
 			if (!content.toLowerCase().contains("would like to work"))
 				result = 1;
 		}
@@ -412,28 +435,89 @@ public class RequestAnalyzer {
 		return result;
 	}
 
-	private static int predictTagIndex(Instance item, Instances data) {
+	public static int predictTagIndex(Instance item, Instances data, FeatureRequestOL request, int index) {
+		String originContent;
+		String subject;
+		String action;
+		double isRealFirst;
+		double matchMDGOODVB;
+		double startWithVB;
+		double question;
+		double matchVBDGOOD;
+		double numValidWords;
+		double matchMDGOOD;
+		double containNEG;
+		double similarityToTitle;
+		double matchMDGOODIF;
+		double matchGOODIF;
+		double matchSYSNEED;
+		double isPastTense;
+		double sentimentScore;
+		double sentimentProbability;
+		double numValidVerbs;
+		double matchIsGOOD ;
+		double matchIsNotGOOD ;
+		double matchIsBAD ;
+		double matchIsNotBAD ;
+		
+		if(index == -1 && request == null){
+		
+		originContent = item.stringValue(0);
+		subject = item.stringValue(data.attribute("subjects"));
+		action = item.stringValue(data.attribute("actions"));
 
-		String originContent = item.stringValue(0);
-		String subject = item.stringValue(data.attribute("subjects"));
-		String action = item.stringValue(data.attribute("actions"));
+		 isRealFirst = item.value(data.attribute("isRealFirst"));
+		 matchMDGOODVB = item.value(data.attribute("matchMDGOODVB"));
+		 startWithVB = item.value(data.attribute("startWithVB"));
+		 question = item.value(data.attribute("question"));
+		 matchVBDGOOD = item.value(data.attribute("matchVBDGOOD"));
+		 numValidWords = item.value(data.attribute("numValidWords"));
+		 matchMDGOOD = item.value(data.attribute("matchMDGOOD"));
+		 containNEG = item.value(data.attribute("containNEG"));
+		 similarityToTitle = item.value(data.attribute("similarityToTitle"));
+		 matchMDGOODIF = item.value(data.attribute("matchMDGOODIF"));
+		 matchGOODIF = item.value(data.attribute("matchGOODIF"));
+		 matchSYSNEED = item.value(data.attribute("matchSYSNEED"));
+		 isPastTense = item.value(data.attribute("isPastTense"));
+		 sentimentScore = item.value(data.attribute("sentimentScore"));
+		 sentimentProbability = item.value(data.attribute("sentimentProbability"));
+		 numValidVerbs = item.value(data.attribute("numValidVerbs"));
+		 matchIsGOOD = item.value(data.attribute("matchIsGOOD"));
+		 matchIsNotGOOD = item.value(data.attribute("matchIsNotGOOD"));
+		 matchIsBAD = item.value(data.attribute("matchIsBAD"));
+		 matchIsNotBAD = item.value(data.attribute("matchIsNotBAD"));
+		}
+		
+		else{
+			originContent =  request.getSentence(index);
+			subject = request.getSubjects(index);
+			action = request.getActions(index);
 
-		double isRealFirst = item.value(data.attribute("isRealFirst"));
-		double matchMDGOODVB = item.value(data.attribute("matchMDGOODVB"));
-		double startWithVB = item.value(data.attribute("startWithVB"));
-		double question = item.value(data.attribute("question"));
-		double matchVBDGOOD = item.value(data.attribute("matchVBDGOOD"));
-		double numValidWords = item.value(data.attribute("numValidWords"));
-		double matchMDGOOD = item.value(data.attribute("matchMDGOOD"));
-		double containNEG = item.value(data.attribute("containNEG"));
-		double similarityToTitle = item.value(data.attribute("similarityToTitle"));
-		double matchMDGOODIF = item.value(data.attribute("matchMDGOODIF"));
-		double matchGOODIF = item.value(data.attribute("matchGOODIF"));
-		double matchSYSNEED = item.value(data.attribute("matchSYSNEED"));
-		double isPastTense = item.value(data.attribute("isPastTense"));
-		double sentimentScore = item.value(data.attribute("sentimentScore"));
-		double sentimentProbability = item.value(data.attribute("sentimentProbability"));
-		double numValidVerbs = item.value(data.attribute("numValidVerbs"));
+			 isRealFirst = request.getIsRealFirst(index);
+			 matchMDGOODVB = request.getMatchMDGOODVB(index);
+			
+			 startWithVB = request.getStartWithVB(index);
+			 question = request.getQuestion(index);
+			 matchVBDGOOD = request.getMatchVBDGOODB(index);
+			 numValidWords = request.getNumValidWords(index);
+			 matchMDGOOD = request.getMatchMDGOOD(index);
+			 containNEG = request.getContainEXP(index);
+			 similarityToTitle = request.getSimilairity(index);
+			 matchMDGOODIF = request.getMatchGOODIF(index);
+			 matchGOODIF = request.getMatchGOODIF(index);
+			 matchSYSNEED = request.getMatchSYSNEED(index);
+			 isPastTense = request.getIsPastTense(index);
+			 sentimentScore = request.getSentimentScore(index);
+			 sentimentProbability = request.getSentimentProbability(index);
+			 numValidVerbs = request.getNumValidVerbs(index);
+			 matchIsGOOD = request.getMatchIsGOOD(index);
+			 matchIsNotGOOD = request.getMatchIsNotGOOD(index);
+			 matchIsBAD = request.getMatchIsBAD(index);
+			 matchIsNotBAD = request.getMatchIsNotBAD(index);
+			 
+			 
+		}
+		
 
 		// "want to","can"
 		String[] pattern = new String[] { "would like", "\'d like", "’d like", "would love to", "\'d love to",
@@ -448,7 +532,7 @@ public class RequestAnalyzer {
 
 		String[] expPattern = new String[] { "have to", "unfortunately", "possible", "suggestion", "only" };
 
-		if (originContent.contains("This suite can help us measure performance and memory hotspots in 1.2 development"))
+		if (originContent.contains("For compiler errors it is usually possible for the bug raiser to attach a simple testcase"))
 			System.out.println();
 
 		String content = originContent.replaceAll("[(].*[)]", "");
@@ -580,7 +664,7 @@ public class RequestAnalyzer {
 				|| content.contains("<PATH>") || content.contains("<FILE>") || content.contains("<http-link>")
 				|| content.contains("<FILE-SYS>") || content.contains("<FILE-XML>") || content.contains("web-page-link")
 				|| content.contains("<http>") || content.contains("LINK-HTTP") || content.contains("<file-path>"))
-			result = 0;
+			result = 0; 
 
 		boolean exp1 = content.toLowerCase().contains("current") || content.toLowerCase().startsWith("to do this")
 				|| content.toLowerCase().startsWith("possibly") || content.toLowerCase().contains("something like")
@@ -668,10 +752,177 @@ public class RequestAnalyzer {
 		
 		if(FeatureUtility.matchNOTONLY(content))
 			result = 1;
+		
+		if( FeatureUtility.matchMDAllow(content)){ //||	containGood matchMDGOOD == 1 ||
+			result = 3; //benefit
+			}
 
 		// if(sentimentScore<2)
 		// result = 0;
 
+		//TODO
+		if(result != 0)
+			return result;
+		
+		if (originContent.contains("During operations like GRANT privileges, Export and Import selecting those groups manually over and over again is inconvenient and error-prone"))
+			System.out.println();
+		
+		boolean containGood = FeatureUtility.isContain(content, FeatureUtility.GOOD);
+		
+		if( FeatureUtility.matchMDAllow(content)){ //||	containGood matchMDGOOD == 1 ||
+			result = 3; //benefit
+			}
+		
+		//drawback
+		//if (sentimentScore < 1 && sentimentProbability > 0.6) 
+		//	result = 4;	  
+		
+		if(matchIsBAD == 1 || matchIsNotGOOD ==1) 	//[20]matchIsGOOD [21]matchIsNotGOOD [22]matchIsBAD [23]matchIsNotBAD
+			result = 4;
+		
+		if(content.toLowerCase().contains("would like to know why"))
+			result = 4;
+		
+		//if(content.toLowerCase().contains("only")||content.toLowerCase().contains("current"))
+			//result = 4;
+		
+		//if(FeatureUtility.checkContains(content, FeatureUtility.BAD, true))
+		//	result = 4;
+		
+		//example
+		boolean example1 =  content.toLowerCase().contains("for example")
+				||content.toLowerCase().contains("similar to")
+				||content.toLowerCase().startsWith("like");
+		if(example1)
+			result = 5;
+		
+		if(content.toLowerCase().startsWith("other"))
+			result = 5;
+		
+		if(content.toLowerCase().endsWith("following:"))
+			result = 5;
+		
+		boolean containlink = content.contains("<link-http>")//|| content.contains("<CODE>")  || content.contains("<issue-link>")
+				  || content.contains("<http-link>") || content.contains("<html-link>")|| content.contains("<EXAMPLE>")
+				 || content.contains("web-page-link")
+				|| content.contains("<http>") || content.contains("LINK-HTTP");
+		if ( (containlink||content.toLowerCase().contains("like"))  && (numValidVerbs <2  && numValidWords < 10))
+			result = 5; 
+		
+		
+		
+		if(content.matches(".*:[\\s]*<CODE>.*"))
+			result = 5;
+		
+		if(content.equalsIgnoreCase("<CODE>"))
+			result = 5;
+		
+		//explanation
+		if(content.toLowerCase().contains("current"))
+			result = 0;
+		
+		
+		
+		//benefit 
+		if( FeatureUtility.matchMDAllow(content)){  //||containGood matchMDGOOD == 1 ||
+			result = 3; 
+			}
+		
+		//[20]matchIsGOOD [21]matchIsNotGOOD [22]matchIsBAD [23]matchIsNotBAD
+		if(matchIsGOOD == 1 || matchIsNotBAD == 1)
+			result = 3;
+		
+		//example
+		if(content.toLowerCase().contains("something like"))
+			result = 5;
+		
+		//bad
+		if(matchIsBAD == 1 ) 	//[20]matchIsGOOD [21]matchIsNotGOOD [22]matchIsBAD [23]matchIsNotBAD
+			result = 4;
+		
+		if(matchVBDGOOD == 1)
+			result = 4;
+		
+		//if(containNEG==1&&containGood)
+		//	result = 4;
+		//if(question==1&&containGood)
+			//result=4;
+		if(content.matches(".*cause[^,.;?\"']*problem.*"))
+			result=4;
+		if(content.matches(".*not[^,.;?\"']*enough.*"))
+			result=4;
+		
+		if(content.toLowerCase().contains("without success"))
+			result = 4;
+		
+		//example
+		if(content.toLowerCase().contains("for example")
+				||content.toLowerCase().contains("similar to")
+				||content.toLowerCase().startsWith("like"))
+			result = 5;
+		
+		//benefit
+		
+		//startswith good
+		if(content.toLowerCase().contains("won't have to")||content.toLowerCase().contains("no longer need")||
+				content.toLowerCase().contains("could reduce")||content.toLowerCase().contains("benefit"))
+			result = 3; 
+		
+		if(content.matches(".*would[^,.;?\"']*allow.*"))
+			result=3;
+		
+		if(content.matches(".*save[^,.;?\"']*time.*"))
+			result=3;
+		
+		if(content.matches(".*save[^,.;?\"']*memory.*"))
+			result=3;
+		
+		
+		if(content.toLowerCase().startsWith("having this"))
+			result = 3;
+		
+		if(content.toLowerCase().contains("could just")||content.toLowerCase().contains("can just")||
+				content.toLowerCase().contains("a great feature")||content.toLowerCase().contains("give a value"))  
+			result = 3;
+		
+		if(numValidVerbs==1&&subject.equalsIgnoreCase("we")&&action.equalsIgnoreCase("work"))
+			result = 0;
+		
+		if(content.toLowerCase().contains("should")||content.toLowerCase().startsWith("ideally")||content.toLowerCase().startsWith("note"))
+			result = 0;
+		
+		if(content.toLowerCase().startsWith("in order to")&&isRealFirst == 1)
+			result = 0;
+		
+		//example
+		if(content.toLowerCase().contains("something like"))
+			result = 5;
+		
+		if (action != null && action.length() != 0) {
+			if (action.equalsIgnoreCase("mean"))
+				result = 0;
+			if (action.equalsIgnoreCase("propose"))
+				result = 1;
+
+			if (action.equalsIgnoreCase("support")) {
+				if (subject != null && subject.length() != 0) {
+					if (subject.equals("we"))
+						result = 1;
+				}
+			}
+
+			if (subject != null && subject.length() != 0) {
+				if (subject.toLowerCase().equals("proposal"))
+					result = 1;
+			}
+
+		}
+		
+		if(content.toLowerCase().contains("wanna"))
+			result = 1;
+		if(content.toLowerCase().startsWith("for example")||content.toLowerCase().startsWith("example"))
+			result = 5;
+		
 		return result;
 	}
 

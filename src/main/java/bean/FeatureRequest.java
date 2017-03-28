@@ -34,10 +34,60 @@ public class FeatureRequest {
 	ArrayList<String> subjects = new ArrayList<String>();
 	ArrayList<String> actions = new ArrayList<String>();
 	
+	ArrayList<Integer> matchIsGOOD = new ArrayList<Integer>();
+	ArrayList<Integer> matchIsNotGOOD = new ArrayList<Integer>();
+	ArrayList<Integer> matchIsBAD = new ArrayList<Integer>();
+	ArrayList<Integer> matchIsNotBAD = new ArrayList<Integer>();
+	
+	
+	
+	
 	public FeatureRequest(String title) {
 		this.title = title;
 	}
 	
+	public void addMatchIsBAD(int score){
+		matchIsBAD.add(score);
+	}
+	
+	public int getMatchIsBAD(int index){
+		return matchIsBAD.get(index);
+	}
+	
+	
+	public void addMatchIsNotBAD(int score){
+		matchIsNotBAD.add(score);
+	}
+	
+	public int getMatchIsNotBAD(int index){
+		return matchIsNotBAD.get(index);
+	}
+	
+	
+	public void addMatchIsNotGOOD(int score){
+		matchIsNotGOOD.add(score);
+	}
+	
+	public int getMatchIsNotGOOD(int index){
+		return matchIsNotGOOD.get(index);
+	}
+	
+	public void addMatchIsGOOD(int score){
+		matchIsGOOD.add(score);
+	}
+	
+	public int getMatchIsGOOD(int index){
+		return matchIsGOOD.get(index);
+	}
+	
+	
+	
+	
+	
+	
+	public ArrayList<String> getSentences(){
+		return sentences;
+	}
 	
 	public void addSubjects(String label){
 		subjects.add(label);
@@ -319,8 +369,10 @@ public class FeatureRequest {
 			fr+="numValidWords: "+numValidWords.get(i)+"\n";
 			fr+="subjects: "+subjects.get(i)+"\n";
 			fr+="actions: "+actions.get(i)+"\n";
-			
-			
+			fr+="matchIsGOOD: "+matchIsGOOD.get(i)+"\n";
+			fr+="matchIsNotGOOD: "+matchIsNotGOOD.get(i)+"\n";
+			fr+="matchIsBAD: "+matchIsBAD.get(i)+"\n";
+			fr+="matchIsNotBAD: "+matchIsNotBAD.get(i)+"\n";
 		}
 		return fr;   
 	}

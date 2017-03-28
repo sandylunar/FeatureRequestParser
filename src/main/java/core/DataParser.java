@@ -2,9 +2,12 @@ package main.java.core;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -26,7 +29,7 @@ public class DataParser {
 	static ArrayList<FeatureRequest> featureRequestList = new ArrayList<FeatureRequest>();
 	static HashSet<String> labels = new HashSet<String>();
 	static ArrayList<String> labelArray = new ArrayList<String>();
-	static StanfordCoreNlpDemo nlpTool;
+	static StanfordCoreNlpDemo nlpTool =new StanfordCoreNlpDemo(false,"");
 	static String outputFR = "data//log//all-feature-requests.txt";
 	
 	public DataParser(String path){
@@ -34,15 +37,16 @@ public class DataParser {
 		  outputFR = path+"data//log//all-feature-requests.txt";
 	}
 
-	public static void groupTrainData(String outputDir, String targetFileName) throws FileNotFoundException {
+	public static void groupTrainData(String outputDir, String targetFileName) throws FileNotFoundException, UnsupportedEncodingException {
 		exportDir = outputDir;
 		loadTaggedFRFile(targetFileName);
 		readFileByLines();
 	}
 
-	public static void loadTaggedFRFile(String fileName) throws FileNotFoundException {
-		propertiesFile = new File(fileName);
-		reader = new BufferedReader(new FileReader(propertiesFile));
+	public static void loadTaggedFRFile(String fileName) throws FileNotFoundException, UnsupportedEncodingException {
+		//propertiesFile = new File(fileName);
+		InputStreamReader fReader = new InputStreamReader(new FileInputStream(fileName),"UTF-8");
+		reader = new BufferedReader(fReader);
 	}
 
 	public static void readFileByLines() {
@@ -146,8 +150,12 @@ public class DataParser {
 		vals[24] = fr.getNumValidWords(i);
 		vals[25] = data.attribute("subjects").addStringValue(fr.getSubjects(i));
 		vals[26] = data.attribute("actions").addStringValue(fr.getActions(i));
+		vals[27] = fr.getMatchIsGOOD(i);
+		vals[28] = fr.getMatchIsNotGOOD(i);
+		vals[29] = fr.getMatchIsBAD(i);
+		vals[30] = fr.getMatchIsNotBAD(i);
 		
-		vals[27] = labelArray.indexOf(fr.getLabel(i));
+		vals[31] = labelArray.indexOf(fr.getLabel(i));
 		return vals;
 	}
 
@@ -181,6 +189,13 @@ public class DataParser {
 		attributeList.add(new Attribute("numValidWords"));
 		attributeList.add(new Attribute("subjects",(ArrayList<String>) null));
 		attributeList.add(new Attribute("actions",(ArrayList<String>) null));
+		
+		attributeList.add(new Attribute("matchIsGOOD"));
+		attributeList.add(new Attribute("matchIsNotGOOD"));
+		attributeList.add(new Attribute("matchIsBAD"));
+		attributeList.add(new Attribute("matchIsNotBAD"));
+		
+		
 		attributeList.add(new Attribute("tag", labelArray));
 		
 		return attributeList;
@@ -200,9 +215,10 @@ public class DataParser {
 				// parse oneFeatureRequest when line is empty
 				if (tempString.trim().length() == 0) {
 					if (!oneFeatureRequest.isEmpty()) {
-						constructSingleFeatureRequest(oneFeatureRequest, line);
+						boolean added = constructSingleFeatureRequest(oneFeatureRequest, line);
 						oneFeatureRequest = new ArrayList<String>();
-						line++;
+						if(added)
+							line++;
 					}
 					continue;
 				}
@@ -211,12 +227,13 @@ public class DataParser {
 
 			// parse the last one
 			if (!oneFeatureRequest.isEmpty()) {
-				constructSingleFeatureRequest(oneFeatureRequest, line);
+				boolean added = constructSingleFeatureRequest(oneFeatureRequest, line);
 				oneFeatureRequest = new ArrayList<String>();
-				line++;
+				if(added)
+					line++;
 			}
 			
-			constructLabelArray();
+			constructLabelArray(RequestAnalyzer.tagNames);
 
 			reader.close();
 			nlpTool.exit();
@@ -232,15 +249,17 @@ public class DataParser {
 		}
 	}
 
-	private static void constructLabelArray() {
-		//for (String tag : labels)
-		//	labelArray.add(tag);
-		labelArray.add("explanation");
-		labelArray.add("want");
-		labelArray.add("useless");
+	private static void constructLabelArray(String[] tagNames) {
+		System.out.println("Labels found: ");
+		for (String s : labels){
+			System.out.println(s);
+			}
+		for(String tag : tagNames)
+			labelArray.add(tag);
+		
 	}
 
-	private static void constructSingleFeatureRequest(ArrayList<String> oneFeatureRequest, int line) throws IOException {
+	private static boolean constructSingleFeatureRequest(ArrayList<String> oneFeatureRequest, int line) throws IOException {
 		int titleIndex = 0;
 		int targetIndex = oneFeatureRequest.size();
 		String title = null;
@@ -264,11 +283,14 @@ public class DataParser {
 		
 		if (DEBUG) {
 			System.out.printf("=============FR print #%d ===================\n",line);
-			System.out.println(fr);
+			System.out.println(fr.getSentences());
 		}
 		
-		if(fr!=null)
+		if(fr!=null){
 			featureRequestList.add(fr);
+			return true;}
+		else
+			return false;
 	}
 
 	public static FeatureRequestOL constructSFeatureRequestOL(FeatureRequestOL request) throws IOException{
@@ -282,14 +304,12 @@ public class DataParser {
 			String content = request.getSentence(i);
 			String title = request.getTitle();
 			
-			//判断内容是否为空
 			if(title==null || content==null || title.isEmpty() || content.isEmpty()){
 				System.err.println("Empty title or content input in : \n");
 				System.err.println(fr);
 				return null;
 			}
 			
-			//计算NLP的属性值
 			String filteredContent = content.replaceAll("[(].*[)]", "");
 			nlpValues = nlpTool.parseSingleSentence(filteredContent);
 			
@@ -298,7 +318,6 @@ public class DataParser {
 				continue;
 			}
 			
-			//计算isRealFirst
 			if(fr.hasRealFirstBefore())
 				fr.addIsRealFirst(0);
 			else{
@@ -339,6 +358,13 @@ public class DataParser {
 		fr.addSentimentScore((int)nlpValues[17]);
 		fr.addSentimentProbability(nlpValues[18]);
 		fr.addNumValidWords((int)nlpValues[19]);
+		fr.addMatchIsGOOD((int)nlpValues[20]);
+		fr.addMatchIsNotGOOD((int)nlpValues[21]);
+		fr.addMatchIsBAD((int)nlpValues[22]);
+		fr.addMatchIsNotBAD((int)nlpValues[23]);
+
+		
+		
 		
 		String subject = "null";
 		String action = "null";
@@ -442,6 +468,11 @@ public class DataParser {
 			fr.addSentimentScore((int)nlpValues[17]);
 			fr.addSentimentProbability(nlpValues[18]);
 			fr.addNumValidWords((int)nlpValues[19]);
+			fr.addMatchIsGOOD((int)nlpValues[20]);
+			fr.addMatchIsNotGOOD((int)nlpValues[21]);
+			fr.addMatchIsBAD((int)nlpValues[22]);
+			fr.addMatchIsNotBAD((int)nlpValues[23]);
+			
 			
 			String subject = "";
 			String action = "";
@@ -483,10 +514,19 @@ public class DataParser {
 		else {
 			System.err.println("Null input at line: "+line);
 			System.err.println(oneFeatureRequest);
+			return tag;
 		}
 
 		if (FeatureUtility.checkContains(tag, FeatureUtility.excludeTags,false))
-			tag =null;
+			return null;
+
+		if(tag.toLowerCase().contains("example")||tag.toLowerCase().contains("ref")) 
+ 			tag = "example";
+		else if(tag.toLowerCase().contains("benefit"))
+			tag = "benefit";
+		else if(tag.toLowerCase().contains("drawback")
+				||tag.toLowerCase().contains("painpoint")|| tag.toLowerCase().contains("complain"))
+			tag = "drawback";
 		else if(!tag.equals("want") && !tag.equals("useless"))
 			tag = "explanation";
 		
