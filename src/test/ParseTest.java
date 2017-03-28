@@ -10,6 +10,7 @@ import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
 import main.java.bean.FeatureRequestOL;
+import main.java.bean.Node;
 import main.java.parse.Parser;
 import org.junit.Test;
 
@@ -187,5 +188,24 @@ public class ParseTest {
         for(Sentence sentence : document.sentences()){
             System.out.println(sentence.toString());
         }*/
+    }
+
+    @Test
+    public void nodeTest(){
+        Node root = new Node("title", "this is title");
+        for(int i=0;i<3;i++){
+            Node want = new Node("want", "this is want "+i);
+            Node benefit = new Node("benefit", "");
+            for(int j=0;j<3;j++){
+                Node benefit1 = new Node("benefit", "this is benefit "+i+"-"+j);
+                benefit.addChildren(benefit1);
+            }
+            Node example = new Node("example", "this is example "+i);
+            want.addChildren(benefit);
+            want.addChildren(example);
+            root.addChildren(want);
+        }
+        System.out.println(root.toString());
+
     }
 }

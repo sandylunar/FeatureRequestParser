@@ -2,9 +2,12 @@ package main.java.core;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -26,23 +29,24 @@ public class DataParser {
 	static ArrayList<FeatureRequest> featureRequestList = new ArrayList<FeatureRequest>();
 	static HashSet<String> labels = new HashSet<String>();
 	static ArrayList<String> labelArray = new ArrayList<String>();
-	static StanfordCoreNlpDemo nlpTool;
+	static StanfordCoreNlpDemo nlpTool =new StanfordCoreNlpDemo(false,"");
 	static String outputFR = "data//log//all-feature-requests.txt";
-	
+
 	public DataParser(String path){
-		  nlpTool = new StanfordCoreNlpDemo(false,path);
-		  outputFR = path+"data//log//all-feature-requests.txt";
+		nlpTool = new StanfordCoreNlpDemo(false,path);
+		outputFR = path+"data//log//all-feature-requests.txt";
 	}
 
-	public static void groupTrainData(String outputDir, String targetFileName) throws FileNotFoundException {
+	public static void groupTrainData(String outputDir, String targetFileName) throws FileNotFoundException, UnsupportedEncodingException {
 		exportDir = outputDir;
 		loadTaggedFRFile(targetFileName);
 		readFileByLines();
 	}
 
-	public static void loadTaggedFRFile(String fileName) throws FileNotFoundException {
-		propertiesFile = new File(fileName);
-		reader = new BufferedReader(new FileReader(propertiesFile));
+	public static void loadTaggedFRFile(String fileName) throws FileNotFoundException, UnsupportedEncodingException {
+		//propertiesFile = new File(fileName);
+		InputStreamReader fReader = new InputStreamReader(new FileInputStream(fileName),"UTF-8");
+		reader = new BufferedReader(fReader);
 	}
 
 	public static void readFileByLines() {
@@ -69,7 +73,7 @@ public class DataParser {
 			}
 		}
 	}
-	
+
 
 
 	public static Instances readIntoFeatureRequests(String targetFileName) throws Exception {
@@ -81,7 +85,7 @@ public class DataParser {
 		if (DEBUG) {
 			System.out.printf("============Reading from %s to FeatureRequestList ==============\n", targetFileName);
 			FeatureUtility.exportIFeatureRequestsToFile(featureRequestList, outputFR);
-			
+
 			//System.out.println(featureRequestList);
 			System.out.printf("\nExported %d feature request to file: %s\n",featureRequestList.size(),outputFR);
 		}
@@ -96,19 +100,19 @@ public class DataParser {
 			throws Exception {
 		Instances data;
 		double[] vals;
-		
+
 		ArrayList<Attribute> attributeList = constructAttributeList();
 		data = new Instances("PMA Feature Requests", attributeList, 0);
 
 		int numAttr = data.numAttributes();
-		
+
 		for (FeatureRequest fr : featureRequestList) {
 			for (int i = 0; i < fr.getNumSentences(); i++) {
 				vals = constructAttributeValues(numAttr,fr,i,data);
 				data.add(new DenseInstance(1.0, vals));
 			}
 		}
-		
+
 		data.setClassIndex(numAttr - 1);
 
 		return data;
@@ -116,7 +120,7 @@ public class DataParser {
 
 	//TODO update when add new attributes
 	private static double[] constructAttributeValues(int numAttr, FeatureRequest fr, int i, Instances data) {
-		
+
 		Attribute stringAttr = data.attribute(0);
 		double[] vals = new double[numAttr];
 		vals[0] = stringAttr.addStringValue(fr.getSentence(i));
@@ -146,8 +150,12 @@ public class DataParser {
 		vals[24] = fr.getNumValidWords(i);
 		vals[25] = data.attribute("subjects").addStringValue(fr.getSubjects(i));
 		vals[26] = data.attribute("actions").addStringValue(fr.getActions(i));
-		
-		vals[27] = labelArray.indexOf(fr.getLabel(i));
+		vals[27] = fr.getMatchIsGOOD(i);
+		vals[28] = fr.getMatchIsNotGOOD(i);
+		vals[29] = fr.getMatchIsBAD(i);
+		vals[30] = fr.getMatchIsNotBAD(i);
+
+		vals[31] = labelArray.indexOf(fr.getLabel(i));
 		return vals;
 	}
 
@@ -181,8 +189,15 @@ public class DataParser {
 		attributeList.add(new Attribute("numValidWords"));
 		attributeList.add(new Attribute("subjects",(ArrayList<String>) null));
 		attributeList.add(new Attribute("actions",(ArrayList<String>) null));
+
+		attributeList.add(new Attribute("matchIsGOOD"));
+		attributeList.add(new Attribute("matchIsNotGOOD"));
+		attributeList.add(new Attribute("matchIsBAD"));
+		attributeList.add(new Attribute("matchIsNotBAD"));
+
+
 		attributeList.add(new Attribute("tag", labelArray));
-		
+
 		return attributeList;
 	}
 
@@ -200,9 +215,10 @@ public class DataParser {
 				// parse oneFeatureRequest when line is empty
 				if (tempString.trim().length() == 0) {
 					if (!oneFeatureRequest.isEmpty()) {
-						constructSingleFeatureRequest(oneFeatureRequest, line);
+						boolean added = constructSingleFeatureRequest(oneFeatureRequest, line);
 						oneFeatureRequest = new ArrayList<String>();
-						line++;
+						if(added)
+							line++;
 					}
 					continue;
 				}
@@ -211,12 +227,13 @@ public class DataParser {
 
 			// parse the last one
 			if (!oneFeatureRequest.isEmpty()) {
-				constructSingleFeatureRequest(oneFeatureRequest, line);
+				boolean added = constructSingleFeatureRequest(oneFeatureRequest, line);
 				oneFeatureRequest = new ArrayList<String>();
-				line++;
+				if(added)
+					line++;
 			}
-			
-			constructLabelArray();
+
+			constructLabelArray(RequestAnalyzer.tagNames);
 
 			reader.close();
 			nlpTool.exit();
@@ -232,15 +249,17 @@ public class DataParser {
 		}
 	}
 
-	private static void constructLabelArray() {
-		//for (String tag : labels)
-		//	labelArray.add(tag);
-		labelArray.add("explanation");
-		labelArray.add("want");
-		labelArray.add("useless");
+	private static void constructLabelArray(String[] tagNames) {
+		System.out.println("Labels found: ");
+		for (String s : labels){
+			System.out.println(s);
+		}
+		for(String tag : tagNames)
+			labelArray.add(tag);
+
 	}
 
-	private static void constructSingleFeatureRequest(ArrayList<String> oneFeatureRequest, int line) throws IOException {
+	private static boolean constructSingleFeatureRequest(ArrayList<String> oneFeatureRequest, int line) throws IOException {
 		int titleIndex = 0;
 		int targetIndex = oneFeatureRequest.size();
 		String title = null;
@@ -261,44 +280,44 @@ public class DataParser {
 		}
 
 		FeatureRequest fr = constructSingleFeatureRequest(title, oneFeatureRequest, titleIndex, targetIndex);
-		
+
 		if (DEBUG) {
 			System.out.printf("=============FR print #%d ===================\n",line);
-			System.out.println(fr);
+			System.out.println(fr.getSentences());
 		}
-		
-		if(fr!=null)
+
+		if(fr!=null){
 			featureRequestList.add(fr);
+			return true;}
+		else
+			return false;
 	}
 
 	public static FeatureRequestOL constructSFeatureRequestOL(FeatureRequestOL request) throws IOException{
 		FeatureRequestOL fr = request;
 		NGramDistance ng = new NGramDistance();
-		
+
 		int size = request.getNumSentences();
-		
+
 		for(int i = 0 ; i < size; i ++){
 			double[] nlpValues = null;
 			String content = request.getSentence(i);
 			String title = request.getTitle();
-			
-			//判断内容是否为空
+
 			if(title==null || content==null || title.isEmpty() || content.isEmpty()){
 				System.err.println("Empty title or content input in : \n");
 				System.err.println(fr);
 				return null;
 			}
-			
-			//计算NLP的属性值
+
 			String filteredContent = content.replaceAll("[(].*[)]", "");
 			nlpValues = nlpTool.parseSingleSentence(filteredContent);
-			
+
 			if (nlpValues == null) {
 				System.err.println("NLP analysis error when parse: !" + content);
 				continue;
 			}
-			
-			//计算isRealFirst
+
 			if(fr.hasRealFirstBefore())
 				fr.addIsRealFirst(0);
 			else{
@@ -308,63 +327,70 @@ public class DataParser {
 					fr.addIsRealFirst(1);
 				}
 			}
-			
-		
-		
-		
-		Double similarity = Double.valueOf(ng.getDistance(title, content));
-		
-		//TODO Update when add new attributes
-		fr.addLabel("NA");
-		//fr.addSentence(content);
-		fr.addSimilarity(similarity);
-		fr.addAscOrder(Integer.valueOf(i+1));
-		fr.addContainMD(new Integer((int)nlpValues[0]));
-		fr.addContainWants(new Integer((int)nlpValues[1]));
-		fr.addContainShouldCan(new Integer((int)nlpValues[2]));
-		fr.addsStartWithVB(new Integer((int)nlpValues[3]));
-		fr.addMatchMDGOOD(new Integer((int)nlpValues[4]));
-		fr.addContainNEG(new Integer((int)nlpValues[5]));
-		fr.addQuestion(new Integer((int)nlpValues[6]));
-		fr.addNumTrunk(new Integer((int)nlpValues[7]));
-		fr.addNumToken(new Integer((int)nlpValues[8]));
-		fr.addContainEXP(new Integer((int)nlpValues[9]));
-		fr.addMatchMDGOODVB((int)nlpValues[10]);
-		fr.addMatchVBDGOOD((int)nlpValues[11]);
-		fr.addNumValidVerbs((int)nlpValues[12]); // [12]containValidVerbs
-		fr.addMatchMDGOODIF((int)nlpValues[13]);
-		fr.addMatchGOODIF((int)nlpValues[14]);
-		fr.addMatchSYSNEED((int)nlpValues[15]);
-		fr.addIsPastTense((int)nlpValues[16]);
-		fr.addSentimentScore((int)nlpValues[17]);
-		fr.addSentimentProbability(nlpValues[18]);
-		fr.addNumValidWords((int)nlpValues[19]);
-		
-		String subject = "null";
-		String action = "null";
-		if(nlpTool.subjectandAction!=null && nlpTool.subjectandAction.length!=0){
-			 subject = nlpTool.subjectandAction[0];
-			 action = nlpTool.subjectandAction[1];
+
+
+
+
+			Double similarity = Double.valueOf(ng.getDistance(title, content));
+
+			//TODO Update when add new attributes
+			fr.addLabel("NA");
+			//fr.addSentence(content);
+			fr.addSimilarity(similarity);
+			fr.addAscOrder(Integer.valueOf(i+1));
+			fr.addContainMD(new Integer((int)nlpValues[0]));
+			fr.addContainWants(new Integer((int)nlpValues[1]));
+			fr.addContainShouldCan(new Integer((int)nlpValues[2]));
+			fr.addsStartWithVB(new Integer((int)nlpValues[3]));
+			fr.addMatchMDGOOD(new Integer((int)nlpValues[4]));
+			fr.addContainNEG(new Integer((int)nlpValues[5]));
+			fr.addQuestion(new Integer((int)nlpValues[6]));
+			fr.addNumTrunk(new Integer((int)nlpValues[7]));
+			fr.addNumToken(new Integer((int)nlpValues[8]));
+			fr.addContainEXP(new Integer((int)nlpValues[9]));
+			fr.addMatchMDGOODVB((int)nlpValues[10]);
+			fr.addMatchVBDGOOD((int)nlpValues[11]);
+			fr.addNumValidVerbs((int)nlpValues[12]); // [12]containValidVerbs
+			fr.addMatchMDGOODIF((int)nlpValues[13]);
+			fr.addMatchGOODIF((int)nlpValues[14]);
+			fr.addMatchSYSNEED((int)nlpValues[15]);
+			fr.addIsPastTense((int)nlpValues[16]);
+			fr.addSentimentScore((int)nlpValues[17]);
+			fr.addSentimentProbability(nlpValues[18]);
+			fr.addNumValidWords((int)nlpValues[19]);
+			fr.addMatchIsGOOD((int)nlpValues[20]);
+			fr.addMatchIsNotGOOD((int)nlpValues[21]);
+			fr.addMatchIsBAD((int)nlpValues[22]);
+			fr.addMatchIsNotBAD((int)nlpValues[23]);
+
+
+
+
+			String subject = "null";
+			String action = "null";
+			if(nlpTool.subjectandAction!=null && nlpTool.subjectandAction.length!=0){
+				subject = nlpTool.subjectandAction[0];
+				action = nlpTool.subjectandAction[1];
+			}
+
+			fr.addSubjects(subject);
+			fr.addActions(action);
 		}
-		
-		fr.addSubjects(subject);
-		fr.addActions(action);
+
+		for (int i = size; i > 0; i--) {
+			fr.addDescOrder(Integer.valueOf(i));
+
+		}
+
+
+		return fr;
+
+
 	}
 
-	for (int i = size; i > 0; i--) {
-		fr.addDescOrder(Integer.valueOf(i));
 
-	}
-	
-
-	return fr;
-		
-		
-	}
-	
-	
 	private static FeatureRequest constructSingleFeatureRequest(String title, ArrayList<String> oneFeatureRequest, int titleIndex,
-			int targetIndex) throws IOException {
+																int targetIndex) throws IOException {
 
 		FeatureRequest fr = new FeatureRequest(title);
 		NGramDistance ng = new NGramDistance();
@@ -377,15 +403,15 @@ public class DataParser {
 			String[] temp = FeatureUtility.splitByEqual(line, 0, false, false);
 			String tag = null;
 			String content;
-			
+
 			tag = getTag(temp,oneFeatureRequest,i);
-			
+
 			if(tag==null)
 				continue;
-			
+
 			content = getContent(temp[1]);
 			labels.add(tag);
-			
+
 			size++;
 
 
@@ -397,8 +423,8 @@ public class DataParser {
 				System.err.println("NLP analysis error when parse: !" + content);
 				continue;
 			}
-			
-			
+
+
 			if(fr.hasRealFirstBefore())
 				fr.addIsRealFirst(0);
 			else{
@@ -408,7 +434,7 @@ public class DataParser {
 					fr.addIsRealFirst(1);
 				}
 			}
-			
+
 			if(title==null || content==null || title.isEmpty() || content.isEmpty()){
 				System.err.println("Empty title or content input in : \n");
 				System.err.println(oneFeatureRequest);
@@ -416,7 +442,7 @@ public class DataParser {
 			}
 
 			Double similarity = Double.valueOf(ng.getDistance(title, content));
-			
+
 			//TODO Update when add new attributes
 			fr.addLabel(tag);
 			fr.addSentence(content);
@@ -442,14 +468,19 @@ public class DataParser {
 			fr.addSentimentScore((int)nlpValues[17]);
 			fr.addSentimentProbability(nlpValues[18]);
 			fr.addNumValidWords((int)nlpValues[19]);
-			
+			fr.addMatchIsGOOD((int)nlpValues[20]);
+			fr.addMatchIsNotGOOD((int)nlpValues[21]);
+			fr.addMatchIsBAD((int)nlpValues[22]);
+			fr.addMatchIsNotBAD((int)nlpValues[23]);
+
+
 			String subject = "";
 			String action = "";
 			if(nlpTool.subjectandAction!=null && nlpTool.subjectandAction.length!=0){
-				 subject = nlpTool.subjectandAction[0];
-				 action = nlpTool.subjectandAction[1];
+				subject = nlpTool.subjectandAction[0];
+				action = nlpTool.subjectandAction[1];
 			}
-			
+
 			fr.addSubjects(subject);
 			fr.addActions(action);
 		}
@@ -458,7 +489,7 @@ public class DataParser {
 			fr.addDescOrder(Integer.valueOf(i));
 
 		}
-		
+
 
 		return fr;
 	}
@@ -483,13 +514,22 @@ public class DataParser {
 		else {
 			System.err.println("Null input at line: "+line);
 			System.err.println(oneFeatureRequest);
+			return tag;
 		}
 
 		if (FeatureUtility.checkContains(tag, FeatureUtility.excludeTags,false))
-			tag =null;
+			return null;
+
+		if(tag.toLowerCase().contains("example")||tag.toLowerCase().contains("ref"))
+			tag = "example";
+		else if(tag.toLowerCase().contains("benefit"))
+			tag = "benefit";
+		else if(tag.toLowerCase().contains("drawback")
+				||tag.toLowerCase().contains("painpoint")|| tag.toLowerCase().contains("complain"))
+			tag = "drawback";
 		else if(!tag.equals("want") && !tag.equals("useless"))
 			tag = "explanation";
-		
+
 		return tag;
 	}
 

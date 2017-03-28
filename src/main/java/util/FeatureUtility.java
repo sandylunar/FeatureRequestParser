@@ -33,9 +33,25 @@ public class FeatureUtility {
 	public static final String WANT_MD[] = { "should", "can" };
 	public static final String WANTS[] = { "sugg", "propose", "consider", "want", "would like", "\'d like", "��d like",
 			"what about", "how about", "new" };
-	public static final String GOOD[] = { "help", "helpful", "useful", "great", "nice", "good", "appreciate", "greatly",
+	public static final String GOOD[] = {"nicer", "safer","help", "helpful", "useful", "great", "nice", "good", "appreciate", "greatly",
 			"appreciated", "appropriate", "better", "convenient", "cool", "worth" ,"make sense","interesting","a great deal",
-			"a good deal","neat","safer","accurate","simplify","speed","sense","enhanced"};//,"possible"
+			"a good deal","neat","accurate","simplify","speed","sense","enhanced",
+			"necessary","cheaper","ease ","faster","easily","easier","reduce","neater","best","improve","closely",
+			"fine","optimized","awesome","simplified","handy ","fine grained"};//,"possible","save","enable","automatically"
+
+	public static final String GOOD_BENEFIT[] = {"nicer", "safer", "helpful", "useful", "great", "nice", "good", "appreciate", "greatly",
+			"appreciated", "better", "convenient", "cool", "worth" ,"make sense","a great deal",
+			"a good deal","neat","accurate","simplify","speed","sense","enhanced",
+			"cheaper","ease ","faster","easily","easier","reduce","neater","best","improve","closely",
+			"fine","optimized","awesome","simplified","handy ","fine grained","fast","reduce","advantage"
+	};//"interesting","necessary","possible","save","enable","automatically"
+
+
+	public static final String BAD[]={"accidentally","lose","loses","hard","annoying","annoy","miss","confusing",
+			"confuse","bad","unfortunately","unfortunate","failing","fail","'ve yet","have yet","inefficient","awkward","rarely use",
+			"impossible","massive","confused","a large amount","difficult","too much","heavy",
+			"limitation","incorrect","forget","useless","nightmare","inconvenient","error-prone","much effort"}; //"has to","have to","had to","against","still","issue","problem","can't","cannot","can not","cant",
+
 	public static final String EXPLAINATION[] = { "why", "hint", "mean", "has to", "have to", "only", "same", "F.e.",
 			"already", "etc" }; // like
 
@@ -130,26 +146,29 @@ public class FeatureUtility {
 	}
 
 	public static boolean checkContains(String text, String[] list, boolean checkEqual) {
-		
 		List<CoreLabel> rawWords = StanfordCoreNlpDemo.getRawWords(text);
 		for(CoreLabel item : rawWords){
 			String word = item.word();
-			
+
 			for (String target : list) {
-				
+
 				if(checkEqual){
-					if (word.equalsIgnoreCase(target))
+
+					if(target.contains(" ")){
+						if(text.toLowerCase().contains(target.toLowerCase()))
+							return true;
+					} else if (word.equalsIgnoreCase(target))
 						return true;
 				}else{
 					if (word.toLowerCase().contains(target.toLowerCase()))
 						return true;
 				}
-				
+
 			}
 		}
-		
+
 		return false;
-		
+
 	}
 
 	public static boolean checkContains(String text, String[] list) {
@@ -166,21 +185,21 @@ public class FeatureUtility {
 
 		return false;
 	}
-	
+
 	public static boolean isContain(String text, String[] list) {
 
-			for (String target : list) {
-				if (text.toLowerCase().contains(target.toLowerCase()))
-					return true;
-			}
+		for (String target : list) {
+			if (text.toLowerCase().contains(target.toLowerCase()))
+				return true;
+		}
 
 		return false;
 	}
-	
+
 	public static boolean isSysName(String name){
 		return isContain(name, SYSTEM_NAMES,true);
 	}
-	
+
 	public static boolean isContain(String text, String[] list, boolean equal) {
 
 		for (String target : list) {
@@ -190,11 +209,11 @@ public class FeatureUtility {
 			}else{
 				if (text.toLowerCase().contains(target.toLowerCase()))
 					return true;
-				}
+			}
 		}
 
-	return false;
-}
+		return false;
+	}
 
 	public static void exportInstancesToFile(Instances dataRaw, String filename) throws IOException {
 		FileWriter fw = new FileWriter(filename);
@@ -203,7 +222,7 @@ public class FeatureUtility {
 		bw.close();
 		fw.close();
 	}
-	
+
 	public static void exportIFeatureRequestsToFile(ArrayList<FeatureRequest> featureRequestList, String filename) throws IOException {
 		FileWriter fw = new FileWriter(filename);
 		BufferedWriter bw = new BufferedWriter(fw);
@@ -212,7 +231,7 @@ public class FeatureUtility {
 			bw.write(fr.toString());
 			bw.write("\n");
 		}
-		
+
 		bw.close();
 		fw.close();
 	}
@@ -255,7 +274,7 @@ public class FeatureUtility {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param data
 	 * @param option
 	 *            SENTENCE, INSTANCE
@@ -321,76 +340,95 @@ public class FeatureUtility {
 			results[i] = words.get(i).word();
 		return results;
 	}
-	
+
 	public static boolean matchFeature(String content){
 		boolean result = false;
-		
-		Pattern pattern1 = Pattern.compile(".*would be[^,.;?\"'����]*feature.*");
-		Pattern pattern2 = Pattern.compile(".*feature[^,.;?\"'����]*would be.*");
-		Pattern pattern3 = Pattern.compile(".*this is[^,.;?\"'����]*feature.*");
+
+		Pattern pattern1 = Pattern.compile(".*would be[^,.;?\"']*feature.*");
+		Pattern pattern2 = Pattern.compile(".*feature[^,.;?\"']*would be.*");
+		Pattern pattern3 = Pattern.compile(".*this is[^,.;?\"']*feature.*");
 		Matcher matcher1 = pattern1.matcher(content);
 		Matcher matcher2 = pattern2.matcher(content);
 		Matcher matcher3 = pattern3.matcher(content);
 		if(matcher1.matches()||matcher2.matches()||matcher3.matches())
 			result = true;
-		
+
 		return result;
-		 
+
 	}
-	
+
 	public static boolean matchShouldBePossible(String content){
-		Pattern pattern = Pattern.compile(".*should[^,.;?\"'����]*be[^,.;?\"'����]*possible.*");
+		Pattern pattern = Pattern.compile(".*should[^,.;?\"']*be[^,.;?\"']*possible.*");
 		Matcher matcher = pattern.matcher(content);
 		if(matcher.matches())
 			return true;
-		
+
 		return false;
-		
+
 	}
-	
+
+
 	public static boolean matchNOTONLY(String content){
-		Pattern pattern = Pattern.compile(".*should[^,.;?\"'����]*not only[^,.;?\"'����]*but also.*");
+		Pattern pattern = Pattern.compile(".*should[^,.;?\"']*not only[^,.;?\"']*but also.*");
 		Matcher matcher = pattern.matcher(content);
 		if(matcher.matches())
 			return true;
-		
+
 		return false;
-		
+
 	}
-	
+
+	public static boolean matchMDAllow(String content){
+		Pattern pattern = Pattern.compile(".*could[^,.;?\"']*allow[^,.;?\"']*");
+		Matcher matcher = pattern.matcher(content);
+
+		Pattern pattern1 = Pattern.compile(".*would[^,.;?\"']*allow[^,.;?\"']*");
+		Matcher matcher1 = pattern1.matcher(content);
+
+		if(matcher.matches()||matcher1.matches())
+			return true;
+
+		return false;
+
+	}
+
 	public static void main(String args[]){
-		 Pattern pattern = Pattern.compile(".*feature.*");
-		 Matcher matcher = pattern.matcher("\"find and replace feature\"");
-		 System.out.println(matcher.matches());
-		 
+		Pattern pattern = Pattern.compile(".*feature.*");
+		Matcher matcher = pattern.matcher("\"find and replace feature\"");
+		System.out.println(matcher.matches());
+
 		 /*pattern = Pattern.compile(".*would be[^,.;?\"'����]*feature.*");
 		 matcher = pattern.matcher("would be a great feature to have in that regard");
 		 System.out.println(matcher.matches());
-		 
+
 		 pattern = Pattern.compile(".*feature[^,.;?\"'����]*would be.*");
 		 matcher = pattern.matcher("A really useful feature would be a list where one can simply save SQL");
 		 System.out.println(matcher.matches());*/
-		 
-		 pattern = Pattern.compile(".*should[^,.;?\"'����]*be[^,.;?\"'����]*possible.*");
-		 matcher = pattern.matcher("This should be possible for <ant> as well and allow simplify forked testing");
-		 System.out.println(matcher.matches());
-		 
-		 
-		 pattern = Pattern.compile(".*should[^,.;?\"'����]*not only[^,.;?\"'����]*but also.*");
-		 
-		 //pattern = Pattern.compile(".*either[^,.;?\"'����]*but also.*");
-		 matcher = pattern.matcher("SoftExceptions should print not only their trace but also that of the wrapped throwable.");
-		 System.out.println(matcher.matches());
-		 
-		 
-		 //String content = "it would be nice if the compiler emitted an error, since the two situations can be confusingly similar:example = <CODE>";
-		 //String[] tokens = getTokens(content);
-		 //System.out.println(tokens);
-		 //index = replacement.index //= 22
-		 //tokens[index] == "<CODE>";
-		 
+
+		pattern = Pattern.compile(".*should[^,.;?\"']*be[^,.;?\"']*possible.*");
+		matcher = pattern.matcher("This should be possible for <ant> as well and allow simplify forked testing");
+		System.out.println(matcher.matches());
+
+
+		pattern = Pattern.compile(".*should[^,.;?\"']*not only[^,.;?\"']*but also.*");
+
+		//pattern = Pattern.compile(".*either[^,.;?\"'*but also.*");
+		matcher = pattern.matcher("SoftExceptions should print not only their trace but also that of the wrapped throwable.");
+		System.out.println(matcher.matches());
+
+		String text ="If the user doesn't press Save before the countdown expires, the user loses everything";
+		boolean flag = FeatureUtility.checkContains(text, FeatureUtility.BAD, true);
+		System.out.println(flag);
+
+
+		//String content = "it would be nice if the compiler emitted an error, since the two situations can be confusingly similar:example = <CODE>";
+		//String[] tokens = getTokens(content);
+		//System.out.println(tokens);
+		//index = replacement.index //= 22
+		//tokens[index] == "<CODE>";
+
 		  /*String content = "So many people have asked how to write a declare warning / error to detect empty catch blocks, that this is clearly a desirable feature";
-	      System.out.println(matchFeature(content)); 
+	      System.out.println(matchFeature(content));
 		  String[] tokens = getTokens(content);
 	        for(String token : tokens){
 	        	String target = getTokens("<For example0>")[0];
@@ -401,6 +439,53 @@ public class FeatureUtility {
 	        }*/
 
 	}
-	
+
+	/**
+	 *
+	 * @param content
+	 * @param wordList
+	 * @param target
+	 * @return 1...size
+	 */
+	public static ArrayList<Integer> getIndexList(String content, ArrayList<String> wordList,
+												  String target) {
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		String splits[] = target.split(" ");
+		if(splits.length==1){
+			for(int i = 0; i < wordList.size(); i++){
+				String word  = wordList.get(i);
+
+				if(word.equalsIgnoreCase(splits[0]))
+					list.add(new Integer(i+1));
+
+			}
+		}else{
+			for(int i = 0 ; i < wordList.size()-splits.length+1; i++){
+				String word = "";
+				for(int j = 0; j < splits.length;j++){
+					word=word+" "+wordList.get(i+j);
+				}
+				word = word.trim();
+
+				if(word.equalsIgnoreCase(target))
+					list.add(new Integer(i+1));
+			}
+		}
+		return list;
+	}
+
+	public void testGetIndex() throws IOException{
+		String content = "I have to go and have to go to another place";
+		String content2  = "This is really good and good, let me see a good face";
+		StanfordCoreNlpDemo nlp = new StanfordCoreNlpDemo(true,"");
+		nlp.parseSingleSentence(content);
+		ArrayList<Integer> list = FeatureUtility.getIndexList(content,nlp.wordList,"have to");
+		System.out.println(list);
+
+		nlp.parseSingleSentence(content2);
+		ArrayList<Integer> list2 = FeatureUtility.getIndexList(content2,nlp.wordList,"good");
+		System.out.println(list2);
+	}
+
 
 }

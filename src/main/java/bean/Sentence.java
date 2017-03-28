@@ -48,10 +48,6 @@ public class Sentence {
     }
 
     public String toString() {
-        String print = this.origin;
-        for (Sentence list : this.getItemLists()) {
-            print = print.concat(list.getOrigin());
-        }
-        return print;
+        return this.origin;
     }
 }

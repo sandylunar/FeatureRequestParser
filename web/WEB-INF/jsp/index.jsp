@@ -17,11 +17,18 @@
     <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
     <!--引入wangEditor.css-->
     <link rel="stylesheet" type="text/css" href="/resources/css/wangEditor.min.css">
+    <link rel="stylesheet" href="/resources/css/jquery.treeview.css"/>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/resources/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/resources/js/wangEditor.min.js"></script>
+    <script type="text/javascript" src="/resources/js/jquery.treeview.js"></script>
 </head>
 <%--Chrome垂直居中--%>
-<%--display: flex;flex-direction: column;justify-content: center;--%>
+<body style="display: flex;flex-direction: column;justify-content: center;">
 <%--FireFox IE 垂直居中--%>
-<body style="position: fixed;left:50%; top: 50%;-webkit-transform: translateX(-50%) translateY(-50%)">
+<%--<body style="position: absolute;top: 50%;-webkit-transform: translateY(-50%)">--%>
 <div class="container">
     <div class="row" style="border: thin solid #5bc0de;padding:20px 30px;border-radius: 15px">
         <div class="col-md-6">
@@ -38,26 +45,29 @@
                 </div>
                 <div class="form-group">
                     <label for="FRDes">FR Description</label>
-                    <textarea id="FRDes" style="height:200px" name="FRDes" placeholder="Balabala"
-                              autofocus></textarea>
+                    <textarea id="FRDes" style="height:200px" name="FRDes"></textarea>
                 </div>
-                <button class="btn btn-info" type="button" onclick="confirm()">Confirm</button>
+                <button class="btn btn-info" type="button" onclick="confirm()">Submit</button>
             </form>
         </div>
         <div class="col-md-6">
             <div class="form-group">
                 <h1>Output</h1>
-                <textarea class="form-control" id="output" rows="20"></textarea>
+                <%--<textarea class="form-control" id="output" style="height: 430px"></textarea>--%>
+                <div>
+                    <ul id="tree" class="filetree">
+
+                    </ul>
+                </div>
+
             </div>
         </div>
     </div>
 </div>
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
-<!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="/resources/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="/resources/js/wangEditor.min.js"></script>
+
 <script type="text/javascript">
+
+    $("#tree").treeview();
 
     var editor = new wangEditor('FRDes');
     // 关闭菜单栏fixed
@@ -120,7 +130,7 @@
     editor.create();
 
     function confirm() {
-        $('#output').val("");
+        document.getElementById('tree').innerHtml = "";
         // 获取编辑器区域完整html代码
         var html = editor.$txt.html();
         // 获取编辑器纯文本内容
@@ -129,12 +139,12 @@
         var formatText = editor.$txt.formatText();
         var name = $('#name').val();
         var title = $('#FRTitle').val();
-        $.post('/index.do', {
+        $.post('index.do', {
             name: name,
             FRTitle: title,
             FRDes: html
         }, function (data) {
-            $('#output').val(data);
+            document.getElementById('tree').innerHtml = data;
         })
     }
 </script>
