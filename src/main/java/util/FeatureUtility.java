@@ -353,7 +353,7 @@ public class FeatureUtility {
 		Matcher matcher1 = pattern1.matcher(content);
 		Matcher matcher2 = pattern2.matcher(content);
 		Matcher matcher3 = pattern3.matcher(content);
-		Matcher matcher4 = pattern3.matcher(content);
+		Matcher matcher4 = pattern4.matcher(content);
 		if(matcher1.matches()||matcher2.matches()||matcher3.matches()||matcher4.matches())
 			result = true;
 		
@@ -389,10 +389,15 @@ public class FeatureUtility {
 		Pattern pattern1 = Pattern.compile(".*would[^,.;?\"']*allow[^,.;?\"']*");
 		Matcher matcher1 = pattern1.matcher(content);
 		
-		Pattern pattern2 = Pattern.compile(".*would just allow*");
+		Pattern pattern2 = Pattern.compile(".*would just allow.*");
 		Matcher matcher2 = pattern2.matcher(content);
 		
-		if( (matcher.matches() || matcher1.matches()) && !matcher2.matches())
+		Pattern pattern3 = Pattern.compile(".*would have to[^,.;?\"']*allow.*");
+		Matcher matcher3 = pattern3.matcher(content);
+		
+		boolean b3 = matcher3.matches();
+		
+		if( (matcher.matches() || matcher1.matches()) && !matcher2.matches() && !b3)
 			return true;
 		
 		return false;
@@ -450,6 +455,14 @@ public class FeatureUtility {
 			 
 			 String test2 = "These options help ActiveMQ recognize disappeared connections outside of the application layer";
 			 System.out.println("matchHelpSystem = "+FeatureUtility.matchHelpSystem(test2));
+			 
+			 String test3 = "I would appreciate a feature that allows to control some User Interface functionality from phpMyAdmin";
+			 
+			 System.out.println("matchFeature = "+FeatureUtility.matchFeature(test3));
+			 System.out.println("matchFeature = "+test3.matches(".*appreciate[^,.;?\"']*feature.*"));
+			 
+			 String test4 = "Ideally, the Transport API would have to be extended to allow for a onewayBatch(List<Object> messageBatch) method (and the default implementation would just iterate over the list and rely on the existing oneway(Object) method";
+			 System.out.println("matchMDALLOW = "+test4.matches(".*would have to[^,.;?\"']*allow.*"));
 
 	}
 
