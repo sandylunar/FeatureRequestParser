@@ -296,6 +296,8 @@ public class DataParser {
 	public static FeatureRequestOL constructSFeatureRequestOL(FeatureRequestOL request) throws IOException{
 		FeatureRequestOL fr = request;
 		NGramDistance ng = new NGramDistance();
+		String[] systemNames = request.getSystemName();
+		FeatureUtility.SYSTEM_NAMES = systemNames;
 		
 		int size = request.getNumSentences();
 		

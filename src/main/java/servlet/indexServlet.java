@@ -78,7 +78,24 @@ public class indexServlet extends HttpServlet {
         
         int index = tagNames.indexOf("want");
         
-        Node root = null;
+       // Node root = null;
+        
+        Node root = new Node("title", "this is title");
+        for(int i=0;i<3;i++){
+            Node want = new Node("want", "this is want "+i);
+            Node benefit = new Node("benefit", "");
+            for(int j=0;j<3;j++){
+                Node benefit1 = new Node("benefit", "this is benefit "+i+"-"+j);
+                benefit.addChildren(benefit1);
+            }
+            Node example = new Node("example", "this is example "+i);
+            want.addChildren(benefit);
+            want.addChildren(example);
+            root.addChildren(want);
+        }
+        System.out.println(root.toString());
+        
+        
         if(countWant == 1){
         	root = new Node("title",loadedFR.getTitle());
         	Node want = new Node("want",loadedFR.getFullSentence(index).toString());
@@ -92,16 +109,16 @@ public class indexServlet extends HttpServlet {
         			continue;
         		
         		Node node;
-        		ArrayList<Integer> indexList = FeatureUtility.getIndexList("", tagNames, tag);
+        		ArrayList<Integer> indexList = FeatureUtility.getIndexList(tagNames, tag);
         		if(indexList.size() == 1){
         			int i = indexList.get(0)-1;
-        			node = new Node(tag,loadedFR.getFullSentence(i).toString());
+        			node = new Node(tag,loadedFR.getFullSentence(i).getOrigin());
         			
         			
         		}else{
         			node = new Node(tag,"");
         			for(int i : indexList){
-        				Node ni = new Node(tag,loadedFR.getFullSentence(i-1).toString());
+        				Node ni = new Node(tag,loadedFR.getFullSentence(i-1).getOrigin());
         				node.addChildren(ni);
         			}
         		}
@@ -111,10 +128,17 @@ public class indexServlet extends HttpServlet {
         	
         	
         	root.addChildren(want);
+        	System.out.println(root.tag);
         	String output = root.toString();
         	System.out.println(output);
         	printWriter.print("\n====================================\n"+output);
         }
+        
+        
+        
+        //String output = root.toString();
+    	//System.out.println(output);
+    	//printWriter.print(output);
         
         
         
@@ -126,12 +150,16 @@ public class indexServlet extends HttpServlet {
         //rd.forward(request, response);
         
         System.out.println(result);
-        printWriter.print("\n====================================\n"+buffer);
-        printWriter.print("\n====================================\n"+root);
+        //printWriter.print("\n====================================\n"+buffer);
+        //printWriter.print("\n====================================\n"+root);
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/jsp/index.jsp");
+        
+        
         rd.forward(request, response);
+        
+        //TODO
     }
 }

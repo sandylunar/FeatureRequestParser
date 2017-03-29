@@ -322,9 +322,6 @@ public class RequestAnalyzer {
 		if (FeatureUtility.matchFeature(content) || matchSYSNEED == 1)
 			result = 1;
 
-		if (matchMDGOODVB == 1 && isRealFirst == 1) {
-			result = 1;
-		}
 
 		if (content.toLowerCase().contains("look forward") || content.toLowerCase().contains("would like to work")
 				|| content.toLowerCase().contains("willing to contribute")
@@ -351,7 +348,7 @@ public class RequestAnalyzer {
 			result = 0;
 
 			if (matchMDGOODVB == 1 && isRealFirst == 1) {
-				result = 1;
+				result = 1; 
 			}
 
 		}
@@ -764,8 +761,13 @@ public class RequestAnalyzer {
 		if(result != 0)
 			return result;
 		
-		if (originContent.contains("During operations like GRANT privileges, Export and Import selecting those groups manually over and over again is inconvenient and error-prone"))
+		
+		
+		if (originContent.contains("You can only use some standard tokens for this annotation"))
 			System.out.println();
+		
+		if(content.toLowerCase().contains("should"))
+			result = 0;
 		
 		boolean containGood = FeatureUtility.isContain(content, FeatureUtility.GOOD);
 		
@@ -775,7 +777,13 @@ public class RequestAnalyzer {
 		
 		//drawback
 		//if (sentimentScore < 1 && sentimentProbability > 0.6) 
-		//	result = 4;	  
+		//	result = 4;	
+		
+		//Sys-Name does not support
+		
+		//we had an issue
+		
+		//not a good idea
 		
 		if(matchIsBAD == 1 || matchIsNotGOOD ==1) 	//[20]matchIsGOOD [21]matchIsNotGOOD [22]matchIsBAD [23]matchIsNotBAD
 			result = 4;
@@ -806,7 +814,7 @@ public class RequestAnalyzer {
 				  || content.contains("<http-link>") || content.contains("<html-link>")|| content.contains("<EXAMPLE>")
 				 || content.contains("web-page-link")
 				|| content.contains("<http>") || content.contains("LINK-HTTP");
-		if ( (containlink||content.toLowerCase().contains("like"))  && (numValidVerbs <2  && numValidWords < 10))
+		if ( (containlink||content.toLowerCase().contains(" like "))  && (numValidVerbs <2  && numValidWords < 10))
 			result = 5; 
 		
 		
@@ -829,7 +837,7 @@ public class RequestAnalyzer {
 			}
 		
 		//[20]matchIsGOOD [21]matchIsNotGOOD [22]matchIsBAD [23]matchIsNotBAD
-		if(matchIsGOOD == 1 || matchIsNotBAD == 1)
+		if(matchIsGOOD == 1 ) //|| matchIsNotBAD == 1 && !content.toLowerCase().contains("but")
 			result = 3;
 		
 		//example
@@ -849,7 +857,7 @@ public class RequestAnalyzer {
 			//result=4;
 		if(content.matches(".*cause[^,.;?\"']*problem.*"))
 			result=4;
-		if(content.matches(".*not[^,.;?\"']*enough.*"))
+		if(content.matches(".*not[^,.;?\"']*enough.*") && !content.toLowerCase().contains("not familiar enough"))
 			result=4;
 		
 		if(content.toLowerCase().contains("without success"))
@@ -864,6 +872,12 @@ public class RequestAnalyzer {
 		//benefit
 		
 		//startswith good
+		
+		String startWord = content.split(" ")[0];
+		if(FeatureUtility.isContain(startWord,FeatureUtility.GOOD_BENEFIT)){
+			result = 3;
+		}
+		
 		if(content.toLowerCase().contains("won't have to")||content.toLowerCase().contains("no longer need")||
 				content.toLowerCase().contains("could reduce")||content.toLowerCase().contains("benefit"))
 			result = 3; 
@@ -885,14 +899,24 @@ public class RequestAnalyzer {
 				content.toLowerCase().contains("a great feature")||content.toLowerCase().contains("give a value"))  
 			result = 3;
 		
+		
+		//help system
+		boolean matchHelpSystem = FeatureUtility.matchHelpSystem(content);
+		if(matchHelpSystem)
+			result = 3;
+		
+		
 		if(numValidVerbs==1&&subject.equalsIgnoreCase("we")&&action.equalsIgnoreCase("work"))
 			result = 0;
 		
-		if(content.toLowerCase().contains("should")||content.toLowerCase().startsWith("ideally")||content.toLowerCase().startsWith("note"))
+		if(content.toLowerCase().startsWith("ideally")||content.toLowerCase().startsWith("note"))
 			result = 0;
 		
 		if(content.toLowerCase().startsWith("in order to")&&isRealFirst == 1)
 			result = 0;
+		
+		if(content.toLowerCase().contains("goal"))
+			result = 1;
 		
 		//example
 		if(content.toLowerCase().contains("something like"))
@@ -920,8 +944,71 @@ public class RequestAnalyzer {
 		
 		if(content.toLowerCase().contains("wanna"))
 			result = 1;
+		
+		//
 		if(content.toLowerCase().startsWith("for example")||content.toLowerCase().startsWith("example"))
 			result = 5;
+		
+		//drawback
+		
+		if(content.toLowerCase().contains("be forced to"))
+			result = 4;
+		
+		if(content.toLowerCase().startsWith("but")&& containNEG == 1 && matchIsNotBAD!=1 )
+			result = 4;
+		
+		if(content.toLowerCase().contains("not possible")||content.toLowerCase().contains("not a good idea")
+				||content.toLowerCase().contains("unfortunately")||content.toLowerCase().contains("not pretty")||
+				content.toLowerCase().contains("again and again")||content.toLowerCase().contains("no need"))
+			result = 4;
+		
+		if(content.toLowerCase().startsWith("care will be taken")&&matchIsNotBAD == 1)
+			result = 4;
+		
+		if(content.toLowerCase().contains("support")&& (containNEG == 1||content.toLowerCase().contains("only"))&&!content.contains("should"))
+			result = 4;
+		
+		if(containNEG == 1&&content.toLowerCase().contains("only"))
+			result = 4;
+		
+		boolean match = content.matches(".*currently[^,.;?\"']*only.*");
+		if( match) //containNEG == 1 &&
+			result = 4;
+		
+		if(content.toLowerCase().contains("will only")||content.toLowerCase().contains("can only"))
+			result = 4;
+		
+		if(content.toLowerCase().contains("don't wish")
+				||content.toLowerCase().contains("won't like")
+				||content.toLowerCase().contains("won't be able")
+				||content.toLowerCase().contains("but i cannot") 
+				||content.toLowerCase().contains("had an issue")  )
+			result = 4;
+		
+		//if(content.toLowerCase().contains("i want"))
+		//	result = 0;
+
+
+
+		//bad
+		
+		//if(content.toLowerCase().contains("although"))
+			//result = 4;
+
+		if ( (containlink||content.toLowerCase().contains(" like "))  && (numValidVerbs <2  && numValidWords < 10))
+			result = 5; 
+		
+		
+		if(result == 3){
+			if(content.toLowerCase().contains("only"))
+				result = 0;
+			
+			if(content.toLowerCase().contains("would be nice"))
+				result = 3;
+		}
+		
+		if(content.toLowerCase().contains("it would be nice "))
+			result = 1;
 		
 		return result;
 	}
