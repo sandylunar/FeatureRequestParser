@@ -1,5 +1,7 @@
 package main.java.bean;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.util.ArrayList;
 
 public class Node {
@@ -10,12 +12,12 @@ public class Node {
 
     public Node(String tag, String sentence){
         this.tag = tag;
-        this.sentence = sentence;
+        this.sentence = StringEscapeUtils.escapeHtml4(sentence);
     }
 
     public Node(String tag, String sentence, Node parent){
         this.tag = tag;
-        this.sentence = sentence;
+        this.sentence = StringEscapeUtils.escapeHtml4(sentence);
         addParent(parent);
     }
 

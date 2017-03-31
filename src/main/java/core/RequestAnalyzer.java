@@ -3,14 +3,9 @@ package main.java.core;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ListIterator;
 
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.EditDistance;
 import main.java.bean.FeatureRequestOL;
 import main.java.util.FeatureUtility;
 import weka.core.Attribute;
@@ -26,65 +21,9 @@ public class RequestAnalyzer {
 	public static String[] tagNames = new String[] { "explanation", "want", "useless" ,"benefit","drawback","example"};
 	static int tagSize = tagNames.length;
 
-	// TODO
-	public static boolean classifyAsUseless(String content, double verbsAllInvalid) {
 
-		if (verbsAllInvalid == 1)
-			return true;
 
-		if (FeatureUtility.checkContains(content, FeatureUtility.USELESS))
-			return true;
-
-		return false;
-	}
-
-	// TODO
-	public static boolean classifyAsWant(Instance item, Instances data) {
-
-		String content = item.stringValue(0);
-
-		double isRealFirst = item.value(data.attribute("isRealFirst"));
-		double matchMDGOODVB = item.value(data.attribute("matchMDGOODVB"));
-
-		double startWithVB = item.value(data.attribute("startWithVB"));
-		double question = item.value(data.attribute("question"));
-		double matchMDGOOD = item.value(data.attribute("matchMDGOOD"));
-
-		// "want to","can"
-		String[] pattern = new String[] { "would like", "\'d like", "’d like", "would love to", "\'d love to",
-				"’d love to", "appreciate", "suggest", "propose", "should", "add support", "pma may", "may want",
-				"be able to", "need is", "phpmyadmin may", "would want to", "we need", "I need", "to support" };
-
-		String[] pattern2 = new String[] { "how about", "what about" };
-
-		String[] pattern3 = new String[] { "idea", "request", }; // "feature","option","consider",
-
-		if (question == 1) {
-			if (FeatureUtility.isContain(content, pattern2))
-				return true;
-
-			else
-				return false;
-		}
-
-		if (FeatureUtility.isContain(content, pattern) || matchMDGOODVB == 1) {
-			return true;
-		}
-
-		if (FeatureUtility.noSemicolonBeforePattern(content, pattern3)) {
-			return true;
-		}
-
-		if (isRealFirst == 1 && startWithVB == 1)
-			return true;
-
-		if (classifyAsExp(item, data))
-			return false;
-
-		return false;
-	}
-
-	private static void createPrintWriter(String outputFile) {
+	public static void createPrintWriter(String outputFile) {
 		try {
 			out = new PrintWriter(new FileOutputStream(new File(outputFile), true), true);
 		} catch (FileNotFoundException e) {
@@ -124,27 +63,6 @@ public class RequestAnalyzer {
 			count++;
 			String output = String.format("%d - %s - predict to be %s : %s\n",count, tagNames[index], tagNames[predict], sentence);
 			buffer[index].append(output);
-
-			if (index == 1) {
-
-				// if(predict == 2)
-				//System.out.println(count + " - WANT - predict to be " + tagNames[predict] + ":" + sentence);
-			}
-
-			if (index == 0) {
-				// if(predict==2)
-				//System.out.println(count + " - EXP - predict to be " + tagNames[predict] + ":" + sentence);
-			}
-			if (index == 2) {
-				// if(predict==1)
-				//System.out.println(count + " - USELESS - predict to be " + tagNames[predict] + ":" + sentence);
-			}
-			//if(index >2 && (predict==0||predict>2))
-			//System.out.printf("%d - %s - predict to be %s : %s\n",count, tagNames[index], tagNames[predict], sentence);
-
-
-
-
 		}
 
 		for(int i = 0; i < tagSize; i++){
@@ -171,266 +89,6 @@ public class RequestAnalyzer {
 
 	}
 
-
-	public static int predictTagIndex(FeatureRequestOL request, int index){
-		String originContent =  request.getSentence(index);
-		String subject = request.getSubjects(index);
-		String action = request.getActions(index);
-
-		double isRealFirst = request.getIsRealFirst(index);
-		double matchMDGOODVB = request.getMatchMDGOODVB(index);
-
-		double startWithVB = request.getStartWithVB(index);
-		double question = request.getQuestion(index);
-		double matchVBDGOOD = request.getMatchVBDGOODB(index);
-		double numValidWords = request.getNumValidWords(index);
-		double matchMDGOOD = request.getMatchMDGOOD(index);
-		double containNEG = request.getContainEXP(index);
-		double similarityToTitle = request.getSimilairity(index);
-		double matchMDGOODIF = request.getMatchGOODIF(index);
-		double matchGOODIF = request.getMatchGOODIF(index);
-		double matchSYSNEED = request.getMatchSYSNEED(index);
-		double isPastTense = request.getIsPastTense(index);
-		double sentimentScore = request.getSentimentScore(index);
-		double sentimentProbability = request.getSentimentProbability(index);
-		double numValidVerbs = request.getNumValidVerbs(index);
-
-		// "want to","can"
-		String[] pattern = new String[] { "would like", "\'d like", "’d like", "would love to", "\'d love to",
-				"’d love to", "appreciate", "suggest", "propose", "add support", "pma may", "phpmyadmin may",
-				"may wish", "able to", "wish for", "there should be", "may want", "we need", "I need",
-				"I would want to", "we want" };// "should","require",
-
-		String[] pattern2 = new String[] { "how about", "what about" };
-
-		String[] pattern3 = new String[] { "idea", };// "feature","request","consider",
-		// "option",
-
-		String[] expPattern = new String[] { "have to", "unfortunately", "possible", "suggestion", "only" };
-
-		if (originContent.contains("This suite can help us measure performance and memory hotspots in 1.2 development"))
-			System.out.println();
-
-		String content = originContent.replaceAll("[(].*[)]", "");
-		// content = originContent.replaceAll("[\"].*[\"]", "");
-		// content = originContent.replaceAll("['].*[']", "");
-
-		int result = 0;
-
-		if (numValidWords == 0 || numValidVerbs == 0) {
-			result = 2;
-			if (sentimentScore < 2 && sentimentProbability > 0.6)
-				result = 0;
-		}
-
-		if (FeatureUtility.checkContains(content, FeatureUtility.USELESS))
-			result = 2;
-		else if (matchMDGOODVB == 1 && isRealFirst == 1) {
-			result = 1;
-		} else if (matchVBDGOOD == 1 || containNEG == 1 || content.toLowerCase().startsWith("in addition")
-				|| content.toLowerCase().startsWith("also ") || content.toLowerCase().startsWith("so ")
-				|| content.toLowerCase().startsWith("perhaps") || content.toLowerCase().startsWith("by default")
-				|| content.toLowerCase().startsWith("maybe") || content.toLowerCase().contains("for example")
-				|| content.toLowerCase().startsWith("given") || content.toLowerCase().startsWith("unfortunately")
-				|| content.toLowerCase().startsWith("similarly") || content.toLowerCase().contains("why")) {
-
-			result = 0;
-		} else if (question == 1 && FeatureUtility.isContain(content, pattern2)) {
-			result = 1;
-
-		} else if (question == 1 && content.toLowerCase().contains("reason")) {
-			result = 0;
-		} else if ((FeatureUtility.isContain(content, pattern) || matchMDGOODVB == 1) && numValidWords > 1) {
-			result = 1;
-		} else if (FeatureUtility.isContain(content, expPattern) && numValidWords > 1) {
-			result = 0;
-		} else if (matchMDGOOD == 1 || containNEG == 1) {
-			result = 0;
-		} else if (content.toLowerCase().contains("should") && question == 0)
-			result = 1;
-		else if (numValidVerbs == 0 && matchMDGOOD == 0 && containNEG == 0) {
-			result = 2;
-			if (numValidWords >= 2)
-				result = 0;
-
-			if (sentimentScore < 2 && sentimentProbability > 0.6)
-				result = 0;
-		} else if (numValidWords < 2) {
-			result = 2;
-			if (sentimentScore < 2 && sentimentProbability > 0.6)
-				result = 0;
-		} else if (FeatureUtility.noSemicolonBeforePattern(content, pattern3)) {
-			result = 1;
-		} else if (isRealFirst == 1 && startWithVB == 1) {
-			result = 1;
-		}
-
-		if (result == 1) {
-			if (similarityToTitle <= 0.1) {
-				result = 0;
-			}
-		}
-
-		if (content.toLowerCase().contains("there should be") || content.toLowerCase().contains("would like to")
-				|| content.toLowerCase().contains("i'd like") || content.toLowerCase().contains("the request is:")) {
-			if (!content.toLowerCase().contains("would like to work"))
-				result = 1;
-		}
-
-		if (content.toLowerCase().startsWith("however") && isRealFirst == 1 && similarityToTitle <= 0.3)
-			result = 0;
-
-		if (content.toLowerCase().contains("would help") && matchMDGOODIF == 0)
-			result = 0;
-
-		if (content.toLowerCase().contains("would like to know why") || content.toLowerCase().contains("because")
-				|| content.toLowerCase().contains("since") || content.toLowerCase().startsWith("but")
-				|| content.toLowerCase().startsWith("maybe") || content.toLowerCase().startsWith("like"))
-			result = 0;
-
-		// if(matchMDGOODVB == 1) result = 0;
-
-		// if ((FeatureUtility.isContain(content, pattern) || matchMDGOODVB ==
-		// 1) && validWords>1 ) { result = 1;}
-
-		if (content.toLowerCase().contains("suggestion") && question == 0)
-			result = 0;
-
-		if (matchMDGOODIF == 1)
-			result = 1;
-
-		if (isRealFirst == 1 && startWithVB == 1) {
-			result = 1;
-		}
-
-		if (isRealFirst == 1 && (content.toLowerCase().startsWith("goal")))
-			result = 1;
-
-		if (isRealFirst == 1 && (content.toLowerCase().contains("we could")))
-			result = 1;
-
-		if (content.toLowerCase().contains("we should"))
-			result = 1;
-
-		if (content.toLowerCase().contains("whether we should")
-				|| content.toLowerCase().contains("if you think we should"))
-			result = 0;
-
-		if (matchGOODIF == 1 && content.toLowerCase().contains("i think"))
-			result = 1;
-
-		if (FeatureUtility.matchFeature(content) || matchSYSNEED == 1)
-			result = 1;
-
-
-		if (content.toLowerCase().contains("look forward") || content.toLowerCase().contains("would like to work")
-				|| content.toLowerCase().contains("willing to contribute")
-				|| content.toLowerCase().contains("please give your suggestion"))
-			result = 2;
-
-		if ((content.toLowerCase().contains("should") || (content.toLowerCase().startsWith("an option")))
-				&& isRealFirst == 1 && !FeatureUtility.isContain(content, expPattern))
-			result = 1;
-
-		if (content.contains("<link-http>") || content.contains("<issue-link>") || content.contains("<COMMAND>")
-				|| content.contains("<CODE>") || content.contains("<list>") || content.contains("<html-link>")
-				|| content.contains("<PATH>") || content.contains("<FILE>") || content.contains("<http-link>")
-				|| content.contains("<FILE-SYS>") || content.contains("<FILE-XML>") || content.contains("web-page-link")
-				|| content.contains("<http>") || content.contains("LINK-HTTP") || content.contains("<file-path>"))
-			result = 0;
-
-		boolean exp1 = content.toLowerCase().contains("current") || content.toLowerCase().startsWith("to do this")
-				|| content.toLowerCase().startsWith("possibly") || content.toLowerCase().contains("something like")
-				|| content.toLowerCase().contains("just like") || content.toLowerCase().contains("benefits:")
-				|| content.toLowerCase().endsWith(":") || content.toLowerCase().contains("i ever use")
-				|| content.toLowerCase().startsWith("consequently") || content.toLowerCase().contains("limitation");
-		if (exp1) {
-			result = 0;
-
-			if (matchMDGOODVB == 1 && isRealFirst == 1) {
-				result = 1;
-			}
-
-		}
-
-		boolean want1 = content.toLowerCase().contains("add") && content.toLowerCase().contains("support")
-				|| content.toLowerCase().contains("needs to support") || content.toLowerCase().startsWith("let's")
-				|| content.toLowerCase().contains("i'm asking for") || content.toLowerCase().contains("asked for")
-				|| content.toLowerCase().contains("basic idea") || content.toLowerCase().contains("we need");
-		if (want1) {
-			result = 1;
-
-		}
-
-		if (content.toLowerCase().contains("really") && question == 1)
-			result = 0;
-
-		if (isPastTense == 1)
-			result = 0;
-
-		if ((content.toLowerCase().startsWith("is there")) && question == 1)
-			result = 1;
-
-		if ((content.toLowerCase().contains("i want")) && isRealFirst == 1)
-			result = 1;
-
-		if (content.toLowerCase().startsWith("there is a need") || content.toLowerCase().startsWith("would it")
-				|| content.toLowerCase().startsWith("i needed this") || content.toLowerCase().startsWith("i will")
-				|| content.toLowerCase().contains("i'm considering")
-				|| content.toLowerCase().contains("i am considering") || content.toLowerCase().contains("i am planning")
-				|| content.toLowerCase().contains("i'm planning") || content.toLowerCase().contains("why don't we")
-				|| content.toLowerCase().contains("looking for a feature")
-				|| content.toLowerCase().contains("need to be supported"))
-			result = 1;
-
-		if (content.toLowerCase().contains("to do this"))
-			result = 0;
-
-		if (action != null && action.length() != 0) {
-			if (action.equalsIgnoreCase("mean"))
-				result = 0;
-			if (action.equalsIgnoreCase("propose"))
-				result = 1;
-
-			if (action.equalsIgnoreCase("support")) {
-				if (subject != null && subject.length() != 0) {
-					if (subject.equals("we"))
-						result = 1;
-				}
-			}
-
-			if (subject != null && subject.length() != 0) {
-				if (subject.toLowerCase().equals("proposal"))
-					result = 1;
-			}
-
-		}
-
-		if (content.toLowerCase().contains("must")) {
-			boolean prpmust = content.toLowerCase().contains("you must") || content.toLowerCase().contains("it must")
-					|| content.toLowerCase().contains("that must") || content.toLowerCase().contains("which must")
-					|| content.toLowerCase().contains("i must");
-
-			if (prpmust)
-				result = 0;
-			else
-				result = 1;
-		}
-
-		if (content.toLowerCase().startsWith("unfortunately") || content.toLowerCase().startsWith("actually"))
-			result = 0;
-
-		if (FeatureUtility.matchShouldBePossible(content))
-			result = 0;
-
-		if(FeatureUtility.matchNOTONLY(content))
-			result = 1;
-
-		// if(sentimentScore<2)
-		// result = 0;
-
-		return result;
-	}
 
 	public static int predictTagIndex(Instance item, Instances data, FeatureRequestOL request, int index) {
 		String originContent;
@@ -515,22 +173,18 @@ public class RequestAnalyzer {
 
 		}
 
-
 		// "want to","can"
-		String[] pattern = new String[] { "would like", "\'d like", "’d like", "would love to", "\'d love to",
-				"’d love to", "appreciate", "suggest", "propose", "add support", "pma may", "phpmyadmin may",
+		String[] wantPatterns = new String[] { "would like", "\'d like", "’d like", "would love to", "\'d love to",
+				"’d love to", "appreciate", "suggest", "propose", "add support",
 				"may wish", "able to", "wish for", "there should be", "may want", "we need", "I need",
 				"I would want to", "we want" };// "should","require",
 
-		String[] pattern2 = new String[] { "how about", "what about" };
+		String[] wantPatterns2 = new String[] { "how about", "what about" };
 
-		String[] pattern3 = new String[] { "idea", };// "feature","request","consider",
+		String[] wantPatterns3 = new String[] { "idea", };// "feature","request","consider",
 		// "option",
+		String[] expPatterns = new String[] { "have to", "unfortunately", "possible", "suggestion", "only" };
 
-		String[] expPattern = new String[] { "have to", "unfortunately", "possible", "suggestion", "only" };
-
-		if (originContent.contains("For compiler errors it is usually possible for the bug raiser to attach a simple testcase"))
-			System.out.println();
 
 		String content = originContent.replaceAll("[(].*[)]", "");
 		// content = originContent.replaceAll("[\"].*[\"]", "");
@@ -544,11 +198,16 @@ public class RequestAnalyzer {
 				result = 0;
 		}
 
+
+
 		if (FeatureUtility.checkContains(content, FeatureUtility.USELESS))
 			result = 2;
-		else if (matchMDGOODVB == 1 && isRealFirst == 1) {
-			result = 1;
-		} else if (matchVBDGOOD == 1 || containNEG == 1 || content.toLowerCase().startsWith("in addition")
+			//else if (matchMDGOODVB == 1 && isRealFirst == 1) {
+			//	result = 1;
+			//}
+
+
+		else if (matchVBDGOOD == 1 || containNEG == 1 || content.toLowerCase().startsWith("in addition")
 				|| content.toLowerCase().startsWith("also ") || content.toLowerCase().startsWith("so ")
 				|| content.toLowerCase().startsWith("perhaps") || content.toLowerCase().startsWith("by default")
 				|| content.toLowerCase().startsWith("maybe") || content.toLowerCase().contains("for example")
@@ -556,14 +215,14 @@ public class RequestAnalyzer {
 				|| content.toLowerCase().startsWith("similarly") || content.toLowerCase().contains("why")) {
 
 			result = 0;
-		} else if (question == 1 && FeatureUtility.isContain(content, pattern2)) {
+		} else if (question == 1 && FeatureUtility.isContain(content, wantPatterns2)) {
 			result = 1;
 
 		} else if (question == 1 && content.toLowerCase().contains("reason")) {
 			result = 0;
-		} else if ((FeatureUtility.isContain(content, pattern) || matchMDGOODVB == 1) && numValidWords > 1) {
+		} else if ((FeatureUtility.isContain(content, wantPatterns) ) && numValidWords > 1) { //|| matchMDGOODVB == 1
 			result = 1;
-		} else if (FeatureUtility.isContain(content, expPattern) && numValidWords > 1) {
+		} else if (FeatureUtility.isContain(content, expPatterns) && numValidWords > 1) {
 			result = 0;
 		} else if (matchMDGOOD == 1 || containNEG == 1) {
 			result = 0;
@@ -580,7 +239,7 @@ public class RequestAnalyzer {
 			result = 2;
 			if (sentimentScore < 2 && sentimentProbability > 0.6)
 				result = 0;
-		} else if (FeatureUtility.noSemicolonBeforePattern(content, pattern3)) {
+		} else if (FeatureUtility.noSemicolonBeforePattern(content, wantPatterns3)) {
 			result = 1;
 		} else if (isRealFirst == 1 && startWithVB == 1) {
 			result = 1;
@@ -653,7 +312,7 @@ public class RequestAnalyzer {
 			result = 2;
 
 		if ((content.toLowerCase().contains("should") || (content.toLowerCase().startsWith("an option")))
-				&& isRealFirst == 1 && !FeatureUtility.isContain(content, expPattern))
+				&& isRealFirst == 1 && !FeatureUtility.isContain(content, expPatterns))
 			result = 1;
 
 		if (content.contains("<link-http>") || content.contains("<issue-link>") || content.contains("<COMMAND>")
@@ -750,26 +409,35 @@ public class RequestAnalyzer {
 		if(FeatureUtility.matchNOTONLY(content))
 			result = 1;
 
-		if( FeatureUtility.matchMDAllow(content)){ //||	containGood matchMDGOOD == 1 ||
+		if (originContent.contains("We have had the suggestion to make it protocol based, which i like, but for now I would just allow support for"))
+			System.out.println();
+
+
+		if (originContent.contains("the Transport API would have "))
+			System.out.println();
+
+		if(result !=1 && FeatureUtility.matchMDAllow(content)){ //||	containGood matchMDGOOD == 1 ||
 			result = 3; //benefit
 		}
 
 		// if(sentimentScore<2)
 		// result = 0;
 
+
+
 		//TODO
+
 		if(result != 0)
 			return result;
 
 
 
-		if (originContent.contains("You can only use some standard tokens for this annotation"))
-			System.out.println();
+
 
 		if(content.toLowerCase().contains("should"))
 			result = 0;
 
-		boolean containGood = FeatureUtility.isContain(content, FeatureUtility.GOOD);
+		//boolean containGood = FeatureUtility.isContain(content, FeatureUtility.GOOD);
 
 		if( FeatureUtility.matchMDAllow(content)){ //||	containGood matchMDGOOD == 1 ||
 			result = 3; //benefit
@@ -817,7 +485,10 @@ public class RequestAnalyzer {
 		if ( (containlink||content.toLowerCase().contains(" like "))  && (numValidVerbs <2  && numValidWords < 10))
 			result = 5;
 
+		boolean see = content.toLowerCase().contains("see")||content.toLowerCase().contains("read");
 
+		if(see && containlink && numValidWords < 10)
+			result = 5;
 
 		if(content.matches(".*:[\\s]*<CODE>.*"))
 			result = 5;
@@ -882,8 +553,7 @@ public class RequestAnalyzer {
 				content.toLowerCase().contains("could reduce")||content.toLowerCase().contains("benefit"))
 			result = 3;
 
-		if(content.matches(".*would[^,.;?\"']*allow.*"))
-			result=3;
+
 
 		if(content.matches(".*save[^,.;?\"']*time.*"))
 			result=3;
@@ -1007,23 +677,12 @@ public class RequestAnalyzer {
 				result = 3;
 		}
 
-		if(content.toLowerCase().contains("it would be nice "))
+		if(content.toLowerCase().contains("it would be nice ") || content.toLowerCase().contains("it would be much better"))
 			result = 1;
 
 		return result;
 	}
 
-	private static boolean classifyAsExp(Instance item, Instances data) {
-		String content = item.stringValue(0);
-		double matchVBDGOOD = item.value(data.attribute("matchVBDGOOD"));
-		String[] expPattern = new String[] { "have to", "unfortunately", "possible", "suggestion", "maybe", "perhaps" };
-
-		if (FeatureUtility.isContain(content, expPattern) || matchVBDGOOD == 1
-				|| content.toLowerCase().startsWith("maybe"))
-			return true;
-
-		return false;
-	}
 
 	public static int minDistance(String word1, String word2) {
 		int len1 = word1.length();
@@ -1066,11 +725,10 @@ public class RequestAnalyzer {
 	}
 
 	public static void main(String[] args) {
-		String content = "I have a bit of a wishlist item that I want to tentatively propose";
-
+		//String content = "I have a bit of a wishlist item that I want to tentatively propose";
 		String target = "Cannot configure the load balancing count when using Message Groups";
 		String object = "The next 9 messages with different JMSXGroupIDs also go to consumer";
-		EditDistance ed = new EditDistance();
+		//EditDistance ed = new EditDistance();
 		double score = minDistance(object, target);
 
 		// System.out.println((FeatureUtility.isContain("control",

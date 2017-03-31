@@ -60,7 +60,7 @@ public class StanfordCoreNlpDemo {
 		// String text = "these are pretty much unusable without resorting to
 		// ugly hacks like creating a temporary Extension instance just to get
 		// access to the directory.";
-		String text = "These options help ActiveMQ recognize disappeared connections outside of the application layer";
+		String text = "either remove it or use it";
 
 
 
@@ -477,9 +477,13 @@ public class StanfordCoreNlpDemo {
 			firstPos = posList.get(0);
 		}
 
+
 		if (firstPos.equalsIgnoreCase("VB") || wordList.get(0).equalsIgnoreCase("show")) {
 			nlpValues[3] = 1;
-		} else
+		}
+		else if(lemaList.get(0).equals("either")&&posList.get(1).equals("VB"))
+			nlpValues[3] = 1;
+		else
 			nlpValues[3] = 0;
 
 		int MDIndex = posList.indexOf("MD");
