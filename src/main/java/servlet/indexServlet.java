@@ -20,6 +20,7 @@ import main.java.core.DataParser;
 import main.java.core.RequestAnalyzer;
 import main.java.parse.Parser;
 import main.java.util.FeatureUtility;
+import org.json.JSONObject;
 
 /**
  * Created by zzyo on 2017/3/16.
@@ -121,12 +122,16 @@ public class indexServlet extends HttpServlet {
             root.addChildren(want);
             System.out.println(root.tag);
             String output = root.toString();
-            String json = "{\"sNum\":" + sNum + ",\"bNum\":" + bNum + ",\"output\":\'"+output+"\'}";
-            String json1 = "{\"sNum\":" + 1 + ",\"bNum\":" + 2 + ",\"output\":\'"+"output"+"\'}";
+            String json = "{\"sNum\":" + sNum + ",\"bNum\":" + bNum + ",\"output\":\""+output+"\"}";
+            //String json1 = "{\"sNum\":" + 1 + ",\"bNum\":" + 2 + ",\"output\":\'"+"output"+"\'}";
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("sNum", sNum);
+            jsonObject.put("bNum", bNum);
+            jsonObject.put("output", output);
             System.out.println(json);
             response.setContentType("application/json");
             //response.setContentType("text/html;charset=utf-8");
-            response.getWriter().write(json);
+            response.getWriter().write(jsonObject.toString());
         }
     }
 

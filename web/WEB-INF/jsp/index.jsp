@@ -89,8 +89,8 @@
         var html = ue.getContent();
         //获取纯文本内容，返回: hello
         var txt = ue.getContentTxt();
-        alert(html);
-        $.post('index.do', {
+        //alert(html);
+        /*$.post('index.do', {
             name: name,
             FRTitle: title,
             FRDes: html
@@ -99,21 +99,25 @@
             alert("Block数目："+data.bNum+"\n\nSentence数目："+data.sNum);
             $('ul').html(data.output);
             $("#tree").treeview();
-        });
-        /*$.ajax({
+        });*/
+        $.ajax({
             url: 'index.do',
             type: "POST",
             data: {name:name,FRTitle:title,FRDes:html},
             //timeout: 30000,
             dataType: "json",
             success: function (data) {
-                alert("lalalalalal");
-                //alert(data);
-                //alert("Block数目："+data.bNum+"\n\nSentence数目："+data.sNum);
-                $('ul').html(data);
+                alert("Block数目："+data.bNum+"\n\nSentence数目："+data.sNum);
+                $('ul').html(data.output);
                 $("#tree").treeview();
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                //alert(XMLHttpRequest.status);
+                //alert(XMLHttpRequest.readyState);
+                //alert(textStatus);
+                alert("some errors...");
             }
-        });*/
+        });
     }
 </script>
 

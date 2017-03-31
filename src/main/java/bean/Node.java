@@ -61,6 +61,8 @@ public class Node {
         }
         else
             result += "</li>";
+
+        result = result.replaceAll("\n*", "");
         return result;
     }
 
