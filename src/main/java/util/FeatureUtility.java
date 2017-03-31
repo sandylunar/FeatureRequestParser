@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -28,29 +29,30 @@ public class FeatureUtility {
 	static String outputPath = "resource//tag_data_";
 	public static String excludeTags[] = { "_time" };
 	public static final String QUESTION[] = { "why" };
-	public static final String[] SYSTEM_NAMES = {"phpmyadmin","pma","mopidy","mpd"};
+	public static String[] SYSTEM_NAMES = {"phpmyadmin","pma","mopidy","mpd","activemq"};
 
 	public static final String WANT_MD[] = { "should", "can" };
-	public static final String WANTS[] = { "sugg", "propose", "consider", "want", "would like", "\'d like", "��d like",
+	public static final String WANTS[] = { "sugg", "propose", "consider", "want", "would like", "\'d like",
 			"what about", "how about", "new" };
 	public static final String GOOD[] = {"nicer", "safer","help", "helpful", "useful", "great", "nice", "good", "appreciate", "greatly",
 			"appreciated", "appropriate", "better", "convenient", "cool", "worth" ,"make sense","interesting","a great deal",
 			"a good deal","neat","accurate","simplify","speed","sense","enhanced",
-			"necessary","cheaper","ease ","faster","easily","easier","reduce","neater","best","improve","closely",
+			"necessary","cheaper","ease ","faster","easily","easier","neater","best","improve","closely",
 			"fine","optimized","awesome","simplified","handy ","fine grained"};//,"possible","save","enable","automatically"
 
 	public static final String GOOD_BENEFIT[] = {"nicer", "safer", "helpful", "useful", "great", "nice", "good", "appreciate", "greatly",
 			"appreciated", "better", "convenient", "cool", "worth" ,"make sense","a great deal",
 			"a good deal","neat","accurate","simplify","speed","sense","enhanced",
 			"cheaper","ease ","faster","easily","easier","reduce","neater","best","improve","closely",
-			"fine","optimized","awesome","simplified","handy ","fine grained","fast","reduce","advantage"
+			"fine","optimized","awesome","simplified","handy ","fine grained","fast","reduce","advantage","efficiency","visible","clear"
 	};//"interesting","necessary","possible","save","enable","automatically"
 
 
 	public static final String BAD[]={"accidentally","lose","loses","hard","annoying","annoy","miss","confusing",
 			"confuse","bad","unfortunately","unfortunate","failing","fail","'ve yet","have yet","inefficient","awkward","rarely use",
 			"impossible","massive","confused","a large amount","difficult","too much","heavy",
-			"limitation","incorrect","forget","useless","nightmare","inconvenient","error-prone","much effort"}; //"has to","have to","had to","against","still","issue","problem","can't","cannot","can not","cant",
+			"limitation","incorrect","forget","useless","nightmare","inconvenient","error-prone","much effort","annoyance","limited",
+			"naive","simplistic","serious issue","rarely used","disconnected","suffer","undone","trivial","ugly","no point"}; //"has to","have to","had to","against","still","issue","problem","can't","cannot","can not","cant","errors",
 
 	public static final String EXPLAINATION[] = { "why", "hint", "mean", "has to", "have to", "only", "same", "F.e.",
 			"already", "etc" }; // like
@@ -347,10 +349,12 @@ public class FeatureUtility {
 		Pattern pattern1 = Pattern.compile(".*would be[^,.;?\"']*feature.*");
 		Pattern pattern2 = Pattern.compile(".*feature[^,.;?\"']*would be.*");
 		Pattern pattern3 = Pattern.compile(".*this is[^,.;?\"']*feature.*");
+		Pattern pattern4 = Pattern.compile(".*appreciate[^,.;?\"']*feature.*");
 		Matcher matcher1 = pattern1.matcher(content);
 		Matcher matcher2 = pattern2.matcher(content);
 		Matcher matcher3 = pattern3.matcher(content);
-		if(matcher1.matches()||matcher2.matches()||matcher3.matches())
+		Matcher matcher4 = pattern3.matcher(content);
+		if(matcher1.matches()||matcher2.matches()||matcher3.matches()||matcher4.matches())
 			result = true;
 
 		return result;
@@ -385,7 +389,10 @@ public class FeatureUtility {
 		Pattern pattern1 = Pattern.compile(".*would[^,.;?\"']*allow[^,.;?\"']*");
 		Matcher matcher1 = pattern1.matcher(content);
 
-		if(matcher.matches()||matcher1.matches())
+		Pattern pattern2 = Pattern.compile(".*would just allow*");
+		Matcher matcher2 = pattern2.matcher(content);
+
+		if( (matcher.matches() || matcher1.matches()) && !matcher2.matches())
 			return true;
 
 		return false;
@@ -420,6 +427,9 @@ public class FeatureUtility {
 		boolean flag = FeatureUtility.checkContains(text, FeatureUtility.BAD, true);
 		System.out.println(flag);
 
+		String test = "FastMatch, the efficient pattern matching for pointcuts on the constant pool, is currrently only implemented for the within pointcut";
+		boolean match = test.matches(".*currently[^,.;?\"']*only.*");
+		System.out.println("match = "+match);
 
 		//String content = "it would be nice if the compiler emitted an error, since the two situations can be confusingly similar:example = <CODE>";
 		//String[] tokens = getTokens(content);
@@ -438,6 +448,9 @@ public class FeatureUtility {
 	            }
 	        }*/
 
+		String test2 = "These options help ActiveMQ recognize disappeared connections outside of the application layer";
+		System.out.println("matchHelpSystem = "+FeatureUtility.matchHelpSystem(test2));
+
 	}
 
 	/**
@@ -447,7 +460,7 @@ public class FeatureUtility {
 	 * @param target
 	 * @return 1...size
 	 */
-	public static ArrayList<Integer> getIndexList(String content, ArrayList<String> wordList,
+	public static ArrayList<Integer> getIndexList(ArrayList<String> wordList,
 												  String target) {
 		ArrayList<Integer> list = new ArrayList<Integer>();
 		String splits[] = target.split(" ");
@@ -479,13 +492,46 @@ public class FeatureUtility {
 		String content2  = "This is really good and good, let me see a good face";
 		StanfordCoreNlpDemo nlp = new StanfordCoreNlpDemo(true,"");
 		nlp.parseSingleSentence(content);
-		ArrayList<Integer> list = FeatureUtility.getIndexList(content,nlp.wordList,"have to");
+		ArrayList<Integer> list = FeatureUtility.getIndexList(nlp.wordList,"have to");
 		System.out.println(list);
 
 		nlp.parseSingleSentence(content2);
-		ArrayList<Integer> list2 = FeatureUtility.getIndexList(content2,nlp.wordList,"good");
+		ArrayList<Integer> list2 = FeatureUtility.getIndexList(nlp.wordList,"good");
 		System.out.println(list2);
 	}
+
+	public static boolean notEmpty(AbstractCollection negList) {
+		if(negList !=null && !negList.isEmpty())
+			return true;
+		return false;
+	}
+
+	public static boolean matchHelpSystem(String content) {
+		List<CoreLabel> rawWords = StanfordCoreNlpDemo.getRawWords(content);
+		ArrayList<String> wordList = new ArrayList<String>();
+
+		for(CoreLabel item : rawWords){
+			String word = item.word();
+			wordList.add(word);
+		}
+
+		ArrayList<Integer> list = FeatureUtility.getIndexList(wordList,"help");
+
+		if(FeatureUtility.notEmpty(list) == false)
+			return false;
+
+
+		for(int index : list){
+			String checkName = wordList.get(index);
+			for(String name : FeatureUtility.SYSTEM_NAMES){
+				if(checkName.equalsIgnoreCase(name))
+					return true;
+			}
+		}
+		return false;
+	}
+
+
 
 
 }

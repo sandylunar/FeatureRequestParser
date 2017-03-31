@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -59,7 +60,7 @@ public class StanfordCoreNlpDemo {
 		// String text = "these are pretty much unusable without resorting to
 		// ugly hacks like creating a temporary Extension instance just to get
 		// access to the directory.";
-		String text = "but it would be nicer to see this rolled into the broker as a first class citizen";
+		String text = "These options help ActiveMQ recognize disappeared connections outside of the application layer";
 
 
 
@@ -75,12 +76,20 @@ public class StanfordCoreNlpDemo {
 
 		nlp.parseSingleSentence(text);
 
-		int test = nlp.matchIsSomething(text, FeatureUtility.BAD, 2);
+		int test = nlp.matchIsSomething(text, FeatureUtility.GOOD_BENEFIT, 2);
+		int test2  = nlp.matchIsSomething(text, FeatureUtility.GOOD_BENEFIT);
 
-		System.out.println("result = "+test);
+		int test3= nlp.matchIsSomething(text, FeatureUtility.BAD, 2);
+		int test4  = nlp.matchIsSomething(text, FeatureUtility.BAD);
+
+		System.out.println("result1 = "+test);
+		System.out.println("result2 = "+test2);
+		System.out.println("result3 = "+test3);
+		System.out.println("result4 = "+test4);
 
 		nlp.exit();
 	}
+
 	boolean DEBUG = false;
 	ArrayList<String> lemaList = new ArrayList<String>();
 	LexicalizedParser lp = null;
@@ -144,6 +153,8 @@ public class StanfordCoreNlpDemo {
 		}
 		return allVerbs;
 	}
+
+
 
 	private int getCOPDependentValue(JsonNode basicDependenciesNode, String governorGloss) {
 		for (int i = 0; i < basicDependenciesNode.size(); i++) {
@@ -568,14 +579,14 @@ public class StanfordCoreNlpDemo {
 		//TODO
 		//[20]matchIsGOOD [21]matchIsNotGOOD [22]matchIsBAD [23]matchIsNotBAD
 
-		int matchIsGOOD = matchIsSomething(text,FeatureUtility.GOOD_BENEFIT,2);
+		int matchIsGOOD = matchIsSomething(text,FeatureUtility.GOOD_BENEFIT);
 
 		if(matchIsGOOD == 1)
 			nlpValues[20] = 1;
 		if(matchIsGOOD == -1)
 			nlpValues[21] = 1;
 
-		int matchIsBAD = matchIsSomething(text,FeatureUtility.BAD,2);
+		int matchIsBAD = matchIsSomething(text,FeatureUtility.BAD);
 
 		if(matchIsBAD == 1)
 			nlpValues[22] = 1;
@@ -611,6 +622,48 @@ public class StanfordCoreNlpDemo {
 
 		return nlpValues;
 	}
+	private int matchIsSomething(String content, String[] sth) {
+		for(String s : sth){
+
+			ArrayList<Integer> list = FeatureUtility.getIndexList(wordList, s);
+
+			if(list==null || list.size()==0)
+				continue;
+
+			for(int index : list){
+
+				String  word = Integer.toString(index);
+				HashSet<String> negList = getDepGovernorGlosses("neg");
+
+				if(!FeatureUtility.notEmpty(negList))
+					return 1;
+
+				if(negList.contains(word))
+					return -1;
+
+				if(FeatureUtility.notEmpty(getAllRelatedGlosses("cop", word))
+						||FeatureUtility.notEmpty(getAllRelatedGlosses("auxpass", word))
+						||FeatureUtility.notEmpty(getAllRelatedGlosses("nsubj", word))
+						){
+					return 1;
+				}
+
+				if(FeatureUtility.notEmpty(getAllRelatedGlosses("amod", word))){
+					return matchIsSomething(content,new String[]{s},2);
+				}
+
+				else{
+					int temp = matchIsSomething(content,new String[]{s},1);
+					return temp;
+				}
+			}
+
+		}
+
+		return 0;
+	}
+
+
 
 	private int matchIsSomething(String content, String[] sth, int depth) {
 		//matchIsSth(basicDependenciesNode,GOOD,depth)
@@ -633,7 +686,7 @@ public class StanfordCoreNlpDemo {
 			else if (!FeatureUtility.checkContains(s, wordList.toArray(new String[wordList.size()]), true))
 				continue;
 
-			ArrayList<Integer> list = FeatureUtility.getIndexList(content,wordList, s);
+			ArrayList<Integer> list = FeatureUtility.getIndexList(wordList, s);
 
 			if(list==null || list.size()==0)
 				continue;
@@ -680,7 +733,7 @@ public class StanfordCoreNlpDemo {
 			}
 		}
 
-		return 0;
+		return 0; //impossible
 	}
 
 	private boolean hasOverlap(HashSet<String> wordSetFromNEG,
@@ -747,6 +800,43 @@ public class StanfordCoreNlpDemo {
 		return result;
 	}
 
+	/**
+	 *
+	 * @param dep
+	 * @param word
+	 * @return all words related with word where "dep" = @dep
+	 */
+	private HashSet<String> getAllRelatedGlosses(String dep, String word) {
+		HashSet<String> result = new HashSet<String>();
+
+		for (int i = 0; i < basicDependenciesNode.size(); i++) {
+			JsonNode depNode = basicDependenciesNode.get(i);
+			if (word != null && !word.isEmpty()) {
+				String governorGloss = depNode.path("governorGloss").asText();
+				String governor = depNode.path("governor").asText();
+				String dependentGloss = depNode.path("dependentGloss").asText();
+				String dependent = depNode.path("dependent").asText();
+				String depType = depNode.path("dep").asText();
+
+				if(governor.equals("0"))
+					continue;
+
+				if (depType.equals(dep)) {
+					if(governor.equalsIgnoreCase(word)){
+						result.add(dependent);
+					}
+
+					if(dependent.equalsIgnoreCase(word)){
+						result.add(governor);
+					}
+				}
+			}
+		}
+
+		return result;
+
+	}
+
 	private HashSet<String> getAllRelatedGlosses( HashSet<String> words) {
 		HashSet<String> result = new HashSet<String>();
 
@@ -758,6 +848,10 @@ public class StanfordCoreNlpDemo {
 					String governor = depNode.path("governor").asText();
 					String dependentGloss = depNode.path("dependentGloss").asText();
 					String dependent = depNode.path("dependent").asText();
+
+					String depType = depNode.path("dep").asText();
+					if(depType.equals("advcl"))
+						continue;
 
 					if(governor.equals("0"))
 						continue;

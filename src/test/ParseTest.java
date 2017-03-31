@@ -71,10 +71,14 @@ public class ParseTest {
     private String test3 = "<p>aaaa:</p><p><ul><li>bbbbb</li><li>bbbbb</li><li>dddd</li></ul></p><p><br></p>";
     private String test5 = "<p>this is a list :</p><p><ol><li>aaa</li><li>bbb</li><li>ccc</li></ol><div>aaaaa</div><div></div></p><pre style=\"max-width: 100%;\"><code class=\"javascript hljs\" codemark=\"1\">javascript code</code></pre><p><br></p>";
     private String test6 = "<p>this is a list start.</p><ol><li>aaa</li><li>bbb</li><li>this is a file /com/main.java.</li></ol><p>this is a list end,my name is Ronald W. Reagan.</p><p>this is a code. This is another sentence.<br></p><pre style=\"max-width:100%;overflow-x:auto;\"><code class=\"javascript hljs\" codemark=\"1\">javascript code</code></pre><p>this is a code end<br></p>";
+    private String test7 = "<p>qqqq:http://www.baidu.com</p><ul class=\" list-paddingleft-2\" style=\"list-style-type: disc;\"><li><p>wwww</p></li><li><p>eeee</p></li><li><p>rrrr</p></li></ul><p>qqqqqqq<br/></p><pre class=\"brush:cpp;toolbar:false\">aaaaaa&nbsp;c#&nbsp;code</pre><p><a href=\"http://www.baidu.com\" target=\"_self\">http://www.baidu.com</a></p>";
+    private String test8 = "<p>pppp com.edu.stanford.nlp.this is another sentence.</p>";
+    private String test9 = "<p>pppppp com.edu.stanford.nlp. this is another sen.</p><ul class=\" list-paddingleft-2\" style=\"list-style-type: disc;\"><li><p>list1</p></li><li><p>list2</p></li><li><p>list3</p></li></ul><p>this is list end.this is code:</p><pre class=\"brush:cpp;toolbar:false\">#include&lt;iostream&gt;</pre><p>this is code end.</p><p><a href=\"http://www.baidu.com\" target=\"_self\">baidu</a> <a href=\"http://www.youku.com\">http://www.youku.com</a>&nbsp;<a href=\"http://www.baidu.com\">www.baidu.com</a>&nbsp;</p>";
+    private String test10 = "<p>this is paths: ./etc/share com.edu.stanford.nlp C:\\windows\\</p>";
 
     @Test
     public void testCode() {
-        String origin = test6;
+        String origin = test7;
         System.out.println(origin);
         System.out.println("---------------------   parse code  -----------------------------\n");
         Parser parser = new Parser();
@@ -86,6 +90,13 @@ public class ParseTest {
         System.out.println("---------------------   parse list  ------------------------------\n");
         tmp = parser.parseList(tmp);
         System.out.println(tmp);
+        System.out.println("---------------------   parse html&list  ------------------------------\n");
+        tmp = parser.parseHtmlToText(tmp);
+        System.out.println(tmp);
+        System.out.println("---------------------   parse block  ------------------------------\n");
+        ArrayList<String> blocks = parser.parseBlock(tmp);
+        System.out.println("---------------------   parse sentences  ------------------------------\n");
+        parser.parseSentences(blocks);
         System.out.println("---------------------   parse email  ------------------------------\n");
         tmp = parser.parseEmail(tmp);
         System.out.println(tmp);
@@ -101,14 +112,6 @@ public class ParseTest {
         System.out.println("---------------------   parse path  ------------------------------\n");
         tmp = parser.parsePath(tmp);
         System.out.println(tmp);
-        System.out.println("---------------------   parse html&list  ------------------------------\n");
-        tmp = parser.parseHtmlToText(tmp);
-        System.out.println(tmp);
-        System.out.println("---------------------   parse block  ------------------------------\n");
-        ArrayList<String> blocks = parser.parseBlock(tmp);
-        //System.out.println(blocks.toString());
-        System.out.println("---------------------   parse sentences  ------------------------------\n");
-        parser.parseSentences(blocks);
 
         //System.out.println(parser.getReplacementMap());
     }
@@ -116,7 +119,7 @@ public class ParseTest {
     @Test
     public void parseTest(){
         Parser parser = new Parser();
-        FeatureRequestOL fr = parser.getFR("","",test6);
+        FeatureRequestOL fr = parser.getFR("","",test10);
         System.out.println(parser.printResult(fr));
         int bIndex = 0;
         for(ArrayList<Integer> block : fr.getBlocks()){
@@ -154,10 +157,13 @@ public class ParseTest {
                 "this is a list end.\n" +
                 "this is a code.<$CODE-JAVASCRIPT$0>.this is a code end.";
         String origin2 = "this is a list start:<LIST0><LIST1><LIST2>";
+        String origin3 = "this is a path com.edu.stanford.nlp.this is another sentence.";
+        String origin4 = "this is a path /resources/css.this is another sentence.";
+        String origin5 = "this is list end.this is code.";
         /*Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref, sentiment");
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-        Annotation annotation = new Annotation(origin);
+        Annotation annotation = new Annotation(origin4);
         pipeline.annotate(annotation);
         StringWriter sw = new StringWriter();
         try {
@@ -175,7 +181,7 @@ public class ParseTest {
         JsonNode sentencesNode = rootNode.path("sentences");
         int sentencesSize = sentencesNode.size();
         System.out.println(sentencesSize);*/
-        Reader reader = new StringReader(origin2);
+        Reader reader = new StringReader(origin5);
         DocumentPreprocessor dp = new DocumentPreprocessor(reader);
         for (List<HasWord> words : dp) {
             String sentence = "";

@@ -3,7 +3,7 @@ package main.java.bean;
 import java.util.ArrayList;
 
 public class Node {
-    String tag;
+    public String tag;
     String sentence;
     Node parent;
     ArrayList<Node> children = new ArrayList<Node>();
@@ -46,14 +46,14 @@ public class Node {
             result = "\t"+result;
 
         return result;*/
-        String result = "<li><span class=\"file\"><strong>"+tag+"<br></strong>"+sentence+"\n"+"</span>";
+        String result = "<li><span class=\"glyphicon glyphicon-sort-by-attributes\"><span style=\"font-family:Arial;font-size:120%;font-weight:bold\">&nbsp;"+tag.toUpperCase()+"<br></span>"+sentence+"\n"+"</span>";
         if (hasChildren()){
             result += "<ul>";
             for(Node node : children){
                 String tmp = node.toString();
                 //System.out.println(result);
                 if (node.parent.sentence.equals("")){
-                    tmp = tmp.replaceFirst("(?<=<strong>).+?(?=<\\/strong>)", "");
+                    tmp = tmp.replaceFirst("(?<=<span style=\"font-family:Arial;font-size:120%;font-weight:bold\">).+?(?=<\\/span>)", "&nbsp;");
                 }
                 result += tmp;
             }

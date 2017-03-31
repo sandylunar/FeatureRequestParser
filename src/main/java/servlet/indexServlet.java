@@ -32,19 +32,29 @@ public class indexServlet extends HttpServlet {
         String name = request.getParameter("name");
         String FRTitle = request.getParameter("FRTitle");
         String FRDes = request.getParameter("FRDes");
-        PrintWriter printWriter = response.getWriter();
 
         Parser parser = new Parser();
-        //parser.parseCode(FRDes);
-        System.out.println(name + "\n\n\n\n\n" +
-                FRTitle + "\n\n\n\n\n" +
+        System.out.println(name + "\n\n" +
+                FRTitle + "\n\n" +
                 FRDes
         );
 
-
         FeatureRequestOL fr = parser.getFR(name, FRTitle, FRDes);
         String result = parser.printResult(fr);
+        int sNum = parser.getSenNum();
+        int bNum = parser.getBlockNum();
+        System.out.println(result);
 
+        /*String json = "{\"sNum\":" + sNum + ",\"bNum\":" + bNum + ",\"output\":\""+"output"+"\"}";
+        System.out.println(json);
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        response.setContentType("application/json");
+        //response.setContentType("text/html;charset=utf-8");
+        response.getWriter().write(json);*/
 
         System.out.printf("source code located in : %s\n",System.getProperty("user.dir"));
         System.out.printf("servlet code located in : %s\n",path);
@@ -56,6 +66,7 @@ public class indexServlet extends HttpServlet {
         System.out.println("==============Start Loading================");
         System.out.println(loadedFR);
         System.out.println("===============END Loading=================");
+
 
         StringBuffer buffer = new StringBuffer();
         ArrayList<String> tagNames = new ArrayList<>();
@@ -79,11 +90,10 @@ public class indexServlet extends HttpServlet {
         int index = tagNames.indexOf("want");
 
         Node root = null;
+
         if(countWant == 1){
             root = new Node("title",loadedFR.getTitle());
             Node want = new Node("want",loadedFR.getFullSentence(index).toString());
-
-
 
             Iterator<String> it = tagSets.iterator();
             while(it.hasNext()){
@@ -92,16 +102,15 @@ public class indexServlet extends HttpServlet {
                     continue;
 
                 Node node;
-                ArrayList<Integer> indexList = FeatureUtility.getIndexList("", tagNames, tag);
+                ArrayList<Integer> indexList = FeatureUtility.getIndexList(tagNames, tag);
                 if(indexList.size() == 1){
                     int i = indexList.get(0)-1;
-                    node = new Node(tag,loadedFR.getFullSentence(i).toString());
-
+                    node = new Node(tag,loadedFR.getFullSentence(i).getOrigin());
 
                 }else{
                     node = new Node(tag,"");
                     for(int i : indexList){
-                        Node ni = new Node(tag,loadedFR.getFullSentence(i-1).toString());
+                        Node ni = new Node(tag,loadedFR.getFullSentence(i-1).getOrigin());
                         node.addChildren(ni);
                     }
                 }
@@ -109,24 +118,22 @@ public class indexServlet extends HttpServlet {
 
             }
 
-
             root.addChildren(want);
+            System.out.println(root.tag);
             String output = root.toString();
-            System.out.println(output);
-            printWriter.print("\n====================================\n"+output);
+            String json = "{\"sNum\":" + sNum + ",\"bNum\":" + bNum + ",\"output\":\'"+output+"\'}";
+            String json1 = "{\"sNum\":" + 1 + ",\"bNum\":" + 2 + ",\"output\":\'"+"output"+"\'}";
+            System.out.println(json);
+            response.setContentType("application/json");
+            //response.setContentType("text/html;charset=utf-8");
+            response.getWriter().write(json);
         }
-
-        //request.setAttribute("parseResult", result);
-        //RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/jsp/show.jsp");
-        //rd.forward(request, response);
-
-        System.out.println(result);
-        printWriter.print("\n====================================\n"+buffer);
-        printWriter.print("\n====================================\n"+root);
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/jsp/index.jsp");
         rd.forward(request, response);
+
+        //TODO
     }
 }

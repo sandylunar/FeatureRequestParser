@@ -21,10 +21,10 @@ public class Runner {
 		//String filteredDataFile = "resource//dataFiltered_16-attributes-tfidf-actmq-0306.arff";
 		//String filteredDataFile = "resource//dataFiltered_16-attributes-tfidf-0305.arff";
 
-		Instances data = DataParser.readIntoFeatureRequests(ACTIVEMQ_Tagged_File);
-		FeatureUtility.exportInstancesToFile(data,rawDataFile);
+		//Instances data = DataParser.readIntoFeatureRequests(ACTIVEMQ_Tagged_File);
+		//FeatureUtility.exportInstancesToFile(data,rawDataFile);
 
-		// Instances data = new Instances(new BufferedReader(new FileReader(rawDataFile)));
+		Instances data = new Instances(new BufferedReader(new FileReader(rawDataFile)));
 		//RequestClassifier.filterData(data, filteredDataFile);
 		//RequestClassifier.classify(filteredDataFile, rawDataFile);
 		//RequestClassifier.predict("resource//exp1//dataFiltered2.arff",classIndex);

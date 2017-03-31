@@ -586,6 +586,7 @@ _e(function (E, $) {
             if (editor.queryCommandSupported(commandName)) {
                 // 默认命令
                 document.execCommand(commandName, false, commandValue);
+                E.info(commandName+"->"+commandValue)
             } else {
                 // hooks 命令
                 hooks = editor.commandHooks;
@@ -2297,7 +2298,7 @@ _e(function (E, $) {
                 if (e.type === 'keyup') {
                     // 将 div 的内容移动到 p 里面，并移除 div
                     $pElem = $('<p>' + $targetElem.html() + '</p>');
-                    $targetElem.after($pElem);
+                    $targetElem.parent().after($pElem);
                     $targetElem.remove();
 
                     // 如果是回车结束，将选区定位到行首
