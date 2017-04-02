@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.ListIterator;
 
 import org.apache.lucene.search.spell.NGramDistance;
 
@@ -18,6 +19,7 @@ import main.java.bean.FeatureRequestOL;
 import main.java.util.FeatureUtility;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 
 public class DataParser {
@@ -29,25 +31,34 @@ public class DataParser {
 	static ArrayList<FeatureRequest> featureRequestList = new ArrayList<FeatureRequest>();
 	static HashSet<String> labels = new HashSet<String>();
 	static ArrayList<String> labelArray = new ArrayList<String>();
-	static StanfordCoreNlpDemo nlpTool =new StanfordCoreNlpDemo(false,"");
+	// static StanfordCoreNlpDemo nlpTool =new StanfordCoreNlpDemo(false,"");
+	static StanfordCoreNlpDemo nlpTool = null;
 	static String outputFR = "data//log//all-feature-requests.txt";
-	
-	public DataParser(String path){
-		  nlpTool = new StanfordCoreNlpDemo(false,path);
-		  outputFR = path+"data//log//all-feature-requests.txt";
+	public static String[] tagNames = new String[] { "explanation", "want",
+			"useless", "benefit", "drawback", "example" };
+	public static String[] shortTagNames = new String[] { "explanation",
+			"want", "useless" };
+	public static String labelName = "category";
+
+	public DataParser(String path) {
+		nlpTool = new StanfordCoreNlpDemo(false, path);
+		outputFR = path + "data//log//all-feature-requests.txt";
 	}
 
-	public static void groupTrainData(String outputDir, String targetFileName) throws FileNotFoundException, UnsupportedEncodingException {
+	public static void groupTrainData(String outputDir, String targetFileName)
+			throws FileNotFoundException, UnsupportedEncodingException {
 		exportDir = outputDir;
 		loadTaggedFRFile(targetFileName);
 		readFileByLines();
 	}
 
-	public static void loadTaggedFRFile(String fileName) throws FileNotFoundException, UnsupportedEncodingException {
-		//propertiesFile = new File(fileName);
-		InputStreamReader fReader = new InputStreamReader(new FileInputStream(fileName),"UTF-8");
+	public static void loadTaggedFRFile(String fileName)
+			throws FileNotFoundException, UnsupportedEncodingException {
+		// propertiesFile = new File(fileName);
+		InputStreamReader fReader = new InputStreamReader(new FileInputStream(
+				fileName),"UTF-8");
 		reader = new BufferedReader(fReader);
-	}
+		}
 
 	public static void readFileByLines() {
 
@@ -73,54 +84,132 @@ public class DataParser {
 			}
 		}
 	}
-	
 
-
-	public static Instances readIntoFeatureRequests(String targetFileName) throws Exception {
+	public static Instances readIntoFeatureRequests(String targetFileName, String option)
+			throws Exception {
 
 		loadTaggedFRFile(targetFileName);
 
-		constructFeatureRequestList();
+		constructFeatureRequestList(option);
 
 		if (DEBUG) {
-			System.out.printf("============Reading from %s to FeatureRequestList ==============\n", targetFileName);
-			FeatureUtility.exportIFeatureRequestsToFile(featureRequestList, outputFR);
-			
-			//System.out.println(featureRequestList);
-			System.out.printf("\nExported %d feature request to file: %s\n",featureRequestList.size(),outputFR);
-		}
+			System.out
+					.printf("============Reading from %s to FeatureRequestList ==============\n",
+							targetFileName);
+			FeatureUtility.exportIFeatureRequestsToFile(featureRequestList,
+					outputFR);
 
-		Instances data = createWekaInstances();
+			// System.out.println(featureRequestList);
+			System.out.printf("\nExported %d feature request to file: %s\n",
+					featureRequestList.size(), outputFR);
+		}
+		Instances data;
+		
+		if(option.equals("simple"))
+			 data = createSimpleWekaInstances();
+
+		else
+			 data = createWekaInstances();
 
 		return data;
 
 	}
 
-	private static Instances createWekaInstances()
-			throws Exception {
+	private static Instances createWekaInstances() throws Exception {
 		Instances data;
 		double[] vals;
-		
+
 		ArrayList<Attribute> attributeList = constructAttributeList();
 		data = new Instances("PMA Feature Requests", attributeList, 0);
 
 		int numAttr = data.numAttributes();
-		
+
 		for (FeatureRequest fr : featureRequestList) {
 			for (int i = 0; i < fr.getNumSentences(); i++) {
-				vals = constructAttributeValues(numAttr,fr,i,data);
+				vals = constructAttributeValues(numAttr, fr, i, data);
 				data.add(new DenseInstance(1.0, vals));
 			}
 		}
-		
+
 		data.setClassIndex(numAttr - 1);
 
 		return data;
 	}
-
-	//TODO update when add new attributes
-	private static double[] constructAttributeValues(int numAttr, FeatureRequest fr, int i, Instances data) {
+	
+	private static Instances createSimpleWekaInstances() throws Exception {
+		Instances data;
+		constructLabelArray(tagNames);
+		ArrayList<Attribute> attributeList = new ArrayList<Attribute>();
+		attributeList.add(new Attribute("sentence", (ArrayList<String>) null));
+		attributeList.add(new Attribute("category", labelArray));
 		
+		data = new Instances("PMA Feature Requests", attributeList, 0);
+
+		int numAttr = data.numAttributes();
+
+		for (FeatureRequest fr : featureRequestList) {
+			for (int i = 0; i < fr.getNumSentences(); i++) {
+				double[] values = new double[numAttr];
+				Attribute stringAttr = data.attribute(0);
+				values[0] = stringAttr.addStringValue(fr.getSentence(i));
+				values[1] = labelArray.indexOf(fr.getLabel(i));
+				data.add(new DenseInstance(1.0, values));
+			}
+		}
+
+		return data;
+	}
+
+	// TODO Auto-generated method stub
+	public static Instances buildFirstDataSet(Instances data, int numAttributes, String option) {
+
+		constructLabelArray(tagNames);
+
+		ArrayList<String> bool = new ArrayList<String>();
+		bool.add("true");
+		bool.add("false");
+
+		ArrayList<Attribute> attributeList = new ArrayList<Attribute>();
+		;
+
+		for (int i = 0; i < numAttributes - 1; i++) {
+
+			//attributeList.add(new Attribute("FR-" + (i + 1), bool));
+			if(option.equals("numeric"))
+				attributeList.add(new Attribute(Integer.toString(i+1)));
+			if(option.equals("nominal")){
+				attributeList.add(new Attribute(Integer.toString(i+1), bool));
+			}
+		}
+
+		attributeList.add(new Attribute(labelName, labelArray));
+
+		Instances dataset = new Instances("FR",
+				attributeList, 0);
+
+		dataset.setClassIndex(numAttributes - 1);
+
+		ListIterator<Instance> list = data.listIterator();
+		double[] vals;
+		while (list.hasNext()) {
+
+			Instance item = list.next();
+			vals = constructAttributeValues(item, data);
+			dataset.add(new DenseInstance(1.0, vals));
+		}
+
+		return dataset;
+	}
+
+	private static double[] constructAttributeValues(Instance item,
+			Instances data) {
+		return RequestAnalyzer.getVariables(item, data,false);
+	}
+
+	// TODO update when add new attributes
+	private static double[] constructAttributeValues(int numAttr,
+			FeatureRequest fr, int i, Instances data) {
+
 		Attribute stringAttr = data.attribute(0);
 		double[] vals = new double[numAttr];
 		vals[0] = stringAttr.addStringValue(fr.getSentence(i));
@@ -154,12 +243,12 @@ public class DataParser {
 		vals[28] = fr.getMatchIsNotGOOD(i);
 		vals[29] = fr.getMatchIsBAD(i);
 		vals[30] = fr.getMatchIsNotBAD(i);
-		
+
 		vals[31] = labelArray.indexOf(fr.getLabel(i));
 		return vals;
 	}
 
-	//TODO update when add new attribute
+	// TODO update when add new attribute
 	private static ArrayList<Attribute> constructAttributeList() {
 		ArrayList<Attribute> attributeList = new ArrayList<Attribute>();
 		attributeList.add(new Attribute("sentence", (ArrayList<String>) null));
@@ -187,24 +276,23 @@ public class DataParser {
 		attributeList.add(new Attribute("sentimentScore"));
 		attributeList.add(new Attribute("sentimentProbability"));
 		attributeList.add(new Attribute("numValidWords"));
-		attributeList.add(new Attribute("subjects",(ArrayList<String>) null));
-		attributeList.add(new Attribute("actions",(ArrayList<String>) null));
-		
+		attributeList.add(new Attribute("subjects", (ArrayList<String>) null));
+		attributeList.add(new Attribute("actions", (ArrayList<String>) null));
+
 		attributeList.add(new Attribute("matchIsGOOD"));
 		attributeList.add(new Attribute("matchIsNotGOOD"));
 		attributeList.add(new Attribute("matchIsBAD"));
 		attributeList.add(new Attribute("matchIsNotBAD"));
-		
-		
+
 		attributeList.add(new Attribute("tag", labelArray));
-		
+
 		return attributeList;
 	}
 
 	/**
 	 * Split tagged file by empty line, and parse oneFeatureRequest one by one.
 	 */
-	private static void constructFeatureRequestList() {
+	private static void constructFeatureRequestList(String option) {
 		try {
 
 			String tempString = null;
@@ -215,9 +303,10 @@ public class DataParser {
 				// parse oneFeatureRequest when line is empty
 				if (tempString.trim().length() == 0) {
 					if (!oneFeatureRequest.isEmpty()) {
-						boolean added = constructSingleFeatureRequest(oneFeatureRequest, line);
+						boolean added = constructSingleFeatureRequest(
+								oneFeatureRequest, line, option);
 						oneFeatureRequest = new ArrayList<String>();
-						if(added)
+						if (added)
 							line++;
 					}
 					continue;
@@ -227,16 +316,18 @@ public class DataParser {
 
 			// parse the last one
 			if (!oneFeatureRequest.isEmpty()) {
-				boolean added = constructSingleFeatureRequest(oneFeatureRequest, line);
+				boolean added = constructSingleFeatureRequest(
+						oneFeatureRequest, line, option);
 				oneFeatureRequest = new ArrayList<String>();
-				if(added)
+				if (added)
 					line++;
 			}
-			
+
 			constructLabelArray(RequestAnalyzer.tagNames);
 
 			reader.close();
-			nlpTool.exit();
+			if(!option.equals("simple"))
+				nlpTool.exit();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -250,16 +341,20 @@ public class DataParser {
 	}
 
 	private static void constructLabelArray(String[] tagNames) {
+
+		labelArray = new ArrayList<String>();
+
 		System.out.println("Labels found: ");
-		for (String s : labels){
+		for (String s : labels) {
 			System.out.println(s);
-			}
-		for(String tag : tagNames)
+		}
+		for (String tag : tagNames)
 			labelArray.add(tag);
-		
+
 	}
 
-	private static boolean constructSingleFeatureRequest(ArrayList<String> oneFeatureRequest, int line) throws IOException {
+	private static boolean constructSingleFeatureRequest(
+			ArrayList<String> oneFeatureRequest, int line, String option) throws IOException {
 		int titleIndex = 0;
 		int targetIndex = oneFeatureRequest.size();
 		String title = null;
@@ -268,7 +363,8 @@ public class DataParser {
 			String item = oneFeatureRequest.get(i);
 			if (item.contains("title=")) {
 				titleIndex = i;
-				String[] temp = FeatureUtility.splitByEqual(item, 0, false, false);
+				String[] temp = FeatureUtility.splitByEqual(item, 0, false,
+						false);
 				if (temp != null)
 					title = temp[1];
 				else
@@ -279,120 +375,118 @@ public class DataParser {
 				targetIndex = i;
 		}
 
-		FeatureRequest fr = constructSingleFeatureRequest(title, oneFeatureRequest, titleIndex, targetIndex);
-		
+		FeatureRequest fr = constructSingleFeatureRequest(title,
+				oneFeatureRequest, titleIndex, targetIndex,option);
+
 		if (DEBUG) {
-			System.out.printf("=============FR print #%d ===================\n",line);
+			System.out.printf(
+					"=============FR print #%d ===================\n", line);
 			System.out.println(fr.getSentences());
 		}
-		
-		if(fr!=null){
+
+		if (fr != null) {
 			featureRequestList.add(fr);
-			return true;}
-		else
+			return true;
+		} else
 			return false;
 	}
 
-	public static FeatureRequestOL constructSFeatureRequestOL(FeatureRequestOL request) throws IOException{
+	public static FeatureRequestOL constructSFeatureRequestOL(
+			FeatureRequestOL request) throws IOException {
 		FeatureRequestOL fr = request;
 		NGramDistance ng = new NGramDistance();
 		String[] systemNames = request.getSystemName();
 		FeatureUtility.SYSTEM_NAMES = systemNames;
-		
+
 		int size = request.getNumSentences();
-		
-		for(int i = 0 ; i < size; i ++){
+
+		for (int i = 0; i < size; i++) {
 			double[] nlpValues = null;
 			String content = request.getSentence(i);
 			String title = request.getTitle();
-			
-			if(title==null || content==null || title.isEmpty() || content.isEmpty()){
+
+			if (title == null || content == null || title.isEmpty()
+					|| content.isEmpty()) {
 				System.err.println("Empty title or content input in : \n");
 				System.err.println(fr);
 				return null;
 			}
-			
+
 			String filteredContent = content.replaceAll("[(].*[)]", "");
 			nlpValues = nlpTool.parseSingleSentence(filteredContent);
-			
+
 			if (nlpValues == null) {
-				System.err.println("NLP analysis error when parse: !" + content);
+				System.err
+						.println("NLP analysis error when parse: !" + content);
 				continue;
 			}
-			
-			if(fr.hasRealFirstBefore())
+
+			if (fr.hasRealFirstBefore())
 				fr.addIsRealFirst(0);
-			else{
+			else {
 				if (RequestClassifier.classifyAsUseless(content)) {
 					fr.addIsRealFirst(0);
 				} else {
 					fr.addIsRealFirst(1);
 				}
 			}
-			
-		
-		
-		
-		Double similarity = Double.valueOf(ng.getDistance(title, content));
-		
-		//TODO Update when add new attributes
-		fr.addLabel("NA");
-		//fr.addSentence(content);
-		fr.addSimilarity(similarity);
-		fr.addAscOrder(Integer.valueOf(i+1));
-		fr.addContainMD(new Integer((int)nlpValues[0]));
-		fr.addContainWants(new Integer((int)nlpValues[1]));
-		fr.addContainShouldCan(new Integer((int)nlpValues[2]));
-		fr.addsStartWithVB(new Integer((int)nlpValues[3]));
-		fr.addMatchMDGOOD(new Integer((int)nlpValues[4]));
-		fr.addContainNEG(new Integer((int)nlpValues[5]));
-		fr.addQuestion(new Integer((int)nlpValues[6]));
-		fr.addNumTrunk(new Integer((int)nlpValues[7]));
-		fr.addNumToken(new Integer((int)nlpValues[8]));
-		fr.addContainEXP(new Integer((int)nlpValues[9]));
-		fr.addMatchMDGOODVB((int)nlpValues[10]);
-		fr.addMatchVBDGOOD((int)nlpValues[11]);
-		fr.addNumValidVerbs((int)nlpValues[12]); // [12]containValidVerbs
-		fr.addMatchMDGOODIF((int)nlpValues[13]);
-		fr.addMatchGOODIF((int)nlpValues[14]);
-		fr.addMatchSYSNEED((int)nlpValues[15]);
-		fr.addIsPastTense((int)nlpValues[16]);
-		fr.addSentimentScore((int)nlpValues[17]);
-		fr.addSentimentProbability(nlpValues[18]);
-		fr.addNumValidWords((int)nlpValues[19]);
-		fr.addMatchIsGOOD((int)nlpValues[20]);
-		fr.addMatchIsNotGOOD((int)nlpValues[21]);
-		fr.addMatchIsBAD((int)nlpValues[22]);
-		fr.addMatchIsNotBAD((int)nlpValues[23]);
 
-		
-		
-		
-		String subject = "null";
-		String action = "null";
-		if(nlpTool.subjectandAction!=null && nlpTool.subjectandAction.length!=0){
-			 subject = nlpTool.subjectandAction[0];
-			 action = nlpTool.subjectandAction[1];
+			Double similarity = Double.valueOf(ng.getDistance(title, content));
+
+			// TODO Update when add new attributes
+			fr.addLabel("NA");
+			// fr.addSentence(content);
+			fr.addSimilarity(similarity);
+			fr.addAscOrder(Integer.valueOf(i + 1));
+			fr.addContainMD(new Integer((int) nlpValues[0]));
+			fr.addContainWants(new Integer((int) nlpValues[1]));
+			fr.addContainShouldCan(new Integer((int) nlpValues[2]));
+			fr.addsStartWithVB(new Integer((int) nlpValues[3]));
+			fr.addMatchMDGOOD(new Integer((int) nlpValues[4]));
+			fr.addContainNEG(new Integer((int) nlpValues[5]));
+			fr.addQuestion(new Integer((int) nlpValues[6]));
+			fr.addNumTrunk(new Integer((int) nlpValues[7]));
+			fr.addNumToken(new Integer((int) nlpValues[8]));
+			fr.addContainEXP(new Integer((int) nlpValues[9]));
+			fr.addMatchMDGOODVB((int) nlpValues[10]);
+			fr.addMatchVBDGOOD((int) nlpValues[11]);
+			fr.addNumValidVerbs((int) nlpValues[12]); // [12]containValidVerbs
+			fr.addMatchMDGOODIF((int) nlpValues[13]);
+			fr.addMatchGOODIF((int) nlpValues[14]);
+			fr.addMatchSYSNEED((int) nlpValues[15]);
+			fr.addIsPastTense((int) nlpValues[16]);
+			fr.addSentimentScore((int) nlpValues[17]);
+			fr.addSentimentProbability(nlpValues[18]);
+			fr.addNumValidWords((int) nlpValues[19]);
+			fr.addMatchIsGOOD((int) nlpValues[20]);
+			fr.addMatchIsNotGOOD((int) nlpValues[21]);
+			fr.addMatchIsBAD((int) nlpValues[22]);
+			fr.addMatchIsNotBAD((int) nlpValues[23]);
+
+			String subject = "null";
+			String action = "null";
+			if (nlpTool.subjectandAction != null
+					&& nlpTool.subjectandAction.length != 0) {
+				subject = nlpTool.subjectandAction[0];
+				action = nlpTool.subjectandAction[1];
+			}
+
+			fr.addSubjects(subject);
+			fr.addActions(action);
 		}
-		
-		fr.addSubjects(subject);
-		fr.addActions(action);
+
+		for (int i = size; i > 0; i--) {
+			fr.addDescOrder(Integer.valueOf(i));
+
+		}
+
+		return fr;
+
 	}
 
-	for (int i = size; i > 0; i--) {
-		fr.addDescOrder(Integer.valueOf(i));
-
-	}
-	
-
-	return fr;
-		
-		
-	}
-	
-	
-	private static FeatureRequest constructSingleFeatureRequest(String title, ArrayList<String> oneFeatureRequest, int titleIndex,
-			int targetIndex) throws IOException {
+	private static FeatureRequest constructSingleFeatureRequest(String title,
+			ArrayList<String> oneFeatureRequest, int titleIndex, int targetIndex, String option)
+			throws IOException {
 
 		FeatureRequest fr = new FeatureRequest(title);
 		NGramDistance ng = new NGramDistance();
@@ -405,93 +499,98 @@ public class DataParser {
 			String[] temp = FeatureUtility.splitByEqual(line, 0, false, false);
 			String tag = null;
 			String content;
-			
-			tag = getTag(temp,oneFeatureRequest,i);
-			
-			if(tag==null)
+
+			tag = getTag(temp, oneFeatureRequest, i);
+
+			if (tag == null)
 				continue;
-			
+
 			content = getContent(temp[1]);
 			labels.add(tag);
-			
-			size++;
 
+			size++;
 
 			// TODO debug here
 			String filteredContent = content.replaceAll("[(].*[)]", "");
-			nlpValues = nlpTool.parseSingleSentence(filteredContent);
+			
+			if(!option.equals("simple"))
+				nlpValues = nlpTool.parseSingleSentence(filteredContent);
 
-			if (nlpValues == null) {
-				System.err.println("NLP analysis error when parse: !" + content);
+			if (nlpValues == null && !option.equals("simple")) {
+				System.err
+						.println("NLP analysis error when parse: !" + content);
 				continue;
 			}
-			
-			
-			if(fr.hasRealFirstBefore())
+
+			if (fr.hasRealFirstBefore())
 				fr.addIsRealFirst(0);
-			else{
+			else {
 				if (RequestClassifier.classifyAsUseless(content)) {
 					fr.addIsRealFirst(0);
 				} else {
 					fr.addIsRealFirst(1);
 				}
 			}
-			
-			if(title==null || content==null || title.isEmpty() || content.isEmpty()){
+
+			if (title == null || content == null || title.isEmpty()
+					|| content.isEmpty()) {
 				System.err.println("Empty title or content input in : \n");
 				System.err.println(oneFeatureRequest);
 				return null;
 			}
 
 			Double similarity = Double.valueOf(ng.getDistance(title, content));
-			
-			//TODO Update when add new attributes
+
+			// TODO Update when add new attributes
 			fr.addLabel(tag);
 			fr.addSentence(content);
 			fr.addSimilarity(similarity);
 			fr.addAscOrder(Integer.valueOf(size));
-			fr.addContainMD(new Integer((int)nlpValues[0]));
-			fr.addContainWants(new Integer((int)nlpValues[1]));
-			fr.addContainShouldCan(new Integer((int)nlpValues[2]));
-			fr.addsStartWithVB(new Integer((int)nlpValues[3]));
-			fr.addMatchMDGOOD(new Integer((int)nlpValues[4]));
-			fr.addContainNEG(new Integer((int)nlpValues[5]));
-			fr.addQuestion(new Integer((int)nlpValues[6]));
-			fr.addNumTrunk(new Integer((int)nlpValues[7]));
-			fr.addNumToken(new Integer((int)nlpValues[8]));
-			fr.addContainEXP(new Integer((int)nlpValues[9]));
-			fr.addMatchMDGOODVB((int)nlpValues[10]);
-			fr.addMatchVBDGOOD((int)nlpValues[11]);
-			fr.addNumValidVerbs((int)nlpValues[12]); // [12]containValidVerbs
-			fr.addMatchMDGOODIF((int)nlpValues[13]);
-			fr.addMatchGOODIF((int)nlpValues[14]);
-			fr.addMatchSYSNEED((int)nlpValues[15]);
-			fr.addIsPastTense((int)nlpValues[16]);
-			fr.addSentimentScore((int)nlpValues[17]);
+			
+			if(!option.equals("simple")){
+			
+			fr.addContainMD(new Integer((int) nlpValues[0]));
+			fr.addContainWants(new Integer((int) nlpValues[1]));
+			fr.addContainShouldCan(new Integer((int) nlpValues[2]));
+			fr.addsStartWithVB(new Integer((int) nlpValues[3]));
+			fr.addMatchMDGOOD(new Integer((int) nlpValues[4]));
+			fr.addContainNEG(new Integer((int) nlpValues[5]));
+			fr.addQuestion(new Integer((int) nlpValues[6]));
+			fr.addNumTrunk(new Integer((int) nlpValues[7]));
+			fr.addNumToken(new Integer((int) nlpValues[8]));
+			fr.addContainEXP(new Integer((int) nlpValues[9]));
+			fr.addMatchMDGOODVB((int) nlpValues[10]);
+			fr.addMatchVBDGOOD((int) nlpValues[11]);
+			fr.addNumValidVerbs((int) nlpValues[12]); // [12]containValidVerbs
+			fr.addMatchMDGOODIF((int) nlpValues[13]);
+			fr.addMatchGOODIF((int) nlpValues[14]);
+			fr.addMatchSYSNEED((int) nlpValues[15]);
+			fr.addIsPastTense((int) nlpValues[16]);
+			fr.addSentimentScore((int) nlpValues[17]);
 			fr.addSentimentProbability(nlpValues[18]);
-			fr.addNumValidWords((int)nlpValues[19]);
-			fr.addMatchIsGOOD((int)nlpValues[20]);
-			fr.addMatchIsNotGOOD((int)nlpValues[21]);
-			fr.addMatchIsBAD((int)nlpValues[22]);
-			fr.addMatchIsNotBAD((int)nlpValues[23]);
-			
-			
+			fr.addNumValidWords((int) nlpValues[19]);
+			fr.addMatchIsGOOD((int) nlpValues[20]);
+			fr.addMatchIsNotGOOD((int) nlpValues[21]);
+			fr.addMatchIsBAD((int) nlpValues[22]);
+			fr.addMatchIsNotBAD((int) nlpValues[23]);
+
 			String subject = "";
 			String action = "";
-			if(nlpTool.subjectandAction!=null && nlpTool.subjectandAction.length!=0){
-				 subject = nlpTool.subjectandAction[0];
-				 action = nlpTool.subjectandAction[1];
+			if (nlpTool.subjectandAction != null
+					&& nlpTool.subjectandAction.length != 0) {
+				subject = nlpTool.subjectandAction[0];
+				action = nlpTool.subjectandAction[1];
 			}
-			
+
 			fr.addSubjects(subject);
 			fr.addActions(action);
+			}
 		}
 
 		for (int i = size; i > 0; i--) {
 			fr.addDescOrder(Integer.valueOf(i));
 
 		}
-		
 
 		return fr;
 	}
@@ -503,35 +602,40 @@ public class DataParser {
 			char ch = (refinedContent.charAt(refinedContent.length() - 1));
 
 			if (ch == '.') {
-				refinedContent = refinedContent.substring(0, refinedContent.length() - 1);
+				refinedContent = refinedContent.substring(0,
+						refinedContent.length() - 1);
 			}
 		}
 		return refinedContent;
 	}
 
-	private static String getTag(String[] temp, ArrayList<String> oneFeatureRequest, int line) {
+	private static String getTag(String[] temp,
+			ArrayList<String> oneFeatureRequest, int line) {
 		String tag = null;
 		if (temp != null)
 			tag = temp[0];
 		else {
-			System.err.println("Null input at line: "+line);
+			System.err.println("Null input at line: " + line);
 			System.err.println(oneFeatureRequest);
 			return tag;
 		}
 
-		if (FeatureUtility.checkContains(tag, FeatureUtility.excludeTags,false))
+		if (FeatureUtility
+				.checkContains(tag, FeatureUtility.excludeTags, false))
 			return null;
 
-		if(tag.toLowerCase().contains("example")||tag.toLowerCase().contains("ref")) 
- 			tag = "example";
-		else if(tag.toLowerCase().contains("benefit"))
+		if (tag.toLowerCase().contains("example")
+				|| tag.toLowerCase().contains("ref"))
+			tag = "example";
+		else if (tag.toLowerCase().contains("benefit"))
 			tag = "benefit";
-		else if(tag.toLowerCase().contains("drawback")
-				||tag.toLowerCase().contains("painpoint")|| tag.toLowerCase().contains("complain"))
+		else if (tag.toLowerCase().contains("drawback")
+				|| tag.toLowerCase().contains("painpoint")
+				|| tag.toLowerCase().contains("complain"))
 			tag = "drawback";
-		else if(!tag.equals("want") && !tag.equals("useless"))
+		else if (!tag.equals("want") && !tag.equals("useless"))
 			tag = "explanation";
-		
+
 		return tag;
 	}
 
@@ -540,16 +644,21 @@ public class DataParser {
 		ArrayList<String> oneFeatureRequest = new ArrayList<String>();
 		oneFeatureRequest.add("title=Autofill and more flexible sql tab");
 		oneFeatureRequest.add("useless=Good Luck ");
-		oneFeatureRequest.add("useless=Thanks you for this brilliant project. ");
-		oneFeatureRequest.add("want=Make auto fill to finish table names or column. ");
-		oneFeatureRequest.add("explaination=Like tab do inside bash, finishing dir and file names. ");
-		oneFeatureRequest.add("want=I would appreciate a feature that allows to control some User Interface functionality from phpMyAdmin");
+		oneFeatureRequest
+				.add("useless=Thanks you for this brilliant project. ");
+		oneFeatureRequest
+				.add("want=Make auto fill to finish table names or column. ");
+		oneFeatureRequest
+				.add("explaination=Like tab do inside bash, finishing dir and file names. ");
+		oneFeatureRequest
+				.add("want=I would appreciate a feature that allows to control some User Interface functionality from phpMyAdmin");
 
 		int titleIndex = 0;
 		int targetIndex = oneFeatureRequest.size();
 
 		try {
-			FeatureRequest fr = constructSingleFeatureRequest(title, oneFeatureRequest, titleIndex, targetIndex);
+			FeatureRequest fr = constructSingleFeatureRequest(title,
+					oneFeatureRequest, titleIndex, targetIndex, "normal");
 			System.out.println(fr);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
