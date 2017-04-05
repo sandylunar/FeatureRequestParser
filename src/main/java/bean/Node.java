@@ -10,34 +10,34 @@ public class Node {
     Node parent;
     ArrayList<Node> children = new ArrayList<Node>();
 
-    public Node(String tag, String sentence){
+    public Node(String tag, String sentence) {
         this.tag = tag;
         this.sentence = StringEscapeUtils.escapeHtml4(sentence);
     }
 
-    public Node(String tag, String sentence, Node parent){
+    public Node(String tag, String sentence, Node parent) {
         this.tag = tag;
         this.sentence = StringEscapeUtils.escapeHtml4(sentence);
         addParent(parent);
     }
 
-    public void addParent(Node parent){
+    public void addParent(Node parent) {
         this.parent = parent;
     }
 
-    public void addChildren(Node child){
+    public void addChildren(Node child) {
         child.addParent(this);
         children.add(child);
     }
 
-    public boolean hasChildren(){
-        if(children==null || children.isEmpty())
+    public boolean hasChildren() {
+        if (children == null || children.isEmpty())
             return false;
 
         return true;
     }
 
-    public String toString(){
+    public String toString() {
         /*String result = "["+tag+"]"+sentence+"\n";
 
         if(hasChildren()){
@@ -48,20 +48,32 @@ public class Node {
             result = "\t"+result;
 
         return result;*/
-        String result = "<li><span class=\"glyphicon glyphicon-sort-by-attributes\"><span style=\"font-family:Arial;font-size:120%;font-weight:bold\">&nbsp;"+tag.toUpperCase()+"<br></span>"+sentence+"\n"+"</span>";
-        if (hasChildren()){
+        tag = tag.replaceAll("\\s+", " ");
+        sentence = sentence.replaceAll("\\s+", " ");
+        String result = "<li><span class=\"glyphicon glyphicon-sort-by-attributes\"><span style=\"font-family:sans-serif;font-size:130%;font-weight:600\">&nbsp;" + tag.toUpperCase() + "<br></span><br><span style=\"font-family:sans-serif;font-size:120%;font-weight:300\">" + sentence + "</span></span><br><br>";
+        if (hasChildren()) {
             result += "<ul>";
-            for(Node node : children){
+            for (Node node : children) {
                 String tmp = node.toString();
                 //System.out.println(result);
-                if (node.parent.sentence.equals("")){
-                    tmp = tmp.replaceFirst("(?<=<span style=\"font-family:Arial;font-size:120%;font-weight:bold\">).+?(?=<\\/span>)", "&nbsp;");
+                if (node.parent.sentence.equals("")) {
+                    tmp = tmp.replaceFirst("(?<=<span style=\"font-family:sans-serif;font-size:125%;font-weight:550\">).+?(?=<\\/span>)", "&nbsp;");
+                }
+                if (node.tag.equalsIgnoreCase("want")) {
+                    tmp = tmp.replaceFirst("(?<=span class=\")glyphicon glyphicon-sort-by-attributes", "glyphicon glyphicon-star");
+                    tmp = tmp.replaceFirst("font-weight:600", "font-weight:600;color:#000080");
+                    tmp = tmp.replaceFirst("(?<=</span><br>)<span style=\"font-family:sans-serif;font-size:120%;font-weight:300\">", "<span style=\"font-family:sans-serif;font-size:120%;font-weight:450;color:#000080\">");
+                }
+                if (node.tag.equalsIgnoreCase("benefit")){
+                    tmp = tmp.replaceFirst("(?<=span class=\")glyphicon glyphicon-sort-by-attributes", "glyphicon glyphicon-thumbs-up");
+                }
+                if (node.tag.equalsIgnoreCase("example")){
+                    tmp = tmp.replaceFirst("(?<=span class=\")glyphicon glyphicon-sort-by-attributes", "glyphicon glyphicon-hand-right");
                 }
                 result += tmp;
             }
             result += "</ul>";
-        }
-        else
+        } else
             result += "</li>";
 
         result = result.replaceAll("\n*", "");

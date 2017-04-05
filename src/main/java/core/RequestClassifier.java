@@ -32,6 +32,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.bayes.NaiveBayesMultinomialText;
+import weka.classifiers.evaluation.ThresholdCurve;
 import weka.classifiers.functions.Logistic;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.lazy.IBk;
@@ -56,19 +57,25 @@ import weka.core.tokenizers.NGramTokenizer;
 import weka.core.tokenizers.WordTokenizer;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
+import weka.filters.supervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.StringToNominal;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
 public class RequestClassifier {
-	static int tagSize = 3;
-	static String[] tagNames = new String[] { "explaination", "want", "useless" };
+
+	static String[] shortTagNames = new String[] { "explaination", "want", "useless" };
+	static String[] tagNames = new String[] { "explanation", "want",
+			"useless", "benefit", "drawback", "example" };
+	static int tagSize = tagNames.length;
 	static boolean printResult = false;
 	static String[] rawAttributeNames;
-	static String outputFile = "resource//precision_results_non-text.txt";
+	static String outputFile = "data//precision_results_non-text.txt";
 	static PrintWriter out = null;
-	static String modelOutputDir = "resource//models//";
+	static String modelOutputDir = "data//models//";
 
-	public static void classify(String filename, String rawfileName)
-			throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+	public static void classify(String filename, String rawfileName,String label)
+			throws IOException, InstantiationException, IllegalAccessException,
+			ClassNotFoundException {
 		Instances rawData;
 		Instances data;
 
@@ -125,7 +132,9 @@ public class RequestClassifier {
 			int count = 0;
 
 			int size = list.size();
-			System.out.printf("\nFind %d combinations, need classify %d times\n", size, size * classifiers.size());
+			System.out.printf(
+					"\nFind %d combinations, need classify %d times\n", size,
+					size * classifiers.size());
 			for (int i = 0; i < list.size(); i++) {
 				Instances copyData = new Instances(data);
 				int[] a = (int[]) list.get(i);
@@ -143,9 +152,11 @@ public class RequestClassifier {
 				for (Classifier c : classifiers) {
 					try {
 						count++;
-						System.out.println("#classify:" + count + "\\" + size * classifiers.size());
+						System.out.println("#classify:" + count + "\\" + size
+								* classifiers.size());
 
-						double[][] results = RequestClassifier.classify(copyData, c, rawData);
+						double[][] results = RequestClassifier.classify(
+								copyData, c, rawData,label);
 
 						if (results == null)
 							System.err.println("NULL return from classify");
@@ -161,23 +172,34 @@ public class RequestClassifier {
 
 								deleteAttrForMaxPrec[j] = "";
 								for (int m = 0; m < maxAttributes.length; m++)
-									deleteAttrForMaxPrec[j] += rawAttributeNames[maxAttributes[m]] + " ";
+									deleteAttrForMaxPrec[j] += rawAttributeNames[maxAttributes[m]]
+											+ " ";
 
-								printConsole(tagNames[j], count, maxPrecision[j][0], maxPrecision[j][1],
+								printConsole(
+										tagNames[j],
+										count,
+										maxPrecision[j][0],
+										maxPrecision[j][1],
 										"\nFind MAX precision when train and test for %d times.\n",
-										"Highest Precsion = %.2f, Recall = %.2f\n", classiferName,
-										deleteAttrForMaxPrec[j]);
+										"Highest Precsion = %.2f, Recall = %.2f\n",
+										classiferName, deleteAttrForMaxPrec[j]);
 
 							} else if (results[j][0] == maxPrecision[j][0]) {
 								if (results[j][1] > maxPrecision[j][1]) {
 									maxPrecision[j][1] = results[j][1];
 									deleteAttrForMaxPrec[j] = "";
 									for (int k = 0; k < maxAttributes.length; k++)
-										deleteAttrForMaxPrec[j] += rawAttributeNames[maxAttributes[k]] + " ";
+										deleteAttrForMaxPrec[j] += rawAttributeNames[maxAttributes[k]]
+												+ " ";
 
-									printConsole(tagNames[j], count, maxPrecision[j][0], maxPrecision[j][1],
+									printConsole(
+											tagNames[j],
+											count,
+											maxPrecision[j][0],
+											maxPrecision[j][1],
 											"\nUpdate MAX recall when train and test for %d times.\n",
-											"Highest Precsion = %.2f, Recall = %.2f\n", classiferName,
+											"Highest Precsion = %.2f, Recall = %.2f\n",
+											classiferName,
 											deleteAttrForMaxPrec[j]);
 								}
 							}
@@ -189,22 +211,33 @@ public class RequestClassifier {
 
 								deleteAttrForMaxRec[j] = "";
 								for (int k = 0; k < maxAttributes.length; k++)
-									deleteAttrForMaxRec[j] += rawAttributeNames[maxAttributes[k]] + " ";
+									deleteAttrForMaxRec[j] += rawAttributeNames[maxAttributes[k]]
+											+ " ";
 
-								printConsole(tagNames[j], count, maxRecall[j][1], maxRecall[j][0],
+								printConsole(
+										tagNames[j],
+										count,
+										maxRecall[j][1],
+										maxRecall[j][0],
 										"\nFind MAX Recall when train and test for %d times.\n",
-										"Highest Recall = %.2f, Precision = %.2f\n", classiferName,
-										deleteAttrForMaxRec[j]);
+										"Highest Recall = %.2f, Precision = %.2f\n",
+										classiferName, deleteAttrForMaxRec[j]);
 							} else if (results[j][1] == maxRecall[j][1]) {
 								if (results[j][0] > maxRecall[j][0]) {
 									maxRecall[j][0] = results[j][0];
 									deleteAttrForMaxRec[j] = "";
 									for (int k = 0; k < maxAttributes.length; k++)
-										deleteAttrForMaxRec[j] += rawAttributeNames[maxAttributes[k]] + " ";
+										deleteAttrForMaxRec[j] += rawAttributeNames[maxAttributes[k]]
+												+ " ";
 
-									printConsole(tagNames[j], count, maxRecall[j][1], maxRecall[j][0],
+									printConsole(
+											tagNames[j],
+											count,
+											maxRecall[j][1],
+											maxRecall[j][0],
 											"\nUpdate MAX precision when train and test for %d times.\n",
-											"Highest Recall = %.2f, Precision = %.2f\n", classiferName,
+											"Highest Recall = %.2f, Precision = %.2f\n",
+											classiferName,
 											deleteAttrForMaxRec[j]);
 								}
 							}
@@ -220,18 +253,26 @@ public class RequestClassifier {
 
 			if (maxAttributes != null) {
 
-				out.printf("\n\n\nRomoved #attributes = %d ", maxAttributes.length);
+				out.printf("\n\n\nRomoved #attributes = %d ",
+						maxAttributes.length);
 				out.printf("\nTrain and Test for %d times", count);
 				out.println("\nClassifier: " + classiferName);
 
 				for (int j = 0; j < tagSize; j++) {
-					out.printf("\n=============Tag: %s================", tagNames[j]);
-					out.printf("\nHighest Precision = %.2f, Recall = %.2f", maxPrecision[j][0], maxPrecision[j][1]);
-					out.print("\nRemoved attributes names: " + deleteAttrForMaxPrec[j]);
-					out.print("\nRemoved attributes index: " + getRemovedIndex(deleteAttrForMaxPrec[j]));
-					out.printf("\nHighest Recall = %.2f, Precision = %.2f", maxRecall[j][1], maxRecall[j][0]);
-					out.print("\nRemoved attributes names: " + deleteAttrForMaxRec[j]);
-					out.print("\nRemoved attributes index: " + getRemovedIndex(deleteAttrForMaxRec[j]));
+					out.printf("\n=============Tag: %s================",
+							tagNames[j]);
+					out.printf("\nHighest Precision = %.2f, Recall = %.2f",
+							maxPrecision[j][0], maxPrecision[j][1]);
+					out.print("\nRemoved attributes names: "
+							+ deleteAttrForMaxPrec[j]);
+					out.print("\nRemoved attributes index: "
+							+ getRemovedIndex(deleteAttrForMaxPrec[j]));
+					out.printf("\nHighest Recall = %.2f, Precision = %.2f",
+							maxRecall[j][1], maxRecall[j][0]);
+					out.print("\nRemoved attributes names: "
+							+ deleteAttrForMaxRec[j]);
+					out.print("\nRemoved attributes index: "
+							+ getRemovedIndex(deleteAttrForMaxRec[j]));
 					out.println();
 					out.flush();
 				}
@@ -244,8 +285,9 @@ public class RequestClassifier {
 
 	}
 
-	private static void printConsole(String tagName, int count, double output1, double output2, String countString,
-			String performanceString, String classiferName, String deleteAttrNames) {
+	private static void printConsole(String tagName, int count, double output1,
+									 double output2, String countString, String performanceString,
+									 String classiferName, String deleteAttrNames) {
 		System.out.printf("=============Tag: %s================", tagName);
 		System.out.printf(countString, count);
 		System.out.printf(performanceString, output1, output2);
@@ -257,20 +299,20 @@ public class RequestClassifier {
 	private static ArrayList<Classifier> getAllClassifiers() {
 		ArrayList<Classifier> classifiers = new ArrayList<Classifier>();
 		classifiers.add(new RandomForest());
-		// classifiers.add(new NaiveBayes());
+		classifiers.add(new NaiveBayes());
 
-		// classifiers.add(new J48());
+		classifiers.add(new J48());
 
-		// classifiers.add(new DecisionTable());
-		// classifiers.add(new JRip());
+		classifiers.add(new DecisionTable());
+		classifiers.add(new JRip());
 
-		// classifiers.add(new IBk());
+		classifiers.add(new IBk());
 
-		// classifiers.add(new AdaBoostM1());
-		// classifiers.add(new Bagging());
+		classifiers.add(new AdaBoostM1());
+		classifiers.add(new Bagging());
 
-		// classifiers.add(new Logistic());
-		// classifiers.add(new SMO());
+		classifiers.add(new Logistic());
+		classifiers.add(new SMO());
 
 		/*
 		 * WekaPackageManager.loadPackages( false, true, false );
@@ -282,20 +324,22 @@ public class RequestClassifier {
 
 	private static void createPrintWriter(String outputFile) {
 		try {
-			out = new PrintWriter(new FileOutputStream(new File(outputFile), true), true);
+			out = new PrintWriter(new FileOutputStream(new File(outputFile),
+					true), true);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static PrintWriter getPrintWriter(String outputFile) {
 		PrintWriter printer = null;
 		try {
-			printer = new PrintWriter(new FileOutputStream(new File(outputFile), false));
+			printer = new PrintWriter(new FileOutputStream(
+					new File(outputFile), false));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		return printer;
 	}
 
@@ -317,7 +361,8 @@ public class RequestClassifier {
 		return results;
 	}
 
-	public static void filterData(Instances dataRaw, String filename) throws Exception {
+	public static Instances filterData(Instances dataRaw)
+			throws Exception {
 
 		// exportInstancesToFile(dataRaw,
 		// "D:\\FeatureTrac\\github\\WekaDemo\\WekaDemo\\resource\\dataRaw.arff");
@@ -327,7 +372,8 @@ public class RequestClassifier {
 		token.setNGramMaxSize(2);
 		token.setNGramMinSize(2);
 
-		filter = getStopWordFilter(true);
+
+		filter = getStopWordFilter(false);
 		filter.setTFTransform(true);
 		filter.setIDFTransform(true);
 		filter.setInputFormat(dataRaw);
@@ -336,15 +382,15 @@ public class RequestClassifier {
 		filter.setLowerCaseTokens(true);
 
 		Instances dataFiltered = Filter.useFilter(dataRaw, filter);
-		dataFiltered.setClassIndex(dataRaw.numAttributes() - 2);
 
-		FeatureUtility.exportInstancesToFile(dataFiltered, filename);
-		System.out.println("Exported to file: " + filename);
+		return dataFiltered;
+
+
 	}
 
+	public static double[][] classify(Instances data, Classifier classifier,
+									  Instances rawData,String label) throws Exception {
 
-
-	public static double[][] classify(Instances data, Classifier classifier, Instances rawData) throws Exception {
 
 		Attribute tag = data.classAttribute();
 		tagSize = tag.numValues();
@@ -355,47 +401,64 @@ public class RequestClassifier {
 		for (int i = 0; i < tagSize; i++)
 			tagNames[i] = tag.value(i);
 
-		if (classifier.getClass().getName().contains("bayes")) {
-			Discretize filter = new Discretize();
-			filter.setInputFormat(data);
-			data = Filter.useFilter(data, filter);
-		}
+//		if (classifier.getClass().getName().contains("bayes")) {
+//			Discretize filter = new Discretize();
+//			filter.setInputFormat(data);
+//			data = Filter.useFilter(data, filter);
+//		}
 
 		// select attributes
-		/*WrapperSubsetEval evalForAttr = new WrapperSubsetEval();
-		AttributeSelection attselector = new AttributeSelection();
-		evalForAttr.setClassifier(new RandomForest());
-		GreedyStepwise search = new GreedyStepwise();
-		search.setSearchBackwards(true);
-		evalForAttr.setFolds(10);
+		/*
+		 * WrapperSubsetEval evalForAttr = new WrapperSubsetEval();
+		 * AttributeSelection attselector = new AttributeSelection();
+		 * evalForAttr.setClassifier(new RandomForest()); GreedyStepwise search
+		 * = new GreedyStepwise(); search.setSearchBackwards(true);
+		 * evalForAttr.setFolds(10);
+		 *
+		 * attselector.setEvaluator(evalForAttr); attselector.setSearch(search);
+		 * attselector.setInputFormat(data);
+		 */
 
-		attselector.setEvaluator(evalForAttr);
-		attselector.setSearch(search);
-		attselector.setInputFormat(data);*/
+		// System.out.println("#Attributes before selection: " +
+		// data.numAttributes());
 
-		//System.out.println("#Attributes before selection: " + data.numAttributes());
+		// Instances newData = Filter.useFilter(data, attselector);
 
-		//Instances newData = Filter.useFilter(data, attselector);
-
-		/*System.out.println("Attributes after selection: ");
-		Enumeration<Attribute> enumerator = newData.enumerateAttributes();
-		while (enumerator.hasMoreElements()) {
-			System.out.println(enumerator.nextElement().name());
-		}
-
-		System.out.println("Attributes after selection: END");*/
+		/*
+		 * System.out.println("Attributes after selection: ");
+		 * Enumeration<Attribute> enumerator = newData.enumerateAttributes();
+		 * while (enumerator.hasMoreElements()) {
+		 * System.out.println(enumerator.nextElement().name()); }
+		 *
+		 * System.out.println("Attributes after selection: END");
+		 */
 
 		// TODO
-		//classifier.buildClassifier(data);
+		// classifier.buildClassifier(data);
 
 		if (outputModel) {
-			String filename = modelOutputDir + classifier.getClass().getName() + ".model";
+			String filename = modelOutputDir + classifier.getClass().getName()
+					+ ".model";
 			weka.core.SerializationHelper.write(filename, classifier);
 			System.out.println("Export Model: " + filename);
 		}
 
-		//useLowLevel(data);
-		Evaluation eval = getEvaluation(data, classifier);
+		// useLowLevel(data);
+		Evaluation eval = getEvaluation(data, classifier,label);
+
+//		ThresholdCurve tc = new ThresholdCurve();
+//
+//		int classIndex = 1;
+//		Instances result = tc.getCurve(eval.predictions(), classIndex);
+//		System.out.println("The area under the ROC　curve: " + eval.areaUnderROC(classIndex));
+
+
+		if (true) {
+			System.out.println("\n\n==============================");
+			System.out.println(classifier.getClass().getName());
+			System.out.println(eval.toClassDetailsString());
+			System.out.println(eval.toMatrixString());
+		}
 
 		for (int i = 0; i < tagSize; i++) {
 			evalResult[i][0] = Double.valueOf(eval.precision(i));
@@ -409,40 +472,53 @@ public class RequestClassifier {
 		return evalResult;
 	}
 
-	private static Evaluation getEvaluation(Instances data, Classifier classifier) throws Exception {
+	private static Evaluation getEvaluation(Instances data,
+											Classifier classifier,String label) {
 
-		 weka.filters.supervised.attribute.AttributeSelection filter = new weka.filters.supervised.attribute.AttributeSelection();
-		    CfsSubsetEval eval = new CfsSubsetEval();
-		    GreedyStepwise search = new GreedyStepwise();
-		    search.setSearchBackwards(true);
-		    filter.setEvaluator(eval);
-		    filter.setSearch(search);
-		    filter.setInputFormat(data);
-		    Instances newData = Filter.useFilter(data, filter);
+		data.setClassIndex(data.numAttributes()-1);
+//		weka.filters.supervised.attribute.AttributeSelection filter = new weka.filters.supervised.attribute.AttributeSelection();
+//		CfsSubsetEval eval = new CfsSubsetEval();
+//		GreedyStepwise search = new GreedyStepwise();
+//		search.setSearchBackwards(true);
+//		filter.setEvaluator(eval);
+//		filter.setSearch(search);
+//		filter.setInputFormat(data);
+//		Instances newData = Filter.useFilter(data, filter);
 
-		Evaluation evaluation = new Evaluation(data);
+		Instances newData = new Instances(data);
+		newData.setClassIndex(data.attribute(label).index());
+		Evaluation evaluation = null;
+		try {
+			evaluation = new Evaluation(newData);
+			evaluation.crossValidateModel(classifier, newData, 10, new Random(1));
 
-		System.out.println(evaluation.toSummaryString());
-		evaluation.crossValidateModel(classifier, newData, 10, new Random(1));
-		return evaluation;
+			return evaluation;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+
+			return evaluation;
+		}
+
 	}
-	
-	  protected static void useLowLevel(Instances data) throws Exception {
-		    System.out.println("\n3. Low-level");
-		    AttributeSelection attsel = new AttributeSelection();
-		    CfsSubsetEval eval = new CfsSubsetEval();
-		    GreedyStepwise search = new GreedyStepwise();
-		    search.setSearchBackwards(true);
-		    attsel.setEvaluator(eval);
-		    attsel.setSearch(search);
-		    
-		    attsel.SelectAttributes(data);
-		    int[] indices = attsel.selectedAttributes();
-		    System.out.println("selected attribute indices (starting with 0):\n" + Utils.arrayToString(indices));
-		  }
 
-	private static void testClassifier(int folds, Instances data, Instances rawData, Classifier classifier)
-			throws Exception {
+	protected static void useLowLevel(Instances data) throws Exception {
+		System.out.println("\n3. Low-level");
+		AttributeSelection attsel = new AttributeSelection();
+		CfsSubsetEval eval = new CfsSubsetEval();
+		GreedyStepwise search = new GreedyStepwise();
+		search.setSearchBackwards(true);
+		attsel.setEvaluator(eval);
+		attsel.setSearch(search);
+
+		attsel.SelectAttributes(data);
+		int[] indices = attsel.selectedAttributes();
+		System.out.println("selected attribute indices (starting with 0):\n"
+				+ Utils.arrayToString(indices));
+	}
+
+	private static void testClassifier(int folds, Instances data,
+									   Instances rawData, Classifier classifier) throws Exception {
 		Instances train = null;
 		Instances test = null;
 		Evaluation eval = null;
@@ -496,7 +572,7 @@ public class RequestClassifier {
 			}
 
 			out.flush();
-			// System.out.println("Flushed to file: # - actual - predicted -
+			// out.println("Flushed to file: # - actual - predicted -
 			// error - distribution - content");
 
 		}
@@ -524,7 +600,7 @@ public class RequestClassifier {
 		return -1;
 	}
 
-	private static StringToWordVector getStopWordFilter(boolean flag) { 
+	private static StringToWordVector getStopWordFilter(boolean flag) {
 		StringToWordVector filter = new StringToWordVector();
 		if (flag) {
 			final List<String> list = Arrays.asList(SMART_STOP_WORDS);
@@ -544,67 +620,98 @@ public class RequestClassifier {
 		}
 		return filter;
 	}
-	
-	public static final String QUESTION[] = {"why"};
+
+	public static final String QUESTION[] = { "why" };
 
 	public static final String WANT_MD[] = { "should", "can" };
-	public static final String WANTS[] = { "sugg", "propose", "consider", "want", "would like", "\'d like", "’d like",
-			"what about", "how about", "new" };
-	public static final String GOOD[] = { "help", "helpful", "useful", "great", "nice", "good", "appreciate", "greatly",
-			"appreciated", "appropriate", "better", "convenient","cool","worth"};
-	public static final String EXPLAINATION[] = { "why", "hint", "mean", "has to", "have to", "only", "same", "F.e.",
-			"already", "etc" }; // like
-	
-	public static final String USELESSVERB[] = {"be","wander","wonder"};
+	public static final String WANTS[] = { "sugg", "propose", "consider",
+			"want", "would like", "\'d like", "鈥檇 like", "what about",
+			"how about", "new" };
+	public static final String GOOD[] = { "help", "helpful", "useful", "great",
+			"nice", "good", "appreciate", "greatly", "appreciated",
+			"appropriate", "better", "convenient", "cool", "worth" };
+	public static final String EXPLAINATION[] = { "why", "hint", "mean",
+			"has to", "have to", "only", "same", "F.e.", "already", "etc" }; // like
 
-	public static final String SMART_STOP_WORDS[] = { "鈥�", "...", "鈥�", " ", "a", "able", "about", "above",
-			"according", "accordingly", "across", "actually", "after", "afterwards", "again", "against", "all", "allow",
-			"allows", "almost", "alone", "along", "already", "also", "although", "always", "am", "among", "amongst",
-			"an", "and", "another", "any", "anybody", "anyhow", "anyone", "anything", "anyway", "anyways", "anywhere",
-			"apart", "appear", "appreciate", "appropriate", "are", "around", "as", "aside", "ask", "asking",
-			"associated", "at", "available", "away", "awfully", "b", "be", "became", "because", "become", "becomes",
-			"becoming", "been", "before", "beforehand", "behind", "being", "believe", "below", "beside", "besides",
-			"best", "better", "between", "beyond", "both", "brief", "but", "by", "c", "came", "can", "cannot", "cant",
-			"cause", "causes", "certain", "certainly", "changes", "clearly", "co", "com", "come", "comes", "concerning",
-			"consequently", "consider", "considering", "contain", "containing", "contains", "corresponding", "could",
-			"course", "currently", "d", "definitely", "described", "despite", "did", "different", "do", "does", "doing",
-			"done", "down", "downwards", "during", "e", "each", "edu", "eg", "eight", "either", "else", "elsewhere",
-			"enough", "entirely", "especially", "et", "etc", "even", "ever", "every", "everybody", "everyone",
-			"everything", "everywhere", "ex", "exactly", "example", "except", "f", "far", "few", "fifth", "first",
-			"five", "followed", "following", "follows", "for", "former", "formerly", "forth", "four", "from", "further",
-			"furthermore", "g", "get", "gets", "getting", "given", "gives", "go", "goes", "going", "gone", "got",
-			"gotten", "greetings", "h", "had", "happens", "hardly", "has", "have", "having", "he", "hello", "help",
-			"hence", "her", "here", "hereafter", "hereby", "herein", "hereupon", "hers", "herself", "hi", "him",
-			"himself", "his", "hither", "hopefully", "how", "howbeit", "however", "i", "ie", "if", "ignored",
-			"immediate", "in", "inasmuch", "inc", "indeed", "indicate", "indicated", "indicates", "inner", "insofar",
-			"instead", "into", "inward", "is", "it", "its", "itself", "j", "just", "k", "keep", "keeps", "kept", "know",
-			"knows", "known", "l", "last", "lately", "later", "latter", "latterly", "least", "less", "lest", "let",
-			"like", "liked", "likely", "little", "look", "looking", "looks", "ltd", "m", "mainly", "many", "may",
-			"maybe", "me", "mean", "meanwhile", "merely", "might", "more", "moreover", "most", "mostly", "much", "must",
-			"my", "myself", "n", "name", "namely", "nd", "near", "nearly", "necessary", "need", "needs", "neither",
-			"never", "nevertheless", "new", "next", "nine", "no", "nobody", "non", "none", "noone", "nor", "normally",
-			"not", "nothing", "novel", "now", "nowhere", "o", "obviously", "of", "off", "often", "oh", "ok", "okay",
-			"old", "on", "once", "one", "ones", "only", "onto", "or", "other", "others", "otherwise", "ought", "our",
-			"ours", "ourselves", "out", "outside", "over", "overall", "own", "p", "particular", "particularly", "per",
-			"perhaps", "placed", "please", "plus", "possible", "presumably", "probably", "provides", "q", "que",
-			"quite", "qv", "r", "rather", "rd", "re", "really", "reasonably", "regarding", "regardless", "regards",
-			"relatively", "respectively", "right", "s", "said", "same", "saw", "say", "saying", "says", "second",
-			"secondly", "see", "seeing", "seem", "seemed", "seeming", "seems", "seen", "self", "selves", "sensible",
-			"sent", "serious", "seriously", "seven", "several", "shall", "she", "should", "since", "six", "so", "some",
-			"somebody", "somehow", "someone", "something", "sometime", "sometimes", "somewhat", "somewhere", "soon",
-			"sorry", "specified", "specify", "specifying", "still", "sub", "such", "sup", "sure", "t", "take", "taken",
-			"tell", "tends", "th", "than", "thank", "thanks", "thanx", "that", "thats", "the", "their", "theirs",
-			"them", "themselves", "then", "thence", "there", "thereafter", "thereby", "therefore", "therein", "theres",
-			"thereupon", "these", "they", "think", "third", "this", "thorough", "thoroughly", "those", "though",
-			"three", "through", "throughout", "thru", "thus", "to", "together", "too", "took", "toward", "towards",
-			"tried", "tries", "truly", "try", "trying", "twice", "two", "u", "un", "under", "unfortunately", "unless",
-			"unlikely", "until", "unto", "up", "upon", "us", "use", "used", "useful", "uses", "using", "usually",
-			"uucp", "v", "value", "various", "very", "via", "viz", "vs", "w", "want", "wants", "was", "way", "we",
-			"welcome", "well", "went", "were", "what", "whatever", "when", "whence", "whenever", "where", "whereafter",
-			"whereas", "whereby", "wherein", "whereupon", "wherever", "whether", "which", "while", "whither", "who",
-			"whoever", "whole", "whom", "whose", "why", "will", "willing", "wish", "with", "within", "without",
-			"wonder", "would", "would", "x", "y", "yes", "yet", "you", "your", "yours", "yourself", "yourselves", "z",
-			"zero" };
+	public static final String USELESSVERB[] = { "be", "wander", "wonder" };
+
+	public static final String SMART_STOP_WORDS[] = { "閳ワ拷", "...", "閳ワ拷", " ",
+			"a", "able", "about", "above", "according", "accordingly",
+			"across", "actually", "after", "afterwards", "again", "against",
+			"all", "allow", "allows", "almost", "alone", "along", "already",
+			"also", "although", "always", "am", "among", "amongst", "an",
+			"and", "another", "any", "anybody", "anyhow", "anyone", "anything",
+			"anyway", "anyways", "anywhere", "apart", "appear", "appreciate",
+			"appropriate", "are", "around", "as", "aside", "ask", "asking",
+			"associated", "at", "available", "away", "awfully", "b", "be",
+			"became", "because", "become", "becomes", "becoming", "been",
+			"before", "beforehand", "behind", "being", "believe", "below",
+			"beside", "besides", "best", "better", "between", "beyond", "both",
+			"brief", "but", "by", "c", "came", "can", "cannot", "cant",
+			"cause", "causes", "certain", "certainly", "changes", "clearly",
+			"co", "com", "come", "comes", "concerning", "consequently",
+			"consider", "considering", "contain", "containing", "contains",
+			"corresponding", "could", "course", "currently", "d", "definitely",
+			"described", "despite", "did", "different", "do", "does", "doing",
+			"done", "down", "downwards", "during", "e", "each", "edu", "eg",
+			"eight", "either", "else", "elsewhere", "enough", "entirely",
+			"especially", "et", "etc", "even", "ever", "every", "everybody",
+			"everyone", "everything", "everywhere", "ex", "exactly", "example",
+			"except", "f", "far", "few", "fifth", "first", "five", "followed",
+			"following", "follows", "for", "former", "formerly", "forth",
+			"four", "from", "further", "furthermore", "g", "get", "gets",
+			"getting", "given", "gives", "go", "goes", "going", "gone", "got",
+			"gotten", "greetings", "h", "had", "happens", "hardly", "has",
+			"have", "having", "he", "hello", "help", "hence", "her", "here",
+			"hereafter", "hereby", "herein", "hereupon", "hers", "herself",
+			"hi", "him", "himself", "his", "hither", "hopefully", "how",
+			"howbeit", "however", "i", "ie", "if", "ignored", "immediate",
+			"in", "inasmuch", "inc", "indeed", "indicate", "indicated",
+			"indicates", "inner", "insofar", "instead", "into", "inward", "is",
+			"it", "its", "itself", "j", "just", "k", "keep", "keeps", "kept",
+			"know", "knows", "known", "l", "last", "lately", "later", "latter",
+			"latterly", "least", "less", "lest", "let", "like", "liked",
+			"likely", "little", "look", "looking", "looks", "ltd", "m",
+			"mainly", "many", "may", "maybe", "me", "mean", "meanwhile",
+			"merely", "might", "more", "moreover", "most", "mostly", "much",
+			"must", "my", "myself", "n", "name", "namely", "nd", "near",
+			"nearly", "necessary", "need", "needs", "neither", "never",
+			"nevertheless", "new", "next", "nine", "no", "nobody", "non",
+			"none", "noone", "nor", "normally", "not", "nothing", "novel",
+			"now", "nowhere", "o", "obviously", "of", "off", "often", "oh",
+			"ok", "okay", "old", "on", "once", "one", "ones", "only", "onto",
+			"or", "other", "others", "otherwise", "ought", "our", "ours",
+			"ourselves", "out", "outside", "over", "overall", "own", "p",
+			"particular", "particularly", "per", "perhaps", "placed", "please",
+			"plus", "possible", "presumably", "probably", "provides", "q",
+			"que", "quite", "qv", "r", "rather", "rd", "re", "really",
+			"reasonably", "regarding", "regardless", "regards", "relatively",
+			"respectively", "right", "s", "said", "same", "saw", "say",
+			"saying", "says", "second", "secondly", "see", "seeing", "seem",
+			"seemed", "seeming", "seems", "seen", "self", "selves", "sensible",
+			"sent", "serious", "seriously", "seven", "several", "shall", "she",
+			"should", "since", "six", "so", "some", "somebody", "somehow",
+			"someone", "something", "sometime", "sometimes", "somewhat",
+			"somewhere", "soon", "sorry", "specified", "specify", "specifying",
+			"still", "sub", "such", "sup", "sure", "t", "take", "taken",
+			"tell", "tends", "th", "than", "thank", "thanks", "thanx", "that",
+			"thats", "the", "their", "theirs", "them", "themselves", "then",
+			"thence", "there", "thereafter", "thereby", "therefore", "therein",
+			"theres", "thereupon", "these", "they", "think", "third", "this",
+			"thorough", "thoroughly", "those", "though", "three", "through",
+			"throughout", "thru", "thus", "to", "together", "too", "took",
+			"toward", "towards", "tried", "tries", "truly", "try", "trying",
+			"twice", "two", "u", "un", "under", "unfortunately", "unless",
+			"unlikely", "until", "unto", "up", "upon", "us", "use", "used",
+			"useful", "uses", "using", "usually", "uucp", "v", "value",
+			"various", "very", "via", "viz", "vs", "w", "want", "wants", "was",
+			"way", "we", "welcome", "well", "went", "were", "what", "whatever",
+			"when", "whence", "whenever", "where", "whereafter", "whereas",
+			"whereby", "wherein", "whereupon", "wherever", "whether", "which",
+			"while", "whither", "who", "whoever", "whole", "whom", "whose",
+			"why", "will", "willing", "wish", "with", "within", "without",
+			"wonder", "would", "would", "x", "y", "yes", "yet", "you", "your",
+			"yours", "yourself", "yourselves", "z", "zero" };
 
 	public static void predict(String datasource, int index) throws Exception {
 		// load data
@@ -638,7 +745,8 @@ public class RequestClassifier {
 	public static List combine(int[] a, int m) {
 		int n = a.length;
 		if (m > n) {
-			System.err.println("错误！数组a中只�?" + n + "个元素�??" + m + "大于" + 2 + "!!!");
+			System.err.println("閿欒锛佹暟缁刟涓彧锟�?" + n + "涓厓绱狅拷??" + m + "澶т簬" + 2
+					+ "!!!");
 			return null;
 		}
 
@@ -648,7 +756,7 @@ public class RequestClassifier {
 		for (int i = 0; i < n; i++) {
 			bs[i] = 0;
 		}
-		// 初始�?
+		// 鍒濆锟�?
 		for (int i = 0; i < m; i++) {
 			bs[i] = 1;
 		}
@@ -656,7 +764,7 @@ public class RequestClassifier {
 		boolean tempFlag = false;
 		int pos = 0;
 		int sum = 0;
-		// 首先找到第一�?10组合，然后变�?01，同时将左边�?有的1移动到数组的�?左边
+		// 棣栧厛鎵惧埌绗竴锟�?10缁勫悎锛岀劧鍚庡彉锟�?01锛屽悓鏃跺皢宸﹁竟锟�?鏈夌殑1绉诲姩鍒版暟缁勭殑锟�?宸﹁竟
 		do {
 			sum = 0;
 			pos = 0;
@@ -671,7 +779,7 @@ public class RequestClassifier {
 					break;
 				}
 			}
-			// 将左边的1全部移动到数组的�?左边
+			// 灏嗗乏杈圭殑1鍏ㄩ儴绉诲姩鍒版暟缁勭殑锟�?宸﹁竟
 
 			for (int i = 0; i < pos; i++) {
 				if (bs[i] == 1) {
@@ -686,7 +794,7 @@ public class RequestClassifier {
 				}
 			}
 
-			// �?查是否所有的1都移动到了最右边
+			// 锟�?鏌ユ槸鍚︽墍鏈夌殑1閮界Щ鍔ㄥ埌浜嗘渶鍙宠竟
 			for (int i = n - m; i < n; i++) {
 				if (bs[i] == 0) {
 					tempFlag = false;
@@ -728,152 +836,155 @@ public class RequestClassifier {
 	}
 
 	public static void printInstancesByTag(Instances data) throws IOException {
-		
+
 		createPrintWriter("resource//precision_results_non-text.txt");
-		
-		Attribute tag = data.attribute("tag"); 
+
+		Attribute tag = data.attribute("tag");
 		String[] outputfile = new String[tagSize];
 		PrintWriter[] output = new PrintWriter[tagSize];
 		data.setClassIndex(tag.index());
-		
-		for (int i = 0; i < tagSize; i++){
+
+		for (int i = 0; i < tagSize; i++) {
 			tagNames[i] = tag.value(i);
-			outputfile[i]="resource//tag_data_"+tagNames[i]+".txt";
+			outputfile[i] = "resource//tag_data_" + tagNames[i] + ".txt";
 			output[i] = getPrintWriter(outputfile[i]);
-			}
-		
+		}
+
 		ListIterator<Instance> list = data.listIterator();
-		
+
 		System.out.println("Negitive predictions: ");
 		int count = 0;
-		while(list.hasNext()){
+		while (list.hasNext()) {
 			Instance item = list.next();
-			int index = (int)item.classValue();
+			int index = (int) item.classValue();
 			String sentence = item.stringValue(0);
-			
-			if(index == 1){
-				boolean predict = classifyAsWant(item,data);
-				if(!predict){
+
+			if (index == 1) {
+				boolean predict = classifyAsWant(item, data);
+				if (!predict) {
 					count++;
-					System.out.println(count+" - WANT - predict no but yes: " +sentence);
-					}
+					System.out.println(count + " - WANT - predict no but yes: "
+							+ sentence);
+				}
 			}
-			
-			if(index == 0){
-				
-				boolean predict = classifyAsWant(item,data);
-				if(predict){
+
+			if (index == 0) {
+
+				boolean predict = classifyAsWant(item, data);
+				if (predict) {
 					count++;
-					System.out.println(count+" - EXP - predict to be WANT: " +sentence);
-					}
-			}if(index == 2){
-				boolean predict = classifyAsWant(item,data);
-				if(predict){
+					System.out.println(count + " - EXP - predict to be WANT: "
+							+ sentence);
+				}
+			}
+			if (index == 2) {
+				boolean predict = classifyAsWant(item, data);
+				if (predict) {
 					count++;
-					System.out.println(count+" - USELESS - predict to be WANT: " +sentence);
-					}
+					System.out.println(count
+							+ " - USELESS - predict to be WANT: " + sentence);
+				}
 			}
 			output[index].println(item.stringValue(0));
 		}
-		
-		for (int i = 0; i < tagSize; i++){
+
+		for (int i = 0; i < tagSize; i++) {
 			output[i].close();
-			System.out.println("Write to file: "+outputfile[i]);
-			}
-		
+			System.out.println("Write to file: " + outputfile[i]);
+		}
+
 	}
 
+	// TODO
+	public static boolean classifyAsWant(Instance item, Instances data)
+			throws IOException {
 
-	
-	//TODO
-	public static boolean classifyAsWant(Instance item, Instances data) throws IOException {
-		
-		
 		String content = item.stringValue(0);
-		
+
 		double isRealFirst = item.value(data.attribute("isRealFirst"));
-		double matchMDGOODVB = item.value(data.attribute("matchMDGOODVB")); 
+		double matchMDGOODVB = item.value(data.attribute("matchMDGOODVB"));
 		double startWithVB = item.value(data.attribute("startWithVB"));
 		double question = item.value(data.attribute("question"));
 		double matchVBDGOOD = item.value(data.attribute("matchVBDGOOD"));
 		double verbsAllInvalid = item.value(data.attribute("verbsAllInvalid"));
-		
-		//"want to","can"
-		String[] pattern = new String[]{ "would like", "\'d like", "’d like", "would love to", "\'d love to", "’d love to",
-				"appreciate","suggest","propose",
-				"should",
-				"add support",
-				"pma may","phpmyadmin may",
-				};
-		
-		String[] pattern2 = new String[]{"how about","what about"};
-		
-		String[] pattern3 = new String[]{"feature","idea","request","option","consider",};
-		
-		String[] expPattern = new String[]{"have to","unfortunately","possible","suggestion"
-				};
-		
-		if(checkContains(content, expPattern) || matchVBDGOOD == 1 || classifyAsUseless(content) || verbsAllInvalid == 1 ||content.toLowerCase().startsWith("maybe"))
+
+		// "want to","can"
+		String[] pattern = new String[] { "would like", "\'d like", "鈥檇 like",
+				"would love to", "\'d love to", "鈥檇 love to", "appreciate",
+				"suggest", "propose", "should", "add support", "pma may",
+				"phpmyadmin may", };
+
+		String[] pattern2 = new String[] { "how about", "what about" };
+
+		String[] pattern3 = new String[] { "feature", "idea", "request",
+				"option", "consider", };
+
+		String[] expPattern = new String[] { "have to", "unfortunately",
+				"possible", "suggestion" };
+
+		if (checkContains(content, expPattern) || matchVBDGOOD == 1
+				|| classifyAsUseless(content) || verbsAllInvalid == 1
+				|| content.toLowerCase().startsWith("maybe"))
 			return false;
-		
-		if(question == 1){
-			if(checkContains(content, pattern2))
+
+		if (question == 1) {
+			if (checkContains(content, pattern2))
 				return true;
-			
+
 			else
 				return false;
 		}
-		
-		if(checkContains(content, pattern) || matchMDGOODVB==1){
-			return true;
-		}
-		
-		if(noSemicolonBeforePattern(content, pattern3)){
-			return true;
-		}
-		
 
-		
-		if(isRealFirst==1 && startWithVB ==1)
+		if (checkContains(content, pattern) || matchMDGOODVB == 1) {
 			return true;
-		
+		}
+
+		if (noSemicolonBeforePattern(content, pattern3)) {
+			return true;
+		}
+
+		if (isRealFirst == 1 && startWithVB == 1)
+			return true;
+
 		return false;
 	}
-	
-	//TODO
+
+	// TODO
 	public static boolean classifyAsUseless(String content) throws IOException {
-		
-		//List<CoreLabel> rawWords = StanfordCoreNlpDemo.getRawWords(content);
-		//StanfordCoreNlpDemo nlp = new StanfordCoreNlpDemo(false);
-		//HashSet<String> allVerbs = nlp.getAllVerbs(content);
-		//System.out.println(allVerbs);
-		
-		String[] patterns = new String[]{"hi","hello","thank","regards"};
+
+		// List<CoreLabel> rawWords = StanfordCoreNlpDemo.getRawWords(content);
+		// StanfordCoreNlpDemo nlp = new StanfordCoreNlpDemo(false);
+		// HashSet<String> allVerbs = nlp.getAllVerbs(content);
+		// System.out.println(allVerbs);
+
+		String[] patterns = new String[] { "hi", "hello", "thank", "regards" };
 		String[] splits = content.split(" |,");
-		if(splits[0].equalsIgnoreCase("hi") || splits[0].equalsIgnoreCase("hello"))
+		if (splits[0].equalsIgnoreCase("hi")
+				|| splits[0].equalsIgnoreCase("hello"))
 			return true;
-		
-		if(content.toLowerCase().contains("thank"))
+
+		if (content.toLowerCase().contains("thank"))
 			return true;
-		
+
 		return false;
 	}
-	
-	private static boolean noSemicolonBeforePattern(String content, String[] pattern3) {
+
+	private static boolean noSemicolonBeforePattern(String content,
+													String[] pattern3) {
 		boolean result = true;
-		
-		if(checkContains(content, pattern3)){
+
+		if (checkContains(content, pattern3)) {
 			List<CoreLabel> rawWords = StanfordCoreNlpDemo.getRawWords(content);
 			int firstIndex = getFirstIndex(rawWords, pattern3);
-			
-			for(int i = 0; i < firstIndex; i++){
+
+			for (int i = 0; i < firstIndex; i++) {
 				String word = rawWords.get(i).word();
-				if(word.equals(":")){
+				if (word.equals(":")) {
 					result = false;
 					break;
 				}
 			}
-		}else{
+		} else {
 			result = false;
 		}
 		return result;
@@ -881,14 +992,14 @@ public class RequestClassifier {
 
 	public static int getFirstIndex(List<CoreLabel> rawWords, String[] pattern3) {
 		int firstIndex = -1;
-		
-		for(int i = 0; i < rawWords.size();i++){
+
+		for (int i = 0; i < rawWords.size(); i++) {
 			String word = rawWords.get(i).word();
-			if(checkContains(word,pattern3)){
+			if (checkContains(word, pattern3)) {
 				firstIndex = i;
 			}
 		}
-		
+
 		return firstIndex;
 	}
 
@@ -899,27 +1010,57 @@ public class RequestClassifier {
 		}
 		return false;
 	}
-	
-	
-	public static void main(String[] args){
+
+	public static void main(String[] args) {
 		try {
-			System.out.println(classifyAsUseless("This is actually a feature request more than a bug report"));
+			System.out
+					.println(classifyAsUseless("This is actually a feature request more than a bug report"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public static ArrayList<Integer> getAllMatchedIndex(List<CoreLabel> rawWords, String[] good) {
+	public static ArrayList<Integer> getAllMatchedIndex(
+			List<CoreLabel> rawWords, String[] good) {
 		ArrayList<Integer> results = new ArrayList<Integer>();
-		
-		for(int i = 0; i < rawWords.size();i++){
+
+		for (int i = 0; i < rawWords.size(); i++) {
 			String word = rawWords.get(i).word();
-			if(checkContains(word, good)){
+			if (checkContains(word, good)) {
 				results.add(i);
 			}
 		}
-		
+
 		return results;
 	}
+
+	public static void classify(Instances dataset,String label) throws Exception {
+
+
+
+		ArrayList<Classifier> classifiers = getAllClassifiers();
+
+		createPrintWriter(outputFile);
+
+		for (Classifier c : classifiers) {
+			double[][] results = RequestClassifier
+					.classify(dataset, c, dataset, label);
+
+			for (int i = 0; i < tagNames.length; i++) {
+				System.out.printf(
+						"\nclass = %s, precision = %.2f, recall = %.2f",
+						tagNames[i], results[i][0], results[i][1]);
+			}
+
+		}
+	}
+
+	public static int getValueSize(Instances dataset){
+		Iterator<Instance> iterator = dataset.iterator();
+		Instance item = iterator.next();
+		double[] values = RequestAnalyzer.getVariables(item, dataset, false);
+		System.out.println("value size = "+values.length);
+		return values.length;
+	}
+
 }

@@ -346,33 +346,38 @@ public class FeatureRequest {
 			fr+=ascOrder.get(i)+"\n";
 			fr+=descOrder.get(i)+"\n";
 			fr+=labels.get(i)+"\n";
-			fr+="containMD"+containMD.get(i)+"\n";
-			fr+="containWants"+containWants.get(i)+"\n";
-			fr+="containShouldCan:"+containShouldCan.get(i)+"\n";
-			fr+="startWithVB: "+startWithVB.get(i)+"\n";
-			fr+="matchMDGOOD: "+matchMDGOOD.get(i)+"\n";
-			fr+="containNEG: "+containNEG.get(i)+"\n";
-			fr+="question: "+question.get(i)+"\n";
-			fr+="numTrunk: "+numTrunk.get(i)+"\n";
-			fr+="numToken: "+numToken.get(i)+"\n";
-			fr+="containEXP: "+containEXP.get(i)+"\n";
-			fr+="isRealFirst: "+isRealFirst.get(i)+"\n";
-			fr+="matchMDGOODVB: "+matchMDGOODVB.get(i)+"\n";
-			fr+="matchVBDGOOD: "+matchVBDGOOD.get(i)+"\n";
-			fr+="numValidVerbs: "+numValidVerbs.get(i)+"\n";
-			fr+="matchMDGOODIF: "+matchMDGOODIF.get(i)+"\n";
-			fr+="matchGOODIF: "+matchGOODIF.get(i)+"\n";
-			fr+="matchSYSNEED: "+matchSYSNEED.get(i)+"\n";
-			fr+="isPastTense: "+isPastTense.get(i)+"\n";
-			fr+="sentimentScore: "+sentimentScore.get(i)+"\n";
-			fr+="sentimentProbability: "+sentimentProbability.get(i)+"\n";
-			fr+="numValidWords: "+numValidWords.get(i)+"\n";
-			fr+="subjects: "+subjects.get(i)+"\n";
-			fr+="actions: "+actions.get(i)+"\n";
-			fr+="matchIsGOOD: "+matchIsGOOD.get(i)+"\n";
-			fr+="matchIsNotGOOD: "+matchIsNotGOOD.get(i)+"\n";
-			fr+="matchIsBAD: "+matchIsBAD.get(i)+"\n";
-			fr+="matchIsNotBAD: "+matchIsNotBAD.get(i)+"\n";
+
+			if(containMD!=null&&!containMD.isEmpty()){
+				fr+="containMD"+containMD.get(i)+"\n";
+				fr+="containWants"+containWants.get(i)+"\n";
+				fr+="containShouldCan:"+containShouldCan.get(i)+"\n";
+				fr+="startWithVB: "+startWithVB.get(i)+"\n";
+				fr+="matchMDGOOD: "+matchMDGOOD.get(i)+"\n";
+				fr+="containNEG: "+containNEG.get(i)+"\n";
+				fr+="question: "+question.get(i)+"\n";
+				fr+="numTrunk: "+numTrunk.get(i)+"\n";
+				fr+="numToken: "+numToken.get(i)+"\n";
+				fr+="containEXP: "+containEXP.get(i)+"\n";
+				fr+="isRealFirst: "+isRealFirst.get(i)+"\n";
+				fr+="matchMDGOODVB: "+matchMDGOODVB.get(i)+"\n";
+				fr+="matchVBDGOOD: "+matchVBDGOOD.get(i)+"\n";
+				fr+="numValidVerbs: "+numValidVerbs.get(i)+"\n";
+				fr+="matchMDGOODIF: "+matchMDGOODIF.get(i)+"\n";
+				fr+="matchGOODIF: "+matchGOODIF.get(i)+"\n";
+				fr+="matchSYSNEED: "+matchSYSNEED.get(i)+"\n";
+				fr+="isPastTense: "+isPastTense.get(i)+"\n";
+				fr+="sentimentScore: "+sentimentScore.get(i)+"\n";
+				fr+="sentimentProbability: "+sentimentProbability.get(i)+"\n";
+				fr+="numValidWords: "+numValidWords.get(i)+"\n";
+				fr+="subjects: "+subjects.get(i)+"\n";
+				fr+="actions: "+actions.get(i)+"\n";
+				fr+="matchIsGOOD: "+matchIsGOOD.get(i)+"\n";
+				fr+="matchIsNotGOOD: "+matchIsNotGOOD.get(i)+"\n";
+				fr+="matchIsBAD: "+matchIsBAD.get(i)+"\n";
+				fr+="matchIsNotBAD: "+matchIsNotBAD.get(i)+"\n";
+			}
+
+
 		}
 		return fr;
 	}

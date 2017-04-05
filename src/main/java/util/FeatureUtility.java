@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.AbstractCollection;
@@ -21,6 +22,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.converters.ArffSaver;
 
 public class FeatureUtility {
 
@@ -218,11 +220,19 @@ public class FeatureUtility {
 	}
 
 	public static void exportInstancesToFile(Instances dataRaw, String filename) throws IOException {
-		FileWriter fw = new FileWriter(filename);
-		BufferedWriter bw = new BufferedWriter(fw);
-		bw.write(dataRaw.toString());
-		bw.close();
-		fw.close();
+//		ArffSaver saver = new ArffSaver();
+//		saver.setInstances(dataRaw);
+//		saver.setFile(new File(filename));
+//		saver.writeBatch();
+
+		//FileWriter fw = new FileWriter(filename);
+		//BufferedWriter bw = new BufferedWriter(fw);
+		BufferedWriter out = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(filename),"UTF-8"));
+		//System.out.println(dataRaw.toString());
+		out.write(dataRaw.toString());
+		out.close();
+		System.out.println("Exported to "+filename);
+		//fw.close();
 	}
 
 	public static void exportIFeatureRequestsToFile(ArrayList<FeatureRequest> featureRequestList, String filename) throws IOException {
@@ -540,6 +550,15 @@ public class FeatureUtility {
 				if(checkName.equalsIgnoreCase(name))
 					return true;
 			}
+		}
+		return false;
+	}
+
+	public static boolean doesStartWith(String contentLower,
+										String[] patterns) {
+		for(String pattern : patterns){
+			if(contentLower.startsWith(pattern))
+				return true;
 		}
 		return false;
 	}
