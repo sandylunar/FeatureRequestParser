@@ -56,9 +56,14 @@ public class indexServlet extends HttpServlet {
         //response.setContentType("text/html;charset=utf-8");
         response.getWriter().write(json);*/
 
-        System.out.printf("source code located in : %s\n",System.getProperty("user.dir"));
-        System.out.printf("servlet code located in : %s\n",path);
-        DataParser dataParser = new DataParser(path);
+        System.out.printf("source code located in : %s\n", System.getProperty("user.dir"));
+        System.out.printf("servlet code located in : %s\n", path);
+        //DataParser dataParser = new DataParser(path);
+        if (null == request.getSession().getAttribute("dataParser")) {
+            DataParser dataParser = new DataParser(path);
+            request.getSession().setAttribute("dataParser", dataParser);
+        }
+        DataParser dataParser = (DataParser) request.getSession().getAttribute("dataParser");
 
         //TODO update
         FeatureRequestOL loadedFR = dataParser.constructSFeatureRequestOL(fr);
@@ -71,19 +76,19 @@ public class indexServlet extends HttpServlet {
         StringBuffer buffer = new StringBuffer();
         ArrayList<String> tagNames = new ArrayList<>();
 
-        for(int i = 0; i < loadedFR.getNumSentences(); i++){
-            int predict = RequestAnalyzer.predictTagIndex(null,null,fr, i);
+        for (int i = 0; i < loadedFR.getNumSentences(); i++) {
+            int predict = RequestAnalyzer.predictTagIndex(null, null, fr, i);
             String tag = RequestAnalyzer.tagNames[predict];
             tagNames.add(tag);
-            buffer.append("["+tag+"]\n"+loadedFR.getFullSentence(i)+"\n");
+            buffer.append("[" + tag + "]\n" + loadedFR.getFullSentence(i) + "\n");
         }
 
         //if tagNames only have one want
         int countWant = 0;
         HashSet<String> tagSets = new HashSet<>();
-        for(String tag : tagNames){
+        for (String tag : tagNames) {
             tagSets.add(tag);
-            if(tag.equalsIgnoreCase("want"))
+            if (tag.equalsIgnoreCase("want"))
                 countWant++;
         }
 
@@ -91,26 +96,26 @@ public class indexServlet extends HttpServlet {
 
         Node root = null;
 
-        if(countWant == 1){
-            root = new Node("title",loadedFR.getTitle());
-            Node want = new Node("want",loadedFR.getFullSentence(index).toString());
+        if (countWant == 1) {
+            root = new Node("title", loadedFR.getTitle());
+            Node want = new Node("want", loadedFR.getFullSentence(index).toString());
 
             Iterator<String> it = tagSets.iterator();
-            while(it.hasNext()){
+            while (it.hasNext()) {
                 String tag = it.next();
-                if(tag.equals("want")||tag.equals("useless"))
+                if (tag.equals("want") || tag.equals("useless"))
                     continue;
 
                 Node node;
                 ArrayList<Integer> indexList = FeatureUtility.getIndexList(tagNames, tag);
-                if(indexList.size() == 1){
-                    int i = indexList.get(0)-1;
-                    node = new Node(tag,loadedFR.getFullSentence(i).getOrigin());
+                if (indexList.size() == 1) {
+                    int i = indexList.get(0) - 1;
+                    node = new Node(tag, loadedFR.getFullSentence(i).getOrigin());
 
-                }else{
-                    node = new Node(tag,"");
-                    for(int i : indexList){
-                        Node ni = new Node(tag,loadedFR.getFullSentence(i-1).getOrigin());
+                } else {
+                    node = new Node(tag, "");
+                    for (int i : indexList) {
+                        Node ni = new Node(tag, loadedFR.getFullSentence(i - 1).getOrigin());
                         node.addChildren(ni);
                     }
                 }
@@ -121,7 +126,7 @@ public class indexServlet extends HttpServlet {
             root.addChildren(want);
             System.out.println(root.tag);
             String output = root.toString();
-            String json = "{\"sNum\":" + sNum + ",\"bNum\":" + bNum + ",\"output\":\""+output+"\"}";
+            String json = "{\"sNum\":" + sNum + ",\"bNum\":" + bNum + ",\"output\":\"" + output + "\"}";
             //String json1 = "{\"sNum\":" + 1 + ",\"bNum\":" + 2 + ",\"output\":\'"+"output"+"\'}";
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("sNum", sNum);
@@ -137,7 +142,5 @@ public class indexServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/jsp/index.jsp");
         rd.forward(request, response);
-
-        //TODO
     }
 }
