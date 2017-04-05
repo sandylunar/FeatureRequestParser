@@ -17,9 +17,9 @@
         <url-pattern>/index.do</url-pattern>
     </servlet-mapping>
 
-    <session-config>
-        <session-timeout>30</session-timeout>
-    </session-config>
+<!--    <session-config>
+        <session-timeout>3</session-timeout>
+    </session-config>-->
 
 
 </web-app>

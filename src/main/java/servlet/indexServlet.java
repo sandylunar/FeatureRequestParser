@@ -59,11 +59,11 @@ public class indexServlet extends HttpServlet {
         System.out.printf("source code located in : %s\n", System.getProperty("user.dir"));
         System.out.printf("servlet code located in : %s\n", path);
         //DataParser dataParser = new DataParser(path);
-        if (null == request.getSession().getAttribute("dataParser")) {
+        if (null == this.getServletContext().getAttribute("dataParser")) {
             DataParser dataParser = new DataParser(path);
-            request.getSession().setAttribute("dataParser", dataParser);
+            this.getServletContext().setAttribute("dataParser", dataParser);
         }
-        DataParser dataParser = (DataParser) request.getSession().getAttribute("dataParser");
+        DataParser dataParser = (DataParser) this.getServletContext().getAttribute("dataParser");
 
         //TODO update
         FeatureRequestOL loadedFR = dataParser.constructSFeatureRequestOL(fr);
