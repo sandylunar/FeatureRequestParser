@@ -73,12 +73,12 @@
 </div>
 
 <script type="text/javascript">
-    $("#tree").treeview();
-
     var ue = UE.getEditor('container', {
         initialFrameHeight : 300,
         initialFrameWeight : 524,
-        enableContextMenu : false
+        enableContextMenu : false,
+        elementPathEnabled : false,
+        wordCount : false
     });
 
     function confirm() {
@@ -109,7 +109,9 @@
             success: function (data) {
                 alert("Block数目："+data.bNum+"\n\nSentence数目："+data.sNum);
                 $('ul').html(data.output);
-                $("#tree").treeview();
+                $("#tree").treeview({
+                    collapsed: data.collapsed
+                });
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 //alert(XMLHttpRequest.status);
