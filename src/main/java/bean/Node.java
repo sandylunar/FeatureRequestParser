@@ -57,7 +57,7 @@ public class Node {
                 String tmp = node.toString();
                 //System.out.println(result);
                 if (node.parent.sentence.equals("")) {
-                    tmp = tmp.replaceFirst("(?<=<span style=\"font-family:sans-serif;font-size:125%;font-weight:550\">).+?(?=<\\/span>)", "&nbsp;");
+                    tmp = tmp.replaceFirst("(?<=<span style=\"font-family:sans-serif;font-size:130%;font-weight:600\">).+?(?=</span>)", "&nbsp;");
                 }
                 if (node.tag.equalsIgnoreCase("want")) {
                     tmp = tmp.replaceFirst("(?<=span class=\")glyphicon glyphicon-sort-by-attributes", "glyphicon glyphicon-star");
