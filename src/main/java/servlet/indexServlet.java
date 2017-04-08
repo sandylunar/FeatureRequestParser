@@ -30,7 +30,8 @@ public class indexServlet extends HttpServlet {
 
     public void getGroups(int pre, int start, ArrayList<Integer> target) {
         if (start == target.size() - 1) {
-            groups.add(tmp);
+            if (tmp.size() == target.size() - 1)
+                groups.add(tmp);
             System.out.println(tmp);
             tmp = (ArrayList<Integer>) target.clone();
             return;
@@ -254,7 +255,6 @@ public class indexServlet extends HttpServlet {
                                 int num = 0;
                                 for (int k = j; k < block.size(); k++) {
                                     if (tagNames.get(block.get(k)).equalsIgnoreCase("want")) {
-                                        num++;
                                         split.add(num);
                                         num = 0;
                                         if (k == block.size() - 1) {
@@ -269,6 +269,8 @@ public class indexServlet extends HttpServlet {
                                 }
                                 tmp = (ArrayList<Integer>) split.clone();
                                 getGroups(1, 0, split);
+                                Collections.reverse(groups);
+                                System.out.println(groups);
                                 ArrayList<Double> sd = new ArrayList<>();
                                 double s = 0;
                                 for (ArrayList<Integer> list : groups) {
@@ -276,18 +278,20 @@ public class indexServlet extends HttpServlet {
                                     for (int ii : list) {
                                         sum += ii;
                                     }
-                                    double avg = sum / list.size();
-                                    for (int ii = 0; i < list.size(); i++) {
-                                        s = list.get(ii) - avg;
-                                        s += s * s;
+                                    double avg = sum / list.size(), dec;
+                                    for (int ii = 0; ii < list.size(); ii++) {
+                                        dec = list.get(ii) - avg;
+                                        s += dec * dec;
                                     }
                                     s = s / list.size();
                                     sd.add(s);
+                                    System.out.println("标准差--->" + s);
+                                    s = 0;
                                 }
                                 int index = sd.indexOf(Collections.min(sd));
                                 ArrayList<Integer> nodeList = groups.get(index);
                                 System.out.println("best divide--->" + nodeList);
-                                for (int wIndex = 0; wIndex < nodeList.get(0); wIndex++) {
+                                for (int wIndex = 0; wIndex < nodeList.get(0) + 1; wIndex++) {
                                     System.out.println(block.get(j));
                                     want.add(block.get(j));
                                     j++;

@@ -118,15 +118,15 @@ public class ParseTest {
     }
 
     @Test
-    public void parseTest(){
+    public void parseTest() {
         Parser parser = new Parser();
-        FeatureRequestOL fr = parser.getFR("","",test10);
+        FeatureRequestOL fr = parser.getFR("", "", test10);
         System.out.println(parser.printResult(fr));
         int bIndex = 0;
-        for(ArrayList<Integer> block : fr.getBlocks()){
-            System.out.print("Block "+bIndex+":");
-            for(int index : block){
-                System.out.print(index+"  ");
+        for (ArrayList<Integer> block : fr.getBlocks()) {
+            System.out.print("Block " + bIndex + ":");
+            for (int index : block) {
+                System.out.print(index + "  ");
             }
             System.out.print("\n");
             bIndex++;
@@ -186,8 +186,8 @@ public class ParseTest {
         DocumentPreprocessor dp = new DocumentPreprocessor(reader);
         for (List<HasWord> words : dp) {
             String sentence = "";
-            for(HasWord word : words){
-                sentence = sentence.concat(" "+word.word());
+            for (HasWord word : words) {
+                sentence = sentence.concat(" " + word.word());
             }
             System.out.println(sentence);
         }
@@ -198,16 +198,16 @@ public class ParseTest {
     }
 
     @Test
-    public void nodeTest(){
+    public void nodeTest() {
         Node root = new Node("title", "this is title");
-        for(int i=0;i<3;i++){
-            Node want = new Node("want", "this is want "+i);
+        for (int i = 0; i < 3; i++) {
+            Node want = new Node("want", "this is want " + i);
             Node benefit = new Node("benefit", "");
-            for(int j=0;j<3;j++){
-                Node benefit1 = new Node("benefit", "this is benefit "+i+"-"+j);
+            for (int j = 0; j < 3; j++) {
+                Node benefit1 = new Node("benefit", "this is benefit " + i + "-" + j);
                 benefit.addChildren(benefit1);
             }
-            Node example = new Node("example", "this is example "+i);
+            Node example = new Node("example", "this is example " + i);
             want.addChildren(benefit);
             want.addChildren(example);
             root.addChildren(want);
@@ -219,58 +219,60 @@ public class ParseTest {
     ArrayList<Integer> wantSplit = new ArrayList<>();
     ArrayList<Integer> tmp = new ArrayList<>();
     ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+
     @Test
-    public void wantNodeTest()
-    {
-        wantSplit.add(1);
+    public void wantNodeTest() {
+        /*wantSplit.add(1);
         wantSplit.add(4);
         wantSplit.add(4);
         wantSplit.add(3);
         wantSplit.add(0);
-        wantSplit.add(3);
+        wantSplit.add(3);*/
+        wantSplit.add(1);
+        wantSplit.add(2);
+        wantSplit.add(2);
         //System.out.println(wantSplit);
         tmp = (ArrayList<Integer>) wantSplit.clone();
-        balance(1, 0,wantSplit);
+        balance(1, 0, wantSplit);
         ArrayList<Double> sd = new ArrayList<>();
         double s = 0;
-        for (ArrayList<Integer> list : result){
+        for (ArrayList<Integer> list : result) {
             int sum = 0;
-            for (int i : list){
+            for (int i : list) {
                 sum += i;
             }
             double avg = sum / list.size();
-            for (int i=0;i<list.size();i++){
-                s = list.get(i)-avg;
-                s += s*s;
+            for (int i = 0; i < list.size(); i++) {
+                s = list.get(i) - avg;
+                s += s * s;
             }
             s = s / list.size();
             sd.add(s);
         }
         int index = sd.indexOf(Collections.min(sd));
         ArrayList<Integer> nodeList = result.get(index);
-        System.out.println("best is --->"+nodeList);
+        System.out.println("best is --->" + nodeList);
     }
 
-    public void balance(int pre, int start, ArrayList<Integer>target){
-        if (start == target.size()-1){
-            result.add(tmp);
+    public void balance(int pre, int start, ArrayList<Integer> target) {
+        if (start == target.size() - 1) {
+            if (tmp.size() == target.size() - 1)
+                result.add(tmp);
             System.out.println(tmp);
             tmp = (ArrayList<Integer>) wantSplit.clone();
             return;
-        }
-        else{
-            if (1 == pre){
+        } else {
+            if (1 == pre) {
                 //System.out.println("start-->"+(start+1));
-                balance(1, start+1, target);
-                tmp.set(start, tmp.get(start)+tmp.get(start+1));
-                tmp.remove(start+1);
+                balance(1, start + 1, target);
+                tmp.set(start, tmp.get(start) + tmp.get(start + 1));
+                tmp.remove(start + 1);
                 //System.out.println(tmp);
                 //System.out.println("start-->"+(start+1));
-                balance(2, start+1, target);
-            }
-            else if (2 == pre){
+                balance(2, start + 1, target);
+            } else if (2 == pre) {
                 //System.out.println("start-->"+(start+1));
-                balance(2, start+1, target);
+                balance(2, start + 1, target);
             }
         }
     }
