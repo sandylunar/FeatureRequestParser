@@ -1,9 +1,7 @@
 package main.java.servlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -26,6 +24,32 @@ import org.json.JSONObject;
  */
 @WebServlet(name = "indexServlet", urlPatterns = "/")
 public class indexServlet extends HttpServlet {
+
+    ArrayList<Integer> tmp = new ArrayList<>();
+    ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
+
+    public void getGroups(int pre, int start, ArrayList<Integer> target) {
+        if (start == target.size() - 1) {
+            groups.add(tmp);
+            System.out.println(tmp);
+            tmp = (ArrayList<Integer>) target.clone();
+            return;
+        } else {
+            if (1 == pre) {
+                //System.out.println("start-->"+(start+1));
+                getGroups(1, start + 1, target);
+                tmp.set(start, tmp.get(start) + tmp.get(start + 1));
+                tmp.remove(start + 1);
+                //System.out.println(tmp);
+                //System.out.println("start-->"+(start+1));
+                getGroups(2, start + 1, target);
+            } else if (2 == pre) {
+                //System.out.println("start-->"+(start+1));
+                getGroups(2, start + 1, target);
+            }
+        }
+    }
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         ServletContext context = this.getServletContext();
         String path = context.getRealPath("/");
@@ -79,7 +103,7 @@ public class indexServlet extends HttpServlet {
         Node root = null;
 
         if (countWant == 0) {
-            System.out.println(countWant);
+            System.out.println("countWant--->" + countWant);
             HashSet<String> tagSets = new HashSet<>();
             for (String tag : tagNames) {
                 tagSets.add(tag);
@@ -105,7 +129,7 @@ public class indexServlet extends HttpServlet {
         }
 
         if (countWant == 1) {
-            System.out.println(countWant);
+            System.out.println("countWant--->" + countWant);
             HashSet<String> tagSets = new HashSet<>();
             for (String tag : tagNames) {
                 tagSets.add(tag);
@@ -144,17 +168,34 @@ public class indexServlet extends HttpServlet {
         }
 
         if (countWant > 1) {
-            System.out.println(countWant);
+            System.out.println("countWant--->" + countWant);
             ArrayList<ArrayList<Integer>> blocks = loadedFR.getBlocks();
+            System.out.println("Previous------");
+            for (ArrayList<Integer> block : blocks) {
+                for (int i : block) {
+                    System.out.print(i + " ");
+                }
+                System.out.print("\n");
+            }
             // 合并无want的block
             ArrayList<Integer> wantList = FeatureUtility.getIndexList(tagNames, "want");
+            System.out.println("wantList-------");
+            for (int i : wantList) {
+                System.out.println(i + " ");
+            }
             if (blocks.size() > 1) {
                 for (int b = 0; b < blocks.size(); b++) {
                     ArrayList<Integer> block = blocks.get(b);
+                    int wantIndex = -1;
                     for (int i = 0; i < block.size(); i++) {
                         if (wantList.contains(block.get(i) + 1)) {
+                            System.out.println("block" + b + "have want");
+                            wantIndex = i;
                             break;
                         }
+                    }
+                    if (wantIndex > -1) {
+                        continue;
                     }
                     if (b == 0) {
                         ArrayList<Integer> tmp = blocks.get(0);
@@ -169,6 +210,13 @@ public class indexServlet extends HttpServlet {
                     }
                 }
             }
+            System.out.println("result-------");
+            for (ArrayList<Integer> block : blocks) {
+                for (int i : block) {
+                    System.out.print(i + " ");
+                }
+                System.out.print("\n");
+            }
             // 生成want nodes
             ArrayList<ArrayList<Integer>> wantNode = new ArrayList<>();
             for (int b = 0; b < blocks.size(); b++) {
@@ -178,36 +226,89 @@ public class indexServlet extends HttpServlet {
                     for (int j = i; j < block.size(); ) {
                         ArrayList<Integer> want = new ArrayList<>();
                         // Wantxx[Want,$]
-                        if (tagNames.get(i).equalsIgnoreCase("want")) {
+                        if (tagNames.get(block.get(i)).equalsIgnoreCase("want")) {
                             System.out.println("want start-----");
-                            want.add(i);
+                            want.add(block.get(i));
                             // find next want
                             int next = j + 1;
                             for (; next < block.size(); next++) {
-                                System.out.println(tagNames.get(next));
-                                if (tagNames.get(next).equalsIgnoreCase("want")) {
+                                if (tagNames.get(block.get(next)).equalsIgnoreCase("want")) {
                                     break;
                                 }
-                                want.add(next);
+                                want.add(block.get(next));
                             }
-                            j = next;
                             System.out.println("next is --->" + next);
+                            j = next + 1;
                             wantNode.add(want);
                         }
                         // xx[Want,$]
                         else {
-                            for (; j < block.size(); j++) {
-                                if (tagNames.get(j).equalsIgnoreCase("want")) {
-                                    break;
+                            int afterWants = 0;
+                            for (int k = j; k < block.size(); k++) {
+                                if (tagNames.get(block.get(k)).equalsIgnoreCase("want")) {
+                                    afterWants++;
                                 }
-                                want.add(j);
                             }
-                            if (j == block.size()) {
-                                ArrayList<Integer> tmp = wantNode.get(wantNode.size() - 1);
-                                tmp.addAll(want);
-                                wantNode.set(wantNode.size() - 1, tmp);
-                            } else {
+                            if (afterWants >= 2) {
+                                ArrayList<Integer> split = new ArrayList<>();
+                                int num = 0;
+                                for (int k = j; k < block.size(); k++) {
+                                    if (tagNames.get(block.get(k)).equalsIgnoreCase("want")) {
+                                        num++;
+                                        split.add(num);
+                                        num = 0;
+                                        if (k == block.size() - 1) {
+                                            split.add(0);
+                                        }
+                                    } else {
+                                        num++;
+                                        if (k == block.size() - 1) {
+                                            split.add(num);
+                                        }
+                                    }
+                                }
+                                tmp = (ArrayList<Integer>) split.clone();
+                                getGroups(1, 0, split);
+                                ArrayList<Double> sd = new ArrayList<>();
+                                double s = 0;
+                                for (ArrayList<Integer> list : groups) {
+                                    int sum = 0;
+                                    for (int ii : list) {
+                                        sum += ii;
+                                    }
+                                    double avg = sum / list.size();
+                                    for (int ii = 0; i < list.size(); i++) {
+                                        s = list.get(ii) - avg;
+                                        s += s * s;
+                                    }
+                                    s = s / list.size();
+                                    sd.add(s);
+                                }
+                                int index = sd.indexOf(Collections.min(sd));
+                                ArrayList<Integer> nodeList = groups.get(index);
+                                System.out.println("best divide--->" + nodeList);
+                                for (int wIndex = 0; wIndex < nodeList.get(0); wIndex++) {
+                                    System.out.println(block.get(j));
+                                    want.add(block.get(j));
+                                    j++;
+                                }
+                                System.out.println("best--->" + want);
                                 wantNode.add(want);
+                            } else {
+                                for (; j < block.size(); j++) {
+                                    want.add(block.get(j));
+                                    if (tagNames.get(block.get(j)).equalsIgnoreCase("want")) {
+                                        break;
+                                    }
+                                }
+                                if (j == block.size() && !tagNames.get(block.get(j - 1)).equalsIgnoreCase("want")) {
+                                    ArrayList<Integer> tmp = wantNode.get(wantNode.size() - 1);
+                                    tmp.addAll(want);
+                                    wantNode.set(wantNode.size() - 1, tmp);
+                                } else {
+                                    wantNode.add(want);
+                                }
+                                j++;
                             }
                         }
                         //System.out.println("i&j is --->" + j);
@@ -216,8 +317,8 @@ public class indexServlet extends HttpServlet {
                 }
             }
             for (ArrayList<Integer> want : wantNode) {
-                for (int i : want){
-                    System.out.print(i+" ");
+                for (int i : want) {
+                    System.out.print(i + " ");
                 }
                 System.out.print("\n");
             }
@@ -241,18 +342,19 @@ public class indexServlet extends HttpServlet {
                 Iterator<String> it = tagSet.iterator();
                 while (it.hasNext()) {
                     String tag = it.next();
+                    System.out.println(tag);
                     if (tag.equals("want") || tag.equals("useless"))
                         continue;
                     Node node;
                     ArrayList<Integer> indexList = FeatureUtility.getIndexList(tagList, tag);
                     if (indexList.size() == 1) {
                         int i = indexList.get(0) - 1;
-                        node = new Node(tag, loadedFR.getFullSentence(i).getOrigin());
+                        node = new Node(tag, loadedFR.getFullSentence(want.get(i)).getOrigin());
 
                     } else {
                         node = new Node(tag, "");
                         for (int i : indexList) {
-                            Node ni = new Node(tag, loadedFR.getFullSentence(i - 1).getOrigin());
+                            Node ni = new Node(tag, loadedFR.getFullSentence(want.get(i - 1)).getOrigin());
                             node.addChildren(ni);
                         }
                     }

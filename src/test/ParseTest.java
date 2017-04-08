@@ -19,6 +19,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -213,5 +214,64 @@ public class ParseTest {
         }
         System.out.println(root.toString());
 
+    }
+
+    ArrayList<Integer> wantSplit = new ArrayList<>();
+    ArrayList<Integer> tmp = new ArrayList<>();
+    ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+    @Test
+    public void wantNodeTest()
+    {
+        wantSplit.add(1);
+        wantSplit.add(4);
+        wantSplit.add(4);
+        wantSplit.add(3);
+        wantSplit.add(0);
+        wantSplit.add(3);
+        //System.out.println(wantSplit);
+        tmp = (ArrayList<Integer>) wantSplit.clone();
+        balance(1, 0,wantSplit);
+        ArrayList<Double> sd = new ArrayList<>();
+        double s = 0;
+        for (ArrayList<Integer> list : result){
+            int sum = 0;
+            for (int i : list){
+                sum += i;
+            }
+            double avg = sum / list.size();
+            for (int i=0;i<list.size();i++){
+                s = list.get(i)-avg;
+                s += s*s;
+            }
+            s = s / list.size();
+            sd.add(s);
+        }
+        int index = sd.indexOf(Collections.min(sd));
+        ArrayList<Integer> nodeList = result.get(index);
+        System.out.println("best is --->"+nodeList);
+    }
+
+    public void balance(int pre, int start, ArrayList<Integer>target){
+        if (start == target.size()-1){
+            result.add(tmp);
+            System.out.println(tmp);
+            tmp = (ArrayList<Integer>) wantSplit.clone();
+            return;
+        }
+        else{
+            if (1 == pre){
+                //System.out.println("start-->"+(start+1));
+                balance(1, start+1, target);
+                tmp.set(start, tmp.get(start)+tmp.get(start+1));
+                tmp.remove(start+1);
+                //System.out.println(tmp);
+                //System.out.println("start-->"+(start+1));
+                balance(2, start+1, target);
+            }
+            else if (2 == pre){
+                //System.out.println("start-->"+(start+1));
+                balance(2, start+1, target);
+            }
+        }
     }
 }
