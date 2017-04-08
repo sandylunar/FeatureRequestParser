@@ -1,0 +1,31 @@
+mopidy 
+Switch to setting up logging on mopidy logger instead of root
+We should switch to using the mopidy logger to setup our logging, leaving the root handler with a null handler. Goal should be something like:<list>.Advantage of this would be that we no longer need to actively suppress pykka, ws4py, cherrypy, etc, logging.
+
+
+
+
+if(want=0) 合并同类项
+
+if(want=1) 已有
+
+if(want>1)
+
+	split by block
+	if block =1
+		do(split by want)
+	if block >1
+		for each block
+			if block中不含有want，就近合并(先上后下)
+
+		for each block
+			do(split by want)
+
+do(split by want): list[]={XX,XX,XX,XX..}
+首个XX属于下一个want，其他XX属于上面的一个want
+
+case:
+wantXXwant => wantXX, want
+wantXXwantXX => wantXX,wantXX
+wantwant => want,want
+XXwantXXwantXX => XXwant, XXwantXX
