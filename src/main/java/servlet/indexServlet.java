@@ -22,7 +22,6 @@ import org.json.JSONObject;
 /**
  * Created by zzyo on 2017/3/16.
  */
-@WebServlet(name = "indexServlet", urlPatterns = "/")
 public class indexServlet extends HttpServlet {
 
     ArrayList<Integer> tmp = new ArrayList<>();
@@ -37,15 +36,11 @@ public class indexServlet extends HttpServlet {
             return;
         } else {
             if (1 == pre) {
-                //System.out.println("start-->"+(start+1));
                 getGroups(1, start + 1, target);
                 tmp.set(start, tmp.get(start) + tmp.get(start + 1));
                 tmp.remove(start + 1);
-                //System.out.println(tmp);
-                //System.out.println("start-->"+(start+1));
                 getGroups(2, start + 1, target);
             } else if (2 == pre) {
-                //System.out.println("start-->"+(start+1));
                 getGroups(2, start + 1, target);
             }
         }

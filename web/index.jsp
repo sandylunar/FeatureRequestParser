@@ -8,9 +8,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
   <head>
-    <title>$Title$</title>
+    <meta http-equiv="refresh" content="0;URL=/index.html">
+    <title>FRP</title>
   </head>
   <body>
-  $END$
   </body>
 </html>
