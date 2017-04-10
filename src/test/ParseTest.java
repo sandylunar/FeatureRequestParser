@@ -18,10 +18,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import static test.StanfordCoreNlpDemo.pipeline;
 
@@ -216,63 +213,68 @@ public class ParseTest {
 
     }
 
-    ArrayList<Integer> wantSplit = new ArrayList<>();
+    ArrayList<Integer> wantSplit;
     ArrayList<Integer> tmp = new ArrayList<>();
-    ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+    ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
 
     @Test
     public void wantNodeTest() {
-        /*wantSplit.add(1);
-        wantSplit.add(4);
-        wantSplit.add(4);
-        wantSplit.add(3);
-        wantSplit.add(0);
-        wantSplit.add(3);*/
-        wantSplit.add(1);
-        wantSplit.add(2);
-        wantSplit.add(2);
+        Integer[] split = {1, 2, 1};
+        Integer[] split1 = {1, 4, 4};
+        Integer[] split2 = {1, 4, 4, 0};
+        Integer[] split3 = {4, 1, 3};
+        Integer[] split4 = {4, 1, 3, 4};
+        Integer[] split5 = {4, 3, 1, 2};
+        Integer[] split6 = {4, 0, 3, 1, 2};
+        Integer[] split7 = {4, 0, 0, 3, 1, 2};
+        Integer[] split8 = {4, 0, 0, 3, 1, 0, 2, 0};
+        wantSplit = new ArrayList<>(Arrays.asList(split));
         //System.out.println(wantSplit);
         tmp = (ArrayList<Integer>) wantSplit.clone();
-        balance(1, 0, wantSplit);
+        getGroups(1, 0, wantSplit);
+        Collections.reverse(groups);
+        System.out.println("Groups--->" + groups);
         ArrayList<Double> sd = new ArrayList<>();
         double s = 0;
-        for (ArrayList<Integer> list : result) {
+        for (ArrayList<Integer> list : groups) {
             int sum = 0;
             for (int i : list) {
                 sum += i;
             }
-            double avg = sum / list.size();
+            double avg = sum / list.size(), dec;
             for (int i = 0; i < list.size(); i++) {
-                s = list.get(i) - avg;
-                s += s * s;
+                dec = list.get(i) - avg;
+                s += dec * dec;
             }
             s = s / list.size();
             sd.add(s);
+            System.out.println(list + " 方差--->" + s);
+            s = 0;
         }
         int index = sd.indexOf(Collections.min(sd));
-        ArrayList<Integer> nodeList = result.get(index);
+        ArrayList<Integer> nodeList = groups.get(index);
         System.out.println("best is --->" + nodeList);
     }
 
-    public void balance(int pre, int start, ArrayList<Integer> target) {
+    public void getGroups(int pre, int start, ArrayList<Integer> target) {
         if (start == target.size() - 1) {
             if (tmp.size() == target.size() - 1)
-                result.add(tmp);
-            System.out.println(tmp);
+                groups.add(tmp);
+            //System.out.println(tmp);
             tmp = (ArrayList<Integer>) wantSplit.clone();
             return;
         } else {
             if (1 == pre) {
                 //System.out.println("start-->"+(start+1));
-                balance(1, start + 1, target);
+                getGroups(1, start + 1, target);
                 tmp.set(start, tmp.get(start) + tmp.get(start + 1));
                 tmp.remove(start + 1);
                 //System.out.println(tmp);
                 //System.out.println("start-->"+(start+1));
-                balance(2, start + 1, target);
+                getGroups(2, start + 1, target);
             } else if (2 == pre) {
                 //System.out.println("start-->"+(start+1));
-                balance(2, start + 1, target);
+                getGroups(2, start + 1, target);
             }
         }
     }
