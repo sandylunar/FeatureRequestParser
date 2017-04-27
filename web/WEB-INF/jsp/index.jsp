@@ -101,7 +101,7 @@
             $("#tree").treeview();
         });*/
         $.ajax({
-            url: 'index.do',
+            url: 'index.html',
             type: "POST",
             data: {name:name,FRTitle:title,FRDes:html},
             //timeout: 30000,

@@ -6,7 +6,6 @@ import java.util.*;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +15,7 @@ import main.java.bean.Node;
 import main.java.core.DataParser;
 import main.java.core.RequestAnalyzer;
 import main.java.parse.Parser;
+import main.java.predictor.FuzzyPredictorPMAMopidyActivemqAspectj;
 import main.java.util.FeatureUtility;
 import org.json.JSONObject;
 
@@ -81,9 +81,10 @@ public class indexServlet extends HttpServlet {
         System.out.println("===============END Loading=================");
 
         ArrayList<String> tagNames = new ArrayList<>();
+        FuzzyPredictorPMAMopidyActivemqAspectj fp = new FuzzyPredictorPMAMopidyActivemqAspectj();
 
         for (int i = 0; i < loadedFR.getNumSentences(); i++) {
-            int predict = RequestAnalyzer.predictTagIndex(null, null, fr, i);
+            int predict = fp.predictTagIndex(null, null, fr, i);
             String tag = RequestAnalyzer.tagNames[predict];
             tagNames.add(tag);
         }
@@ -100,9 +101,20 @@ public class indexServlet extends HttpServlet {
 
         if (countWant == 0) {
             System.out.println("countWant--->" + countWant);
-            HashSet<String> tagSets = new HashSet<>();
+            ArrayList<String> tagSets = new ArrayList<>();
+            int useless = 0;
             for (String tag : tagNames) {
-                tagSets.add(tag);
+                if (tag.equalsIgnoreCase("useless")){
+                    useless = 1;
+                    continue;
+                }
+                if (tagSets.indexOf(tag) < 0)
+                {
+                    tagSets.add(tag);
+                }
+            }
+            if (1 == useless){
+                tagSets.add("useless");
             }
             root = new Node("title", loadedFR.getTitle());
             Iterator<String> it = tagSets.iterator();
@@ -126,13 +138,21 @@ public class indexServlet extends HttpServlet {
 
         if (countWant == 1) {
             System.out.println("countWant--->" + countWant);
-            HashSet<String> tagSets = new HashSet<>();
+            int useless = 0;
+            ArrayList<String> tagSets = new ArrayList<>();
             for (String tag : tagNames) {
-                tagSets.add(tag);
-                if (tag.equalsIgnoreCase("want"))
-                    countWant++;
+                if (tag.equalsIgnoreCase("useless")){
+                    useless = 1;
+                    continue;
+                }
+                if (tagSets.indexOf(tag) < 0)
+                {
+                    tagSets.add(tag);
+                }
             }
-
+            if (1 == useless){
+                tagSets.add("useless");
+            }
             int index = tagNames.indexOf("want");
 
             root = new Node("title", loadedFR.getTitle());
@@ -141,7 +161,7 @@ public class indexServlet extends HttpServlet {
             Iterator<String> it = tagSets.iterator();
             while (it.hasNext()) {
                 String tag = it.next();
-                if (tag.equals("want") || tag.equals("useless"))
+                if (tag.equals("want"))
                     continue;
 
                 Node node;
@@ -332,17 +352,27 @@ public class indexServlet extends HttpServlet {
                     }
                 }
                 Node wNode = new Node("want", wantStr);
-                HashSet<String> tagSet = new HashSet<>();
+                ArrayList<String> tagSet = new ArrayList<>();
+                int useless = 0;
                 ArrayList<String> tagList = new ArrayList<>();
                 for (int tagIndex : want) {
-                    tagSet.add(tagNames.get(tagIndex));
                     tagList.add(tagNames.get(tagIndex));
+                    if (tagNames.get(tagIndex).equalsIgnoreCase("useless")){
+                        useless = 1;
+                        continue;
+                    }
+                    if (tagSet.indexOf(tagNames.get(tagIndex)) < 0){
+                        tagSet.add(tagNames.get(tagIndex));
+                    }
+                }
+                if (1 == useless){
+                    tagSet.add("useless");
                 }
                 Iterator<String> it = tagSet.iterator();
                 while (it.hasNext()) {
                     String tag = it.next();
                     System.out.println(tag);
-                    if (tag.equals("want") || tag.equals("useless"))
+                    if (tag.equals("want"))
                         continue;
                     Node node;
                     ArrayList<Integer> indexList = FeatureUtility.getIndexList(tagList, tag);

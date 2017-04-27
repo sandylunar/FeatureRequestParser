@@ -3,11 +3,13 @@ package main.java.core;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -286,8 +288,8 @@ public class RequestClassifier {
 	}
 
 	private static void printConsole(String tagName, int count, double output1,
-									 double output2, String countString, String performanceString,
-									 String classiferName, String deleteAttrNames) {
+			double output2, String countString, String performanceString,
+			String classiferName, String deleteAttrNames) {
 		System.out.printf("=============Tag: %s================", tagName);
 		System.out.printf(countString, count);
 		System.out.printf(performanceString, output1, output2);
@@ -299,20 +301,20 @@ public class RequestClassifier {
 	private static ArrayList<Classifier> getAllClassifiers() {
 		ArrayList<Classifier> classifiers = new ArrayList<Classifier>();
 		classifiers.add(new RandomForest());
-		classifiers.add(new NaiveBayes());
+		 classifiers.add(new NaiveBayes());
 
-		classifiers.add(new J48());
+		 classifiers.add(new J48());
 
-		classifiers.add(new DecisionTable());
-		classifiers.add(new JRip());
+		 classifiers.add(new DecisionTable());
+		 classifiers.add(new JRip());
 
-		classifiers.add(new IBk());
+		 classifiers.add(new IBk());
 
-		classifiers.add(new AdaBoostM1());
-		classifiers.add(new Bagging());
+		 classifiers.add(new AdaBoostM1());
+		 classifiers.add(new Bagging());
 
-		classifiers.add(new Logistic());
-		classifiers.add(new SMO());
+		 classifiers.add(new Logistic());
+		 classifiers.add(new SMO());
 
 		/*
 		 * WekaPackageManager.loadPackages( false, true, false );
@@ -372,7 +374,7 @@ public class RequestClassifier {
 		token.setNGramMaxSize(2);
 		token.setNGramMinSize(2);
 
-
+		
 		filter = getStopWordFilter(false);
 		filter.setTFTransform(true);
 		filter.setIDFTransform(true);
@@ -382,16 +384,16 @@ public class RequestClassifier {
 		filter.setLowerCaseTokens(true);
 
 		Instances dataFiltered = Filter.useFilter(dataRaw, filter);
-
+		
 		return dataFiltered;
 
-
+		
 	}
 
 	public static double[][] classify(Instances data, Classifier classifier,
-									  Instances rawData,String label) throws Exception {
+			Instances rawData,String label) throws Exception {
 
-
+		
 		Attribute tag = data.classAttribute();
 		tagSize = tag.numValues();
 		tagNames = new String[tagSize];
@@ -406,7 +408,7 @@ public class RequestClassifier {
 //			filter.setInputFormat(data);
 //			data = Filter.useFilter(data, filter);
 //		}
-
+		
 		// select attributes
 		/*
 		 * WrapperSubsetEval evalForAttr = new WrapperSubsetEval();
@@ -414,7 +416,7 @@ public class RequestClassifier {
 		 * evalForAttr.setClassifier(new RandomForest()); GreedyStepwise search
 		 * = new GreedyStepwise(); search.setSearchBackwards(true);
 		 * evalForAttr.setFolds(10);
-		 *
+		 * 
 		 * attselector.setEvaluator(evalForAttr); attselector.setSearch(search);
 		 * attselector.setInputFormat(data);
 		 */
@@ -429,7 +431,7 @@ public class RequestClassifier {
 		 * Enumeration<Attribute> enumerator = newData.enumerateAttributes();
 		 * while (enumerator.hasMoreElements()) {
 		 * System.out.println(enumerator.nextElement().name()); }
-		 *
+		 * 
 		 * System.out.println("Attributes after selection: END");
 		 */
 
@@ -445,13 +447,13 @@ public class RequestClassifier {
 
 		// useLowLevel(data);
 		Evaluation eval = getEvaluation(data, classifier,label);
-
+		
 //		ThresholdCurve tc = new ThresholdCurve();
-//
+//		
 //		int classIndex = 1;
 //		Instances result = tc.getCurve(eval.predictions(), classIndex);
 //		System.out.println("The area under the ROC　curve: " + eval.areaUnderROC(classIndex));
-
+		
 
 		if (true) {
 			System.out.println("\n\n==============================");
@@ -473,7 +475,7 @@ public class RequestClassifier {
 	}
 
 	private static Evaluation getEvaluation(Instances data,
-											Classifier classifier,String label) {
+			Classifier classifier,String label) {
 
 		data.setClassIndex(data.numAttributes()-1);
 //		weka.filters.supervised.attribute.AttributeSelection filter = new weka.filters.supervised.attribute.AttributeSelection();
@@ -490,7 +492,7 @@ public class RequestClassifier {
 		Evaluation evaluation = null;
 		try {
 			evaluation = new Evaluation(newData);
-			evaluation.crossValidateModel(classifier, newData, 10, new Random(1));
+			evaluation.crossValidateModel(classifier, newData, 10, new Random(1));	
 
 			return evaluation;
 		} catch (Exception e) {
@@ -518,7 +520,7 @@ public class RequestClassifier {
 	}
 
 	private static void testClassifier(int folds, Instances data,
-									   Instances rawData, Classifier classifier) throws Exception {
+			Instances rawData, Classifier classifier) throws Exception {
 		Instances train = null;
 		Instances test = null;
 		Evaluation eval = null;
@@ -970,7 +972,7 @@ public class RequestClassifier {
 	}
 
 	private static boolean noSemicolonBeforePattern(String content,
-													String[] pattern3) {
+			String[] pattern3) {
 		boolean result = true;
 
 		if (checkContains(content, pattern3)) {
@@ -1035,13 +1037,13 @@ public class RequestClassifier {
 	}
 
 	public static void classify(Instances dataset,String label) throws Exception {
-
-
-
+		
+		
+		
 		ArrayList<Classifier> classifiers = getAllClassifiers();
-
+		
 		createPrintWriter(outputFile);
-
+		
 		for (Classifier c : classifiers) {
 			double[][] results = RequestClassifier
 					.classify(dataset, c, dataset, label);
@@ -1054,12 +1056,37 @@ public class RequestClassifier {
 
 		}
 	}
+	
+	public static void classify(String filename,String label) throws Exception {
+		
+		InputStreamReader isr = new InputStreamReader(new FileInputStream(filename),"UTF-8");
+		BufferedReader read = new BufferedReader(isr);		   
+		Instances dataset = new Instances(read);
+		dataset.setClassIndex(dataset.numAttributes()-1);
+		
+		ArrayList<Classifier> classifiers = getAllClassifiers();
+		
+		createPrintWriter(outputFile);
+		
+		for (Classifier c : classifiers) {
+			double[][] results = RequestClassifier
+					.classify(dataset, c, dataset, label);
 
+			for (int i = 0; i < tagNames.length; i++) {
+				System.out.printf(
+						"\nclass = %s, precision = %.2f, recall = %.2f",
+						tagNames[i], results[i][0], results[i][1]);
+			}
+
+		}
+	}
+	
+	
 	public static int getValueSize(Instances dataset){
 		Iterator<Instance> iterator = dataset.iterator();
 		Instance item = iterator.next();
-		double[] values = RequestAnalyzer.getVariables(item, dataset, false);
-		System.out.println("value size = "+values.length);
+		double[] values = RequestAnalyzer.getVariables(item, dataset, true);
+		//System.out.println("value size = "+values.length);
 		return values.length;
 	}
 

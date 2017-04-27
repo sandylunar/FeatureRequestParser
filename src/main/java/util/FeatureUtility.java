@@ -31,7 +31,7 @@ public class FeatureUtility {
 	static String outputPath = "resource//tag_data_";
 	public static String excludeTags[] = { "_time" };
 	public static final String QUESTION[] = { "why" };
-	public static String[] SYSTEM_NAMES = {"phpmyadmin","pma","mopidy","mpd","activemq"};
+	public static String[] SYSTEM_NAMES = {"phpmyadmin","pma","mopidy","mpd","activemq","swt"};
 
 	public static final String WANT_MD[] = { "should", "can" };
 	public static final String WANTS[] = { "sugg", "propose", "consider", "want", "would like", "\'d like",
@@ -40,27 +40,30 @@ public class FeatureUtility {
 			"appreciated", "appropriate", "better", "convenient", "cool", "worth" ,"make sense","interesting","a great deal",
 			"a good deal","neat","accurate","simplify","speed","sense","enhanced",
 			"necessary","cheaper","ease ","faster","easily","easier","neater","best","improve","closely",
-			"fine","optimized","awesome","simplified","handy ","fine grained"};//,"possible","save","enable","automatically"
-
+			"fine","optimized","awesome","simplified","handy ","fine grained",};//,"possible","save","enable","automatically","available"
+	
 	public static final String GOOD_BENEFIT[] = {"nicer", "safer", "helpful", "useful", "great", "nice", "good", "appreciate", "greatly",
-			"appreciated", "better", "convenient", "cool", "worth" ,"make sense","a great deal",
-			"a good deal","neat","accurate","simplify","speed","sense","enhanced",
-			"cheaper","ease ","faster","easily","easier","reduce","neater","best","improve","closely",
-			"fine","optimized","awesome","simplified","handy ","fine grained","fast","reduce","advantage","efficiency","visible","clear"
-	};//"interesting","necessary","possible","save","enable","automatically"
+		"appreciated", "better", "convenient", "cool", "worth" ,"make sense","a great deal",
+		"a good deal","neat","accurate","simplify","speed","sense","enhanced",
+		"cheaper","ease ","faster","easily","easier","easiest","reduce","neater","best","improve","closely",
+		"fine","optimized","awesome","simplified","handy ","fine grained","fast","reduce",
+		"advantage","efficiency","visible","clear","portable","rapid","benefit","handled","available","easy","powerful","nicely","benefit","beneficial","good","efficient",
+		"reliable","help","advantageous","preferable","quickly","safely","usable","attractive","handy"
+		};//"interesting","necessary","possible","save","enable","automatically""configurable"
 
-
+	
 	public static final String BAD[]={"accidentally","lose","loses","hard","annoying","annoy","miss","confusing",
-			"confuse","bad","unfortunately","unfortunate","failing","fail","'ve yet","have yet","inefficient","awkward","rarely use",
-			"impossible","massive","confused","a large amount","difficult","too much","heavy",
-			"limitation","incorrect","forget","useless","nightmare","inconvenient","error-prone","much effort","annoyance","limited",
-			"naive","simplistic","serious issue","rarely used","disconnected","suffer","undone","trivial","ugly","no point"}; //"has to","have to","had to","against","still","issue","problem","can't","cannot","can not","cant","errors",
-
+		"confuse","bad","unfortunately","unfortunate","failing","fail","'ve yet","have yet","inefficient","awkward","rarely use",
+		"impossible","massive","confused","a large amount","difficult","too much","heavy",
+		"limitation","incorrect","forget","useless","nightmare","inconvenient","error-prone","much effort","annoyance","limited",
+		"naive","simplistic","serious issue","rarely used","disconnected","suffer","undone","trivial","ugly","no point","unable",
+		"problematic","smaller","complex","verbose","expensive","drastic","arbitrary","shortcoming","shortcomings","hassle","pain"}; //"has to","have to","had to","against","still","issue","problem","can't","cannot","can not","cant","errors",
+	
 	public static final String EXPLAINATION[] = { "why", "hint", "mean", "has to", "have to", "only", "same", "F.e.",
 			"already", "etc" }; // like
 
 	public static final String USELESSVERB[] = { "be", "wander", "wonder", "thank","appreciate" };
-	public static final String[] USELESS = { "hi", "hello", "thank", "regards", "thanks" };
+	public static final String[] USELESS = { "hi", "hello", "thank", "regards", "thanks","best wish" };
 
 	public static final String SMART_STOP_WORDS[] = { " ", "a", "able", "about", "above", "according", "accordingly",
 			"across", "actually", "after", "afterwards", "again", "against", "all", "allow", "allows", "almost",
@@ -115,7 +118,7 @@ public class FeatureUtility {
 			"wandering","feature","available","actually","request","more","than","bug","exists","other","form","missed","while","going","through",
 			"sources","code","enclosed","zip","time","change","write","attach","I'll","implementation","changes","release","patch","report","second",":",")",
 			"happy","implement","these","them","can","do","fix","if","we're","agreed","care","taken","don't","feel","free","add","further","benefits",
-			"drawbacks","comments","good","luck"}; //REMOVE same
+			"drawbacks","comments","good","luck","more","details","for"}; //REMOVE same
 
 	public static String[] splitByEqual(String line, int lineNumber, boolean exclude, boolean export)
 			throws IOException {
@@ -125,7 +128,7 @@ public class FeatureUtility {
 
 		String tag = results[0].trim();
 
-		if (tag.contains(" ") || tag.length() > 15 || results.length < 2)
+		if (tag.contains(" ") || tag.length() > 20|| results.length < 2)
 			return null;
 
 		String content = line.substring(line.indexOf("=") + 1).trim();
@@ -153,11 +156,11 @@ public class FeatureUtility {
 		List<CoreLabel> rawWords = StanfordCoreNlpDemo.getRawWords(text);
 		for(CoreLabel item : rawWords){
 			String word = item.word();
-
+			
 			for (String target : list) {
-
+				
 				if(checkEqual){
-
+					
 					if(target.contains(" ")){
 						if(text.toLowerCase().contains(target.toLowerCase()))
 							return true;
@@ -167,12 +170,12 @@ public class FeatureUtility {
 					if (word.toLowerCase().contains(target.toLowerCase()))
 						return true;
 				}
-
+				
 			}
 		}
-
+		
 		return false;
-
+		
 	}
 
 	public static boolean checkContains(String text, String[] list) {
@@ -189,21 +192,21 @@ public class FeatureUtility {
 
 		return false;
 	}
-
+	
 	public static boolean isContain(String text, String[] list) {
 
-		for (String target : list) {
-			if (text.toLowerCase().contains(target.toLowerCase()))
-				return true;
-		}
+			for (String target : list) {
+				if (text.toLowerCase().contains(target.toLowerCase()))
+					return true;
+			}
 
 		return false;
 	}
-
+	
 	public static boolean isSysName(String name){
 		return isContain(name, SYSTEM_NAMES,true);
 	}
-
+	
 	public static boolean isContain(String text, String[] list, boolean equal) {
 
 		for (String target : list) {
@@ -213,18 +216,18 @@ public class FeatureUtility {
 			}else{
 				if (text.toLowerCase().contains(target.toLowerCase()))
 					return true;
-			}
+				}
 		}
 
-		return false;
-	}
+	return false;
+}
 
 	public static void exportInstancesToFile(Instances dataRaw, String filename) throws IOException {
 //		ArffSaver saver = new ArffSaver();
 //		saver.setInstances(dataRaw);
 //		saver.setFile(new File(filename));
 //		saver.writeBatch();
-
+		
 		//FileWriter fw = new FileWriter(filename);
 		//BufferedWriter bw = new BufferedWriter(fw);
 		BufferedWriter out = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(filename),"UTF-8"));
@@ -234,7 +237,7 @@ public class FeatureUtility {
 		System.out.println("Exported to "+filename);
 		//fw.close();
 	}
-
+	
 	public static void exportIFeatureRequestsToFile(ArrayList<FeatureRequest> featureRequestList, String filename) throws IOException {
 		FileWriter fw = new FileWriter(filename);
 		BufferedWriter bw = new BufferedWriter(fw);
@@ -243,7 +246,7 @@ public class FeatureUtility {
 			bw.write(fr.toString());
 			bw.write("\n");
 		}
-
+		
 		bw.close();
 		fw.close();
 	}
@@ -286,7 +289,7 @@ public class FeatureUtility {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param data
 	 * @param option
 	 *            SENTENCE, INSTANCE
@@ -352,10 +355,10 @@ public class FeatureUtility {
 			results[i] = words.get(i).word();
 		return results;
 	}
-
+	
 	public static boolean matchFeature(String content){
 		boolean result = false;
-
+		
 		Pattern pattern1 = Pattern.compile(".*would be[^,.;?\"']*feature.*");
 		Pattern pattern2 = Pattern.compile(".*feature[^,.;?\"']*would be.*");
 		Pattern pattern3 = Pattern.compile(".*this is[^,.;?\"']*feature.*");
@@ -364,96 +367,96 @@ public class FeatureUtility {
 		Matcher matcher2 = pattern2.matcher(content);
 		Matcher matcher3 = pattern3.matcher(content);
 		Matcher matcher4 = pattern4.matcher(content);
-		if(matcher1.matches()||matcher2.matches()||matcher3.matches()||matcher4.matches())
+		if(matcher1.matches()||matcher2.matches()||matcher3.matches()||matcher4.matches()||content.matches(".*is[^,.;?\"']*feature request.*"))
 			result = true;
-
+		
 		return result;
-
+		 
 	}
-
+	
 	public static boolean matchShouldBePossible(String content){
 		Pattern pattern = Pattern.compile(".*should[^,.;?\"']*be[^,.;?\"']*possible.*");
 		Matcher matcher = pattern.matcher(content);
 		if(matcher.matches())
 			return true;
-
+		
 		return false;
-
+		
 	}
-
-
+	
+	
 	public static boolean matchNOTONLY(String content){
 		Pattern pattern = Pattern.compile(".*should[^,.;?\"']*not only[^,.;?\"']*but also.*");
 		Matcher matcher = pattern.matcher(content);
 		if(matcher.matches())
 			return true;
-
+		
 		return false;
-
+		
 	}
-
+	
 	public static boolean matchMDAllow(String content){
 		Pattern pattern = Pattern.compile(".*could[^,.;?\"']*allow[^,.;?\"']*");
 		Matcher matcher = pattern.matcher(content);
-
+		
 		Pattern pattern1 = Pattern.compile(".*would[^,.;?\"']*allow[^,.;?\"']*");
 		Matcher matcher1 = pattern1.matcher(content);
-
+		
 		Pattern pattern2 = Pattern.compile(".*would just allow.*");
 		Matcher matcher2 = pattern2.matcher(content);
-
+		
 		Pattern pattern3 = Pattern.compile(".*would have to[^,.;?\"']*allow.*");
 		Matcher matcher3 = pattern3.matcher(content);
-
+		
 		boolean b3 = matcher3.matches();
-
+		
 		if( (matcher.matches() || matcher1.matches()) && !matcher2.matches() && !b3)
 			return true;
-
+		
 		return false;
-
+		
 	}
-
+	
 	public static void main(String args[]){
-		Pattern pattern = Pattern.compile(".*feature.*");
-		Matcher matcher = pattern.matcher("\"find and replace feature\"");
-		System.out.println(matcher.matches());
-
+		 Pattern pattern = Pattern.compile(".*feature.*");
+		 Matcher matcher = pattern.matcher("\"find and replace feature\"");
+		 System.out.println(matcher.matches());
+		 
 		 /*pattern = Pattern.compile(".*would be[^,.;?\"'����]*feature.*");
 		 matcher = pattern.matcher("would be a great feature to have in that regard");
 		 System.out.println(matcher.matches());
-
+		 
 		 pattern = Pattern.compile(".*feature[^,.;?\"'����]*would be.*");
 		 matcher = pattern.matcher("A really useful feature would be a list where one can simply save SQL");
 		 System.out.println(matcher.matches());*/
-
-		pattern = Pattern.compile(".*should[^,.;?\"']*be[^,.;?\"']*possible.*");
-		matcher = pattern.matcher("This should be possible for <ant> as well and allow simplify forked testing");
-		System.out.println(matcher.matches());
-
-
-		pattern = Pattern.compile(".*should[^,.;?\"']*not only[^,.;?\"']*but also.*");
-
-		//pattern = Pattern.compile(".*either[^,.;?\"'*but also.*");
-		matcher = pattern.matcher("SoftExceptions should print not only their trace but also that of the wrapped throwable.");
-		System.out.println(matcher.matches());
-
-		String text ="If the user doesn't press Save before the countdown expires, the user loses everything";
-		boolean flag = FeatureUtility.checkContains(text, FeatureUtility.BAD, true);
-		System.out.println(flag);
-
-		String test = "FastMatch, the efficient pattern matching for pointcuts on the constant pool, is currrently only implemented for the within pointcut";
-		boolean match = test.matches(".*currently[^,.;?\"']*only.*");
-		System.out.println("match = "+match);
-
-		//String content = "it would be nice if the compiler emitted an error, since the two situations can be confusingly similar:example = <CODE>";
-		//String[] tokens = getTokens(content);
-		//System.out.println(tokens);
-		//index = replacement.index //= 22
-		//tokens[index] == "<CODE>";
-
+		 
+		 pattern = Pattern.compile(".*should[^,.;?\"']*be[^,.;?\"']*possible.*");
+		 matcher = pattern.matcher("This should be possible for <ant> as well and allow simplify forked testing");
+		 System.out.println(matcher.matches());
+		 
+		 
+		 pattern = Pattern.compile(".*should[^,.;?\"']*not only[^,.;?\"']*but also.*");
+		 
+		 //pattern = Pattern.compile(".*either[^,.;?\"'*but also.*");
+		 matcher = pattern.matcher("SoftExceptions should print not only their trace but also that of the wrapped throwable.");
+		 System.out.println(matcher.matches());
+		 
+		 String text ="If the user doesn't press Save before the countdown expires, the user loses everything";
+		 boolean flag = FeatureUtility.checkContains(text, FeatureUtility.BAD, true);
+		 System.out.println(flag);
+		 
+		 String test = "FastMatch, the efficient pattern matching for pointcuts on the constant pool, is currrently only implemented for the within pointcut";
+			boolean match = test.matches(".*currently[^,.;?\"']*only.*");
+			 System.out.println("match = "+match);
+		 
+		 //String content = "it would be nice if the compiler emitted an error, since the two situations can be confusingly similar:example = <CODE>";
+		 //String[] tokens = getTokens(content);
+		 //System.out.println(tokens);
+		 //index = replacement.index //= 22
+		 //tokens[index] == "<CODE>";
+		 
 		  /*String content = "So many people have asked how to write a declare warning / error to detect empty catch blocks, that this is clearly a desirable feature";
-	      System.out.println(matchFeature(content));
+	      System.out.println(matchFeature(content)); 
 		  String[] tokens = getTokens(content);
 	        for(String token : tokens){
 	        	String target = getTokens("<For example0>")[0];
@@ -462,38 +465,38 @@ public class FeatureUtility {
 	                System.out.println("ƥ��:-->"+token);
 	            }
 	        }*/
-
-		String test2 = "These options help ActiveMQ recognize disappeared connections outside of the application layer";
-		System.out.println("matchHelpSystem = "+FeatureUtility.matchHelpSystem(test2));
-
-		String test3 = "I would appreciate a feature that allows to control some User Interface functionality from phpMyAdmin";
-
-		System.out.println("matchFeature = "+FeatureUtility.matchFeature(test3));
-		System.out.println("matchFeature = "+test3.matches(".*appreciate[^,.;?\"']*feature.*"));
-
-		String test4 = "Ideally, the Transport API would have to be extended to allow for a onewayBatch(List<Object> messageBatch) method (and the default implementation would just iterate over the list and rely on the existing oneway(Object) method";
-		System.out.println("matchMDALLOW = "+test4.matches(".*would have to[^,.;?\"']*allow.*"));
+			 
+			 String test2 = "These options help ActiveMQ recognize disappeared connections outside of the application layer";
+			 System.out.println("matchHelpSystem = "+FeatureUtility.matchHelpSystem(test2));
+			 
+			 String test3 = "I would appreciate a feature that allows to control some User Interface functionality from phpMyAdmin";
+			 
+			 System.out.println("matchFeature = "+FeatureUtility.matchFeature(test3));
+			 System.out.println("matchFeature = "+test3.matches(".*appreciate[^,.;?\"']*feature.*"));
+			 
+			 String test4 = "Ideally, the Transport API would have to be extended to allow for a onewayBatch(List<Object> messageBatch) method (and the default implementation would just iterate over the list and rely on the existing oneway(Object) method";
+			 System.out.println("matchMDALLOW = "+test4.matches(".*would have to[^,.;?\"']*allow.*"));
 
 	}
 
 	/**
-	 *
+	 * 
 	 * @param content
 	 * @param wordList
 	 * @param target
 	 * @return 1...size
 	 */
 	public static ArrayList<Integer> getIndexList(ArrayList<String> wordList,
-												  String target) {
+			String target) {
 		ArrayList<Integer> list = new ArrayList<Integer>();
 		String splits[] = target.split(" ");
 		if(splits.length==1){
 			for(int i = 0; i < wordList.size(); i++){
-				String word  = wordList.get(i);
-
-				if(word.equalsIgnoreCase(splits[0]))
-					list.add(new Integer(i+1));
-
+			String word  = wordList.get(i);
+			
+			if(word.equalsIgnoreCase(splits[0]))
+				list.add(new Integer(i+1));
+			
 			}
 		}else{
 			for(int i = 0 ; i < wordList.size()-splits.length+1; i++){
@@ -502,14 +505,14 @@ public class FeatureUtility {
 					word=word+" "+wordList.get(i+j);
 				}
 				word = word.trim();
-
+				
 				if(word.equalsIgnoreCase(target))
 					list.add(new Integer(i+1));
 			}
 		}
 		return list;
 	}
-
+	
 	public void testGetIndex() throws IOException{
 		String content = "I have to go and have to go to another place";
 		String content2  = "This is really good and good, let me see a good face";
@@ -517,7 +520,7 @@ public class FeatureUtility {
 		nlp.parseSingleSentence(content);
 		ArrayList<Integer> list = FeatureUtility.getIndexList(nlp.wordList,"have to");
 		System.out.println(list);
-
+		
 		nlp.parseSingleSentence(content2);
 		ArrayList<Integer> list2 = FeatureUtility.getIndexList(nlp.wordList,"good");
 		System.out.println(list2);
@@ -528,22 +531,22 @@ public class FeatureUtility {
 			return true;
 		return false;
 	}
-
+	
 	public static boolean matchHelpSystem(String content) {
 		List<CoreLabel> rawWords = StanfordCoreNlpDemo.getRawWords(content);
 		ArrayList<String> wordList = new ArrayList<String>();
-
+		
 		for(CoreLabel item : rawWords){
 			String word = item.word();
 			wordList.add(word);
 		}
-
+		
 		ArrayList<Integer> list = FeatureUtility.getIndexList(wordList,"help");
-
+		
 		if(FeatureUtility.notEmpty(list) == false)
 			return false;
-
-
+			
+		
 		for(int index : list){
 			String checkName = wordList.get(index);
 			for(String name : FeatureUtility.SYSTEM_NAMES){
@@ -555,7 +558,7 @@ public class FeatureUtility {
 	}
 
 	public static boolean doesStartWith(String contentLower,
-										String[] patterns) {
+			String[] patterns) {
 		for(String pattern : patterns){
 			if(contentLower.startsWith(pattern))
 				return true;
@@ -563,7 +566,39 @@ public class FeatureUtility {
 		return false;
 	}
 
+	public static int getSortedPosition(double value, double[] confidences) {
 
+		for(int i = 0 ; i < confidences.length; i++){
+			if(value == confidences[i]){
+				confidences[i] = -2;
+				return i;
+				}
+		}
+		return -1;
+	}
+	
+	public static int getSortedPosition(double value, Double[] confidences) {
 
+		for(int i = 0 ; i < confidences.length; i++){
+			if(value == confidences[i]){
+				confidences[i] = -2.0;
+				return i;
+				}
+		}
+		return -1;
+	}
+	
+	public static int getFirstIndexOf(int value, int[] confidences) {
+
+		for(int i = 0 ; i < confidences.length; i++){
+			if(value == confidences[i]){
+				return i;
+				}
+		}
+		return -1;
+	}
+	
+	
+	
 
 }

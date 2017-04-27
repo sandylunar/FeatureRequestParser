@@ -145,7 +145,7 @@ public class Parser {
     }
 
     public String parseQuote(String origin) {
-        String regEx = "([\"']).*?\\1";
+        String regEx = "([\"'])(?![a-z]\\s).*?\\1";
         Pattern pattern = Pattern.compile(regEx);
         Matcher matcher = pattern.matcher(origin);
         StringBuffer sb = new StringBuffer();
