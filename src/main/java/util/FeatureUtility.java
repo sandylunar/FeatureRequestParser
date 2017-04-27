@@ -31,7 +31,7 @@ public class FeatureUtility {
 	static String outputPath = "resource//tag_data_";
 	public static String excludeTags[] = { "_time" };
 	public static final String QUESTION[] = { "why" };
-	public static String[] SYSTEM_NAMES = {"phpmyadmin","pma","mopidy","mpd","activemq"};
+	public static String[] SYSTEM_NAMES = {"phpmyadmin","pma","mopidy","mpd","activemq","swt"};
 
 	public static final String WANT_MD[] = { "should", "can" };
 	public static final String WANTS[] = { "sugg", "propose", "consider", "want", "would like", "\'d like",
@@ -40,27 +40,30 @@ public class FeatureUtility {
 			"appreciated", "appropriate", "better", "convenient", "cool", "worth" ,"make sense","interesting","a great deal",
 			"a good deal","neat","accurate","simplify","speed","sense","enhanced",
 			"necessary","cheaper","ease ","faster","easily","easier","neater","best","improve","closely",
-			"fine","optimized","awesome","simplified","handy ","fine grained"};//,"possible","save","enable","automatically"
+			"fine","optimized","awesome","simplified","handy ","fine grained",};//,"possible","save","enable","automatically","available"
 	
 	public static final String GOOD_BENEFIT[] = {"nicer", "safer", "helpful", "useful", "great", "nice", "good", "appreciate", "greatly",
 		"appreciated", "better", "convenient", "cool", "worth" ,"make sense","a great deal",
 		"a good deal","neat","accurate","simplify","speed","sense","enhanced",
-		"cheaper","ease ","faster","easily","easier","reduce","neater","best","improve","closely",
-		"fine","optimized","awesome","simplified","handy ","fine grained","fast","reduce","advantage","efficiency","visible","clear"
-		};//"interesting","necessary","possible","save","enable","automatically"
+		"cheaper","ease ","faster","easily","easier","easiest","reduce","neater","best","improve","closely",
+		"fine","optimized","awesome","simplified","handy ","fine grained","fast","reduce",
+		"advantage","efficiency","visible","clear","portable","rapid","benefit","handled","available","easy","powerful","nicely","benefit","beneficial","good","efficient",
+		"reliable","help","advantageous","preferable","quickly","safely","usable","attractive","handy"
+		};//"interesting","necessary","possible","save","enable","automatically""configurable"
 
 	
 	public static final String BAD[]={"accidentally","lose","loses","hard","annoying","annoy","miss","confusing",
 		"confuse","bad","unfortunately","unfortunate","failing","fail","'ve yet","have yet","inefficient","awkward","rarely use",
 		"impossible","massive","confused","a large amount","difficult","too much","heavy",
 		"limitation","incorrect","forget","useless","nightmare","inconvenient","error-prone","much effort","annoyance","limited",
-		"naive","simplistic","serious issue","rarely used","disconnected","suffer","undone","trivial","ugly","no point"}; //"has to","have to","had to","against","still","issue","problem","can't","cannot","can not","cant","errors",
+		"naive","simplistic","serious issue","rarely used","disconnected","suffer","undone","trivial","ugly","no point","unable",
+		"problematic","smaller","complex","verbose","expensive","drastic","arbitrary","shortcoming","shortcomings","hassle","pain"}; //"has to","have to","had to","against","still","issue","problem","can't","cannot","can not","cant","errors",
 	
 	public static final String EXPLAINATION[] = { "why", "hint", "mean", "has to", "have to", "only", "same", "F.e.",
 			"already", "etc" }; // like
 
 	public static final String USELESSVERB[] = { "be", "wander", "wonder", "thank","appreciate" };
-	public static final String[] USELESS = { "hi", "hello", "thank", "regards", "thanks" };
+	public static final String[] USELESS = { "hi", "hello", "thank", "regards", "thanks","best wish" };
 
 	public static final String SMART_STOP_WORDS[] = { " ", "a", "able", "about", "above", "according", "accordingly",
 			"across", "actually", "after", "afterwards", "again", "against", "all", "allow", "allows", "almost",
@@ -115,7 +118,7 @@ public class FeatureUtility {
 			"wandering","feature","available","actually","request","more","than","bug","exists","other","form","missed","while","going","through",
 			"sources","code","enclosed","zip","time","change","write","attach","I'll","implementation","changes","release","patch","report","second",":",")",
 			"happy","implement","these","them","can","do","fix","if","we're","agreed","care","taken","don't","feel","free","add","further","benefits",
-			"drawbacks","comments","good","luck"}; //REMOVE same
+			"drawbacks","comments","good","luck","more","details","for"}; //REMOVE same
 
 	public static String[] splitByEqual(String line, int lineNumber, boolean exclude, boolean export)
 			throws IOException {
@@ -125,7 +128,7 @@ public class FeatureUtility {
 
 		String tag = results[0].trim();
 
-		if (tag.contains(" ") || tag.length() > 15 || results.length < 2)
+		if (tag.contains(" ") || tag.length() > 20|| results.length < 2)
 			return null;
 
 		String content = line.substring(line.indexOf("=") + 1).trim();
@@ -364,7 +367,7 @@ public class FeatureUtility {
 		Matcher matcher2 = pattern2.matcher(content);
 		Matcher matcher3 = pattern3.matcher(content);
 		Matcher matcher4 = pattern4.matcher(content);
-		if(matcher1.matches()||matcher2.matches()||matcher3.matches()||matcher4.matches())
+		if(matcher1.matches()||matcher2.matches()||matcher3.matches()||matcher4.matches()||content.matches(".*is[^,.;?\"']*feature request.*"))
 			result = true;
 		
 		return result;
@@ -561,6 +564,38 @@ public class FeatureUtility {
 				return true;
 		}
 		return false;
+	}
+
+	public static int getSortedPosition(double value, double[] confidences) {
+
+		for(int i = 0 ; i < confidences.length; i++){
+			if(value == confidences[i]){
+				confidences[i] = -2;
+				return i;
+				}
+		}
+		return -1;
+	}
+	
+	public static int getSortedPosition(double value, Double[] confidences) {
+
+		for(int i = 0 ; i < confidences.length; i++){
+			if(value == confidences[i]){
+				confidences[i] = -2.0;
+				return i;
+				}
+		}
+		return -1;
+	}
+	
+	public static int getFirstIndexOf(int value, int[] confidences) {
+
+		for(int i = 0 ; i < confidences.length; i++){
+			if(value == confidences[i]){
+				return i;
+				}
+		}
+		return -1;
 	}
 	
 	

@@ -3,11 +3,13 @@ package main.java.core;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1055,11 +1057,36 @@ public class RequestClassifier {
 		}
 	}
 	
+	public static void classify(String filename,String label) throws Exception {
+		
+		InputStreamReader isr = new InputStreamReader(new FileInputStream(filename),"UTF-8");
+		BufferedReader read = new BufferedReader(isr);		   
+		Instances dataset = new Instances(read);
+		dataset.setClassIndex(dataset.numAttributes()-1);
+		
+		ArrayList<Classifier> classifiers = getAllClassifiers();
+		
+		createPrintWriter(outputFile);
+		
+		for (Classifier c : classifiers) {
+			double[][] results = RequestClassifier
+					.classify(dataset, c, dataset, label);
+
+			for (int i = 0; i < tagNames.length; i++) {
+				System.out.printf(
+						"\nclass = %s, precision = %.2f, recall = %.2f",
+						tagNames[i], results[i][0], results[i][1]);
+			}
+
+		}
+	}
+	
+	
 	public static int getValueSize(Instances dataset){
 		Iterator<Instance> iterator = dataset.iterator();
 		Instance item = iterator.next();
-		double[] values = RequestAnalyzer.getVariables(item, dataset, false);
-		System.out.println("value size = "+values.length);
+		double[] values = RequestAnalyzer.getVariables(item, dataset, true);
+		//System.out.println("value size = "+values.length);
 		return values.length;
 	}
 

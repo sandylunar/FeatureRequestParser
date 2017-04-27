@@ -38,12 +38,21 @@ public class FeatureRequest {
 	ArrayList<Integer> matchIsNotGOOD = new ArrayList<Integer>();
 	ArrayList<Integer> matchIsBAD = new ArrayList<Integer>();
 	ArrayList<Integer> matchIsNotBAD = new ArrayList<Integer>();
+	ArrayList<Double> numNNP = new ArrayList<Double>();
 	
 	
 	
 	
 	public FeatureRequest(String title) {
 		this.title = title;
+	}
+	
+	public void addNumNNP(double size){
+		numNNP.add(size);
+	}
+	
+	public double getNumNNP(int index){
+		return numNNP.get(index);
 	}
 	
 	public void addMatchIsBAD(int score){
@@ -375,6 +384,7 @@ public class FeatureRequest {
 				fr+="matchIsNotGOOD: "+matchIsNotGOOD.get(i)+"\n";
 				fr+="matchIsBAD: "+matchIsBAD.get(i)+"\n";
 				fr+="matchIsNotBAD: "+matchIsNotBAD.get(i)+"\n";
+				fr+="numNNP: "+numNNP.get(i)+"\n";
 			}
 			
 			
@@ -392,5 +402,6 @@ public class FeatureRequest {
 		}
 		
 		return false;
-	}	
+	}
+
 }

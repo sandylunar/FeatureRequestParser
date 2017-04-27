@@ -16,6 +16,8 @@ import org.apache.lucene.search.spell.NGramDistance;
 
 import main.java.bean.FeatureRequest;
 import main.java.bean.FeatureRequestOL;
+import main.java.bean.Sentence;
+import main.java.predictor.FuzzyPredictorPMAMopidyActivemqAspectj;
 import main.java.util.FeatureUtility;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -31,8 +33,9 @@ public class DataParser {
 	static ArrayList<FeatureRequest> featureRequestList = new ArrayList<FeatureRequest>();
 	static HashSet<String> labels = new HashSet<String>();
 	static ArrayList<String> labelArray = new ArrayList<String>();
-	// static StanfordCoreNlpDemo nlpTool =new StanfordCoreNlpDemo(false,"");
-	static StanfordCoreNlpDemo nlpTool = null;
+	static StanfordCoreNlpDemo nlpTool =new StanfordCoreNlpDemo(false,"");
+	//static StanfordCoreNlpDemo nlpTool = null;
+	public static StringBuffer autoTagBuffer = new StringBuffer();
 	static String outputFR = "data//log//all-feature-requests.txt";
 	public static String[] tagNames = new String[] { "explanation", "want",
 			"useless", "benefit", "drawback", "example" };
@@ -45,45 +48,7 @@ public class DataParser {
 		outputFR = path + "data//log//all-feature-requests.txt";
 	}
 
-	public static void groupTrainData(String outputDir, String targetFileName)
-			throws FileNotFoundException, UnsupportedEncodingException {
-		exportDir = outputDir;
-		loadTaggedFRFile(targetFileName);
-		readFileByLines();
-	}
-
-	public static void loadTaggedFRFile(String fileName)
-			throws FileNotFoundException, UnsupportedEncodingException {
-		// propertiesFile = new File(fileName);
-		InputStreamReader fReader = new InputStreamReader(new FileInputStream(
-				fileName),"UTF-8");
-		reader = new BufferedReader(fReader);
-		}
-
-	public static void readFileByLines() {
-
-		try {
-			String tempString = null;
-			int line = 1;
-
-			while ((tempString = reader.readLine()) != null) {
-
-				FeatureUtility.splitByEqual(tempString, line, true, true);
-				line++;
-
-			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e1) {
-				}
-			}
-		}
-	}
+	
 
 	public static Instances readIntoFeatureRequests(String targetFileName, String option)
 			throws Exception {
@@ -114,6 +79,16 @@ public class DataParser {
 		return data;
 
 	}
+
+	public static void loadTaggedFRFile(String fileName)
+			throws FileNotFoundException, UnsupportedEncodingException {
+		// propertiesFile = new File(fileName);
+		InputStreamReader fReader = new InputStreamReader(new FileInputStream(
+				fileName),"UTF-8");
+		reader = new BufferedReader(fReader);
+		}
+
+
 
 	private static Instances createWekaInstances() throws Exception {
 		Instances data;
@@ -161,16 +136,16 @@ public class DataParser {
 	}
 
 	// TODO Auto-generated method stub
-	public static Instances buildFirstDataSet(Instances data, int numAttributes, String option) {
+	public static Instances buildBooleanDataSet(Instances data, int numAttributes, String option) {
 
 		constructLabelArray(tagNames);
 
 		ArrayList<String> bool = new ArrayList<String>();
-		bool.add("true");
 		bool.add("false");
+		bool.add("true");
 
 		ArrayList<Attribute> attributeList = new ArrayList<Attribute>();
-		;
+		
 
 		for (int i = 0; i < numAttributes - 1; i++) {
 
@@ -181,6 +156,10 @@ public class DataParser {
 				attributeList.add(new Attribute(Integer.toString(i+1), bool));
 			}
 		}
+		
+		//add confidence rank
+		
+		//attributeList.add(new Attribute("priority"));
 
 		attributeList.add(new Attribute(labelName, labelArray));
 
@@ -192,9 +171,9 @@ public class DataParser {
 		ListIterator<Instance> list = data.listIterator();
 		double[] vals;
 		while (list.hasNext()) {
-
 			Instance item = list.next();
-			vals = constructAttributeValues(item, data);
+			vals = constructAttributeValues(item, data); 
+			
 			dataset.add(new DenseInstance(1.0, vals));
 		}
 
@@ -243,8 +222,9 @@ public class DataParser {
 		vals[28] = fr.getMatchIsNotGOOD(i);
 		vals[29] = fr.getMatchIsBAD(i);
 		vals[30] = fr.getMatchIsNotBAD(i);
-
-		vals[31] = labelArray.indexOf(fr.getLabel(i));
+		vals[31] = fr.getNumNNP(i);
+		
+		vals[32] = labelArray.indexOf(fr.getLabel(i));
 		return vals;
 	}
 
@@ -283,7 +263,8 @@ public class DataParser {
 		attributeList.add(new Attribute("matchIsNotGOOD"));
 		attributeList.add(new Attribute("matchIsBAD"));
 		attributeList.add(new Attribute("matchIsNotBAD"));
-
+		attributeList.add(new Attribute("numNNP"));
+		
 		attributeList.add(new Attribute("tag", labelArray));
 
 		return attributeList;
@@ -335,6 +316,7 @@ public class DataParser {
 				try {
 					reader.close();
 				} catch (IOException e1) {
+					e1.printStackTrace();
 				}
 			}
 		}
@@ -462,6 +444,7 @@ public class DataParser {
 			fr.addMatchIsNotGOOD((int) nlpValues[21]);
 			fr.addMatchIsBAD((int) nlpValues[22]);
 			fr.addMatchIsNotBAD((int) nlpValues[23]);
+			fr.addNumNNP(nlpValues[24]);
 
 			String subject = "null";
 			String action = "null";
@@ -573,6 +556,7 @@ public class DataParser {
 			fr.addMatchIsNotGOOD((int) nlpValues[21]);
 			fr.addMatchIsBAD((int) nlpValues[22]);
 			fr.addMatchIsNotBAD((int) nlpValues[23]);
+			fr.addNumNNP(nlpValues[24]);
 
 			String subject = "";
 			String action = "";
@@ -664,6 +648,84 @@ public class DataParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+
+
+	public static void constructFeatureRequestListFromNonTag() {
+		try {
+
+			String tempString = null;
+			ArrayList<String> oneFeatureRequest = new ArrayList<String>();
+
+			int line = 1;
+			while ((tempString = reader.readLine()) != null) {
+				// parse oneFeatureRequest when line is empty
+				if (tempString.trim().length() == 0) {
+					if (!oneFeatureRequest.isEmpty()) {
+						boolean added = tagOneFeatureRequest(oneFeatureRequest, line);
+						oneFeatureRequest = new ArrayList<String>();
+						if (added)
+							line++;
+					}
+					continue;
+				}
+				oneFeatureRequest.add(tempString);
+			}
+
+			// parse the last one
+			if (!oneFeatureRequest.isEmpty()) {
+				boolean added = tagOneFeatureRequest(
+						oneFeatureRequest, line);
+				oneFeatureRequest = new ArrayList<String>();
+				if (added)
+					line++;
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		
+		
+	}
+
+
+
+	private static boolean tagOneFeatureRequest(ArrayList<String> oneFeatureRequest, int line) throws IOException {
+		String title = oneFeatureRequest.get(0);
+		FuzzyPredictorPMAMopidyActivemqAspectj fp = new FuzzyPredictorPMAMopidyActivemqAspectj();
+		System.out.println("\n\ntitle="+title);
+		autoTagBuffer.append("\n\ntitle="+title+"\n");
+		ArrayList<Sentence> sentences = new ArrayList<Sentence>();
+		
+		for(int i = 1; i < oneFeatureRequest.size();i++){
+			
+			Sentence sentence = new Sentence();
+			sentence.setResult(oneFeatureRequest.get(i));
+			sentences.add(sentence);
+			
+		}
+		
+		FeatureRequestOL fr = new FeatureRequestOL("", title, null, sentences);
+		FeatureRequestOL loadedFR = DataParser.constructSFeatureRequestOL(fr);
+		
+		for(int i = 0; i < loadedFR.getNumSentences(); i++){
+        	int predict = fp.predictTagIndex(null,null,fr, i);
+        	String tag = RequestAnalyzer.tagNames[predict];
+        	autoTagBuffer.append(tag+"="+fr.getSentence(i)+"\n");
+        	System.out.println(tag+"="+fr.getSentence(i));
+        }
+		
+		
+		return true;
 	}
 
 }
