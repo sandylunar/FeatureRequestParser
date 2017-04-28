@@ -29,7 +29,7 @@ public class RequestAnalyzer {
 	static String outputFile = "resource//precision_results_non-text.txt";
 	static boolean printResult = false;
 	static String[] rawAttributeNames;
-	public static String[] tagNames = new String[] { "explanation", "want", "useless", "benefit", "drawback",
+	public static String[] tagNames = new String[] { "explanation", "intent", "trivia", "benefit", "drawback",
 			"example" };
 	public static double[] tagWeights = {5,1,6,2,3,4};
 	

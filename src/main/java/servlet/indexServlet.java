@@ -93,7 +93,7 @@ public class indexServlet extends HttpServlet {
 
         int countWant = 0;
         for (String tag : tagNames) {
-            if (tag.equalsIgnoreCase("want"))
+            if (tag.equalsIgnoreCase("intent"))
                 countWant++;
         }
 
@@ -104,7 +104,7 @@ public class indexServlet extends HttpServlet {
             ArrayList<String> tagSets = new ArrayList<>();
             int useless = 0;
             for (String tag : tagNames) {
-                if (tag.equalsIgnoreCase("useless")){
+                if (tag.equalsIgnoreCase("trivia")){
                     useless = 1;
                     continue;
                 }
@@ -114,7 +114,7 @@ public class indexServlet extends HttpServlet {
                 }
             }
             if (1 == useless){
-                tagSets.add("useless");
+                tagSets.add("trivia");
             }
             root = new Node("title", loadedFR.getTitle());
             Iterator<String> it = tagSets.iterator();
@@ -141,7 +141,7 @@ public class indexServlet extends HttpServlet {
             int useless = 0;
             ArrayList<String> tagSets = new ArrayList<>();
             for (String tag : tagNames) {
-                if (tag.equalsIgnoreCase("useless")){
+                if (tag.equalsIgnoreCase("trivia")){
                     useless = 1;
                     continue;
                 }
@@ -151,17 +151,17 @@ public class indexServlet extends HttpServlet {
                 }
             }
             if (1 == useless){
-                tagSets.add("useless");
+                tagSets.add("trivia");
             }
-            int index = tagNames.indexOf("want");
+            int index = tagNames.indexOf("intent");
 
             root = new Node("title", loadedFR.getTitle());
-            Node want = new Node("want", loadedFR.getFullSentence(index).toString());
+            Node want = new Node("intent", loadedFR.getFullSentence(index).toString());
 
             Iterator<String> it = tagSets.iterator();
             while (it.hasNext()) {
                 String tag = it.next();
-                if (tag.equals("want"))
+                if (tag.equals("intent"))
                     continue;
 
                 Node node;
@@ -194,7 +194,7 @@ public class indexServlet extends HttpServlet {
                 System.out.print("\n");
             }
             // 合并无want的block
-            ArrayList<Integer> wantList = FeatureUtility.getIndexList(tagNames, "want");
+            ArrayList<Integer> wantList = FeatureUtility.getIndexList(tagNames, "intent");
             System.out.println("wantList-------");
             for (int i : wantList) {
                 System.out.println(i + " ");
@@ -242,26 +242,26 @@ public class indexServlet extends HttpServlet {
                     for (int j = i; j < block.size(); ) {
                         ArrayList<Integer> want = new ArrayList<>();
                         // Wantxx[Want,$]
-                        if (tagNames.get(block.get(i)).equalsIgnoreCase("want")) {
+                        if (tagNames.get(block.get(i)).equalsIgnoreCase("intent")) {
                             System.out.println("want start-----");
                             want.add(block.get(i));
                             // find next want
                             int next = j + 1;
                             for (; next < block.size(); next++) {
-                                if (tagNames.get(block.get(next)).equalsIgnoreCase("want")) {
+                                if (tagNames.get(block.get(next)).equalsIgnoreCase("intent")) {
                                     break;
                                 }
                                 want.add(block.get(next));
                             }
                             System.out.println("next is --->" + next);
-                            j = next + 1;
+                            j = next;
                             wantNode.add(want);
                         }
                         // xx[Want,$]
                         else {
                             int afterWants = 0;
                             for (int k = j; k < block.size(); k++) {
-                                if (tagNames.get(block.get(k)).equalsIgnoreCase("want")) {
+                                if (tagNames.get(block.get(k)).equalsIgnoreCase("intent")) {
                                     afterWants++;
                                 }
                             }
@@ -269,7 +269,7 @@ public class indexServlet extends HttpServlet {
                                 ArrayList<Integer> split = new ArrayList<>();
                                 int num = 0;
                                 for (int k = j; k < block.size(); k++) {
-                                    if (tagNames.get(block.get(k)).equalsIgnoreCase("want")) {
+                                    if (tagNames.get(block.get(k)).equalsIgnoreCase("intent")) {
                                         split.add(num);
                                         num = 0;
                                         if (k == block.size() - 1) {
@@ -316,11 +316,11 @@ public class indexServlet extends HttpServlet {
                             } else {
                                 for (; j < block.size(); j++) {
                                     want.add(block.get(j));
-                                    if (tagNames.get(block.get(j)).equalsIgnoreCase("want")) {
+                                    if (tagNames.get(block.get(j)).equalsIgnoreCase("intent")) {
                                         break;
                                     }
                                 }
-                                if (j == block.size() && !tagNames.get(block.get(j - 1)).equalsIgnoreCase("want")) {
+                                if (j == block.size() && !tagNames.get(block.get(j - 1)).equalsIgnoreCase("intent")) {
                                     ArrayList<Integer> tmp = wantNode.get(wantNode.size() - 1);
                                     tmp.addAll(want);
                                     wantNode.set(wantNode.size() - 1, tmp);
@@ -346,18 +346,18 @@ public class indexServlet extends HttpServlet {
             for (ArrayList<Integer> want : wantNode) {
                 String wantStr = "";
                 for (int w : want) {
-                    if (tagNames.get(w).equalsIgnoreCase("want")) {
+                    if (tagNames.get(w).equalsIgnoreCase("intent")) {
                         wantStr = loadedFR.getFullSentence(w).getOrigin();
                         System.out.println("wantStr--->" + wantStr);
                     }
                 }
-                Node wNode = new Node("want", wantStr);
+                Node wNode = new Node("intent", wantStr);
                 ArrayList<String> tagSet = new ArrayList<>();
                 int useless = 0;
                 ArrayList<String> tagList = new ArrayList<>();
                 for (int tagIndex : want) {
                     tagList.add(tagNames.get(tagIndex));
-                    if (tagNames.get(tagIndex).equalsIgnoreCase("useless")){
+                    if (tagNames.get(tagIndex).equalsIgnoreCase("trivia")){
                         useless = 1;
                         continue;
                     }
@@ -366,13 +366,13 @@ public class indexServlet extends HttpServlet {
                     }
                 }
                 if (1 == useless){
-                    tagSet.add("useless");
+                    tagSet.add("trivia");
                 }
                 Iterator<String> it = tagSet.iterator();
                 while (it.hasNext()) {
                     String tag = it.next();
                     System.out.println(tag);
-                    if (tag.equals("want"))
+                    if (tag.equals("intent"))
                         continue;
                     Node node;
                     ArrayList<Integer> indexList = FeatureUtility.getIndexList(tagList, tag);

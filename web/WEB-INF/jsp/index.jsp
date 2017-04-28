@@ -15,8 +15,9 @@
     <title>FRP</title>
     <!-- Bootstrap -->
     <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
-    <!--引入wangEditor.css-->
-    <link rel="stylesheet" type="text/css" href="/resources/css/wangEditor.min.css">
+    <%--<!--引入wangEditor.css-->
+    <link rel="stylesheet" type="text/css" href="/resources/css/wangEditor.min.css">--%>
+    <link rel="stylesheet" href="/resources/font-awesome-4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="/resources/css/jquery.treeview.css"/>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
