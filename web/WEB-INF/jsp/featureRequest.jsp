@@ -12,7 +12,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <title>FRP</title>
+    <title>FRA</title>
     <!-- Bootstrap -->
     <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
     <%--<!--引入wangEditor.css-->
@@ -27,7 +27,7 @@
     <script type="text/javascript" src="/resources/js/jquery.treeview.js"></script>
 
     <script type="text/javascript" charset="utf-8" src="/resources/js/ueditor.config.js"></script>
-    <script type="text/javascript" charset="utf-8" src="/resources/js/ueditor.all.js"> </script>
+    <script type="text/javascript" charset="utf-8" src="/resources/js/ueditor.all.js"></script>
     <!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
     <!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
     <script type="text/javascript" charset="utf-8" src="/resources/lang/en/en.js"></script>
@@ -56,7 +56,9 @@
                     <!-- 加载编辑器的容器 -->
                     <script id="container" name="content" type="text/plain"></script>
                 </div>
-                <button class="btn btn-info" type="button" onclick="confirm()">Submit</button>
+                <div style="margin: 0 auto;width: 60px">
+                    <button class="btn btn-info" type="button" onclick="confirm()">Submit</button>
+                </div>
             </form>
         </div>
         <div class="col-md-6">
@@ -75,11 +77,11 @@
 
 <script type="text/javascript">
     var ue = UE.getEditor('container', {
-        initialFrameHeight : 300,
-        initialFrameWeight : 524,
-        enableContextMenu : false,
-        elementPathEnabled : false,
-        wordCount : false
+        initialFrameHeight: 300,
+        initialFrameWeight: 524,
+        enableContextMenu: false,
+        elementPathEnabled: false,
+        wordCount: false
     });
 
     function confirm() {
@@ -92,23 +94,23 @@
         var txt = ue.getContentTxt();
         //alert(html);
         /*$.post('index.do', {
-            name: name,
-            FRTitle: title,
-            FRDes: html
-        }, function (data) {
-            //alert(data);
-            alert("Block数目："+data.bNum+"\n\nSentence数目："+data.sNum);
-            $('ul').html(data.output);
-            $("#tree").treeview();
-        });*/
+         name: name,
+         FRTitle: title,
+         FRDes: html
+         }, function (data) {
+         //alert(data);
+         alert("Block数目："+data.bNum+"\n\nSentence数目："+data.sNum);
+         $('ul').html(data.output);
+         $("#tree").treeview();
+         });*/
         $.ajax({
-            url: 'index.html',
+            url: 'featureRequest.html',
             type: "POST",
-            data: {name:name,FRTitle:title,FRDes:html},
+            data: {name: name, FRTitle: title, FRDes: html},
             //timeout: 30000,
             dataType: "json",
             success: function (data) {
-                alert("Block数目："+data.bNum+"\n\nSentence数目："+data.sNum);
+                alert("Block数目：" + data.bNum + "\n\nSentence数目：" + data.sNum);
                 $('ul').html(data.output);
                 $("#tree").treeview({
                     collapsed: data.collapsed

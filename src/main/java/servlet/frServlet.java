@@ -22,7 +22,7 @@ import org.json.JSONObject;
 /**
  * Created by zzyo on 2017/3/16.
  */
-public class indexServlet extends HttpServlet {
+public class frServlet extends HttpServlet {
 
     ArrayList<Integer> tmp = new ArrayList<>();
     ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
@@ -408,7 +408,7 @@ public class indexServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/jsp/index.jsp");
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/jsp/featureRequest.jsp");
         rd.forward(request, response);
     }
 }

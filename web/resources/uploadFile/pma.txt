@@ -1,0 +1,366 @@
+﻿title=Add global configuration to remove DELETE button from SQL tab
+want=I would appreciate a feature that allows to control some User Interface functionality from phpMyAdmin. 
+want=In particular, I would like to be able to globally remove the DELETE button from the SQL tab when exploring a table. 
+drawback=It seems too easy to accidentally click that button and press Go before realizing what you're doing. 
+drawback=I don't wish to have "CODE-SQL" ever displayed on our production systems.
+example=Maybe something like CODE-cfg?
+useless=Thanks in advance for your consideration.
+
+title=Why GET parameters in URL ? (better are POST)
+useless=Hello,
+drawback=I would like to know why phpMyAdmin inserts various GET parameters in the URL (including a token). 
+want=I think it would be more appropriate (for security and privacy) to have POST parameters.
+explanation=Does it exist a way to choose POST parameters and remove all GET parameters from the URL ?
+useless=I thank you for future answer.
+useless=Bill
+
+title=Store composer.lock in git for releases
+want=We should store composer.lock for NUM-VERSION and newer releases. 
+benefit=This would allow to reproduce build in future and it would also provide us information which composer package versions were shipped in the release.
+example=There seems to be some hints here:LINK-HTTP
+
+title=Database analyzer
+drawback=There are many people who may not have the knowledge of concepts like normal forms and end up creating bad schemas and databases. 
+want=It will be great to have a database analyzer which can suggest how can a schema be modified in order to reduce redundancies and optimize database usage.
+
+
+title=Include interface language in the error report
+want=The error report should include user interface language to be able to catch locale specific errors such as NUM-BUGID
+
+title=.htaccess protection
+want=It would be nice for MyPHPAdmin can allow "FILE-htaccess" creations.
+
+
+title=Link to get real row counts of all the views in a db, at once
+useless=Hi,
+want=The Db FILE-PHP should provide an option to fetch all the Real Row counts (for views at once).
+explanation=The placement of the link can be next to the 'With Selected:' div below the tables and views listing.
+want=Should we include a icon for this or a simple link, like shown in the screenshot attached, is enough ?
+
+title=Display the CREATE TABLE statement like HeidiSQL
+useless=I used HeidiSQL before, but it don't support Linux, so I try PMA, I found PMA is powerful.
+want=But I think it's more convenient for users if there is a quick way to view the CREATE TABLE and DATABASE statement like HeidiSQL.
+
+title=Auto Completion for SQL statements
+want=I was using PMA writing long JOIN statements when I realised it'd be really cool to have autocompletion in PMA where ever I write SQL statements. 
+want=Initial goal should be to implement auto completion for standard keywords, but then later also based on selected database (For example, take into account the tables, and their structures present in the database) to provide better suggestion for auto completion. 
+benefit=It'd be really helpful in case of huge JOIN statements.
+useless=I'm willing to write this, if you like the idea.
+useless=I already miss contributing to PMA :)
+
+
+
+title=Database images : show images preview.
+useless=Hello Dear phpMyAdmin team.
+want=I have little idea about images in table, I dont know if it's possible now,but what about show images in php table ?
+explanation=I mean if someone save name of file into database, it would be also possible to add relative path to the image and show him direct in db.
+example=For example I will add new record with name FILE-IMAGE. 
+explanation=In the structure of table I can specify the path in form of : CODE-DB. 
+explanation=This is just example and I think it can be interesting, because many time I or everyone else want to see how this picture looks and I must to search for it for long time throught many tables to found the path.
+benefit=I think it will be not easy, but it can save time of many users,admin or developers for this, who will save file name of picture or file into db.
+useless=Thanks a lot and I hope my post isn't just wasting of your time.
+
+
+title=Automatically save new table after naming first column
+explanation=Naming a table is not always a users' first action when creating a new table, sometimes its the last before clicking Save. 
+explanation=If a user leaves their station or visits another window or tab while creating a table, the inactivity clock counts down. 
+drawback=If the user doesn't press Save before the countdown expires, the user loses everything, has log in again and re-enter whatever details had already been entered prior to the countdown expiring. 
+want=It would be greatly appreciated by all users if a new table was automatically saved after naming the first column regardless of whether the user has entered a table name or not. 
+explanation=If no table name has been entered when the countdown expires, automatically save it as 'table1' perhaps. 
+benefit=So if the user has NUM-Digital column names entered when the countdown expires, the user won't have to re-enter everything again after logging in again.
+
+
+title=Access to Add columns text-box and Go button when creating table
+explanation=When creating a table with a large number of columns in the 'Structure' window, the 'Structure' window allows NUM-Digital columns to be created without having to scroll. 
+explanation=The window begins scrolling automatically after NUM-Digital columns. 
+drawback=However, after adding a NUM-Digital and subsequent columns, the 'Add columns' text-box and 'Go' button at the top of the window are not visible. 
+drawback=With each subsequent new column added (if adding 1 column at a time), the user has to scroll back to the top of the 'Structure' window to click the Go button to add 1 or more new columns. 
+want=It would be immensely helpful (user-friendly and time saving) if the area containing the Table name, Add columns text-box and Go button scrolled within the window.
+
+
+title=Feasture request: test an SQL query without executing it
+explanation=I usually test my SQL queries in phpmyadmin before I use them to see if they will execute or produce an error, because I have forgotten something - (the devil usually hide it ugly face in the details when it comes to programming)
+want=Therefore I would like to request that a small button saying "TEST SQL" to be added in the SQL section of phpmyadmin where it is possible to test an SQL query without executing it - the test should look and fell exactly as if the "GO" button was clicked except that the sql query shouldn't be executed for real.
+useless=Is this a feature you would consider to add ?
+
+
+title=autocreate phpmyadmin tables
+want=it would be nice to specityonly pma database in config and then the tables would be created automatically no table set config to be auto create
+
+
+
+title=Drag and Droppable QueryBuilder
+useless=Hi everyone, 
+explanation=I planned to add a new query building format such as build queries using logical operators like AND,OR and use them as graphical operators like drag and droppable.
+explanation=When try to type the query there may be errors in column name, table name. 
+explanation=So, we use drag and droppable labels. 
+explanation=When we drop the label it will automatically generate the query
+example=We are currently working on this,See LINK-HTTP
+useless=Any suggestion???
+
+
+title=Autofill and more flexible sql tab
+useless=Hi, Developers. 
+useless=Thanks you for this brilliant project. 
+want=Make auto fill to finish table names or column. 
+example=Like tab do inside bash, finishing dir and file names. 
+benefit=It will be really helpful.
+
+
+title=show database creation date
+want=show database creation date, ability to sort (for example, latest first) on the database list page.
+benefit=It would be great to have the database creation date on the database list in standard view, or when you enable statistics view.
+
+
+title=option to disable JS-Windows for errors
+want=Please add an option to redisplay the "old" error-div if something failed.
+drawback=If you have a long (text) sql-query failing, you get an totally undersized js-error dialog which is hard to read and closes on an accidential click.
+want=I suggest: add an div on top of the page, containing the error, have the query-section (with inline) under it. 
+benefit=Having this, you can see the error on full monitor width, second you can change the query to make it work and maybe you can put a structured output above it. 
+explanation=Sometimes only a quote or brace is missing, which you must find.
+
+
+title=Adding an extra icon next to column names for use in SQL editor
+want=It would be useful adding an icon next to column names in the left tree to add it's name into the sql editor at the right pane.
+explanation=The "Blue Column Icon" could also be replaced with an "arrow" or a "SQL text" icon to do this job.
+useless=Thanks ;)
+
+
+title=Search for a database and navigate to it
+want=We have a lot of databases (larger than NUM-Digital), and would love to have a way to search for a specific database on the list of databases view.
+
+
+title=Possibility to use FILE-SQL as SQL file upload patch, browse in local server user files and using url as SQL file location.
+drawback=Right now SQL file can only be uploaded from your computer 
+explanation=which means if you have slow internet connection or server further away from your physical location using previous uploading with FTP or any other means could speed up and quarantee quality of SQL file rather then having it getting interrupted before uploading finishes.
+explanation=My issue came up with United States, Kansas City located server and my own location in Northen Europe, Estonia, with file about NUM-Digital Mb large.
+
+
+title=Find and Replacing column wise
+want = Usually I am using PhpMyAdmin for managing may MySQL databases, I think it is better to have "Find and Replace" for data of table's columns.
+benefit=If we can select a column and the find particular word or string and then replace with some other string through GUI, that will be very helpful.
+explanation=But I was wondering , this feature is available or not. 
+useless=Did I miss something related to "find and replace feature" or please give your suggestion to this.
+useless=Best Regards,
+useless=Isuru Madhushankha
+
+
+title=Drop dialog from insert into table ajaxification
+drawback=There seems to be no point in having a jQuery UI dialog for the insert into table functionality on FILE-PHP as it looks ugly, 
+drawback=and brings no extra efficiency when compared to the ajax-loaded pages.
+
+
+title=Structure Info: weird header
+explanation=The Row Statistics table has Statements and Value headers. 
+explanation=What's Statements supposed to be? 
+drawback=I think there's no need for that header.
+explanation=Same for Space usage.
+
+
+title=BSD support in FILE-PHP
+drawback=The file FILE-PHP have support only for Linux and Windows, 
+want=I would like to have support added for *BSD operating systems too.
+
+
+title=export templates
+drawback=when exporting tables from database, i have to check the same options again and again
+want=i would like to save which tables to export and which options should be checked
+
+
+title=Generate SQL query to use later
+useless=Hello,
+explanation=Many times I want to add a new column, change another column, and add an index for the same table.
+explanation=But, once the table is already large, all these changes should be made at the same time (same query).
+drawback=It's hard to me to make the SQL query manually.
+want=so, phpMyAdmin would help me a lot if I could just "generate" the SQL for each change BEFORE applying. 
+drawback=Unfortunately, I must have a table for tests, so that I test there, and copy the generated query after it applied there, and then I accommodate it to the table I want.
+benefit=So, if phpMyAdmin had this feature, I could just "simulate" the queries, and then I join all of them manually into a single "ALTER TABLE" query (adding commas).
+
+title=designer settings lost on navigate
+explanation=i change settings on designer toolbar,but when i navigate to other page and return back to designed, the buttons are set back to default settings. 
+drawback=it's very annoying to click the buttons again and again.
+drawback=also when i drag and drop the tables and then accidentally click on edit table button instead of collapse table button, the table layout is lost, 
+want = it should auto save every minute or so
+
+
+title=Pre-Synchronize structure and data separately
+explanation=Synchronizing everything with a remote database can take some time before even producing results. 
+want=As the Structure part of synchronizing seems to take the majority of the time, consider having additional options to be able to run Structure Synchronization and Data Synchronization separately.
+
+
+title=Please, remove the frameset
+explanation=This is actually a feature request more than a bug report.
+useless=Lets face it.
+drawback=The frameset of phpmyadmin is not pretty.
+explanation=How many websites nowadays do you find that uses framesets?
+explanation=What is the main reason there are so few?
+want=I suggest a switch to html5 with the nice CODE-XML prefix.
+explanation=Sometimes, I want to shift-click a link in the right frame to get another window so I can have different tables in different windows.
+drawback=Then, the resulting window will miss the left frame.
+useless=I also want to give positive feedback: thanks for phpmyadmin, a useful application that I use daily.
+
+
+title=Add Ajax For Edit SQL popup
+useless=Hi phpMyAdmins,
+want=I would like to propose a UI improvement using AJAX. 
+useless=I am not sure if this has been already proposed, but I think it is not and I would like to work on it as GSoC NUM-Digital work if approved.
+explanation=Under the Browse Section, when a user clicks on the edit button, there's a popup window. 
+drawback=With the current multitabbed browsers, it is sometimes very confusing for me to find my actual edit popup window. 
+want=I would propose for a AJAXified textarea to accept input from the textarea, and do a refresh for the div that shows the resultset. 
+useless=I wish to provide more details in my proposal.
+useless=Look forward to your reply,
+useless=Thank you,
+useless=M. Ravi
+useless=EMAIL
+
+
+title=Synchronize: Show configured servers in select
+explanation=I am using multiple pre-configured servers in the configuration, yet the Synchronize tool does not use them.
+want=It would be nice if they could be included there, so it doesnt has to be entered manually.
+
+
+title=Option to restrict access to tabs
+explanation=We are offering a central PhpMyAdmin installation for our hosting customers which we locked down using the configuration.
+drawback=Unfortunately, there is no option to disable certain tabs.
+
+
+title=Tuning recommandation
+want=PhpMyAdmin may generate some tuning recommandation like mysqltuner or tuning-primer output
+
+
+
+title=Let group tables or views into "folders"
+explanation=Very often there's a large number of tables inside one database.
+example=For example, NUM-Digital to NUM-Digital tables may control site forum, NUM-Digital tables may refer to search engine, etc.
+drawback=Moving logical groups of tables into separate databases is often bad solution, cos: 1) complicates app portability, 2) many host providers limit DB number.
+explanation=Sometimes there's table groups based on app logic.
+example=For example, some tables may contain "abstract" data, that must be accessible for daily customers only for reading.
+drawback=During operations like GRANT privileges, Export and Import selecting those groups manually over and over again is inconvenient and error-prone.
+suggestion=The suggestion is to support "packing" similar tables into new PMA object, "folder" or "directory", stored on pma_db level.
+explanation=A folder can contain tables or views and other folders.
+explanation=When folder is "pma current object":
+explanation=Only folders or tables or views directly nested in it are visible on "Structure" tab.
+explanation=Selecting (checking on) folder on "Structure" tab for group operation means: do that operation for all its (direct and indirect) child objects.
+explanation=For organizing existing databases, support moving tables between folders.
+explanation=phpMyAdmin is 1-panel manager, so move interface may be:
+explanation=Maybe, the term "folder" should be replaced by "directory" or "table group".
+
+title=Angular links not saved in Designer
+explanation=When clicking on Angular links in Designer, saving, going anywhere else in phpMyAdmin, returning in Designer the links return to direct links.
+
+
+title=Dry Run feature
+want=I'd like to see a dry run feature. 
+explanation=A way to show affected rows without actually affecting them. 
+want= As a newbie developer trial and error is sometimes necessary and dry running the code would be a great feature to have in that regard.
+
+
+title=Relation view: multi-column constraints not supported
+explanation=In phpMyAdmin, there's no possibility to add, edit or view foreign key constraints consisting of more than one column.
+
+
+
+
+title= Database name above list of tables in left pane
+explanation= Previous versions of phpmyadmin had the name of the current database just above the list of tables in the left pane. 
+want = restore this or add an option in the config file to restore this
+drawback=This was convenient for me to click out of habit to return to the main view of the database.
+
+
+
+title= Improved view support
+want= Add support for using the "browse" and "drop" function for views
+
+
+
+title= Improved view support
+closed_time = 2013-06-11
+explanation= in NUM-VERSION, databases which start with the same names are grouped together. 
+want =It would be nice if it could be turned off in FILE-PHP to get the behavior from the versions less then NUM-VERSION
+explanation= in NUM-VERSION, the number of rows in the table detail view  are given in approximate numbers (For example, NUM-Digital k for NUM-Digital). 
+want =I would also appreciate if it could be set back to the  behavior in previous versions.
+explanation= the section 'MySQL settings' at the bottom seem to refer to general MySQL issues, less to personal configuration settings. 
+benefit = So it might fit better into a separate file.
+benefit= a separate changelog only for the FILE-PHP would be nice.
+drawback = If someone updates very frequently (like I do) it's much effort to find all the changes between the FILE-PHP in the former version and the new one.
+
+
+title= OPTIMAL MY.INI VALUES
+want= The mysql server runtime status sheet should include a function to determine the best my.ini values which can be calculated.
+benefit= phpmyadmin should show these and other values maybe in other color (red) to give some hints for better <FILE-SYS> settings.
+explanation= runtime information: Key read requests NUM-Digital  Key reads NUM-Digital  Key write requests NUM-Digital  Key writes NUM-Digital
+
+
+
+title= Favorite SQL statements list
+want= A really useful feature would be a list where one can simply save SQL statements one often uses in a database 
+example = like for truncatin multiple tables, delete specific records from tables, a special select with multiple joins
+solution = This should be easily possible using cookies.
+
+
+title= Import local sql dump
+want= An option where the client can upload the sql dump via ftp and choose a server path to the file in phpmyadmin and import it, regardless of size.
+explanation = This would eliminate the need to upload the file, as it would already be present on the server.
+
+
+title= Improve popup window titles (query window, theme selector)
+want= It would be nice if this could be standardized. 
+want=It would be very nice if both of these windows could work like the main window with regard to CODE-cfg and CODE-cfg.
+
+
+title= Blob: Show hex
+want= (add an option to) show blob fields as hexadecimal values instead of as 'weird' characters
+
+
+title= bookmarks listbox on left panel
+want = It would be great if the bookmarks dropdown listbox is in a more accessible location, like on the left panel.
+
+
+title= OLD_PASSWORD() option in change password
+want= It would be very useful if phpMyAdmin had the option to use the old password algorithm while setting up new users or editing them.
+solution= To solve this, you have to type (quoting from the mysql manual):
+
+
+
+title= Add "use" / "create database" to export
+want= It would be useful if the export had an option to add  a "use DB_NAME" to the top of the export of either a table or a whole database.
+want= It would also be useful if there were an option to  add "create database DB_NAME" to the database export option.
+
+
+title= mysqli Support
+want= How about mysqli support?
+
+
+title= Database Dump; escape sql keywords
+want= when dumping, if a table name or field or anything is an SQL keyword, wrap it in backticks
+drawback= when I dumped my database, I found SQL errors in creating some tables - that's because I had chosen poor names for fields in tables
+
+
+
+title= Side Nav Icons (Select Table)
+want= Please add an option to display a Select icon in addition to the normal Browse icon.
+
+
+title=Allow exporting to be based off of a sql statement
+want= It would be nice to allow a SQL statement in the export area.
+explanation=  I only want to backup a certain part of the database based off of some SQL statement. 
+explanation= I then manipulate the fields that need manipulated. 
+explanation= Something went wrong, I delete the fields based off of the same SQL statement and then want to load the backup i did from the SQL statement.
+
+
+title=Session timeout variable needed
+want= I'd like it not to timeout so quickly
+
+
+title=Differentiate what user failed
+explanation=We currently fire same error whether "normal" user or control user connecting failed. 
+want=There should be at least different message.
+
+
+title=Add "not like" as a Search function
+want=It would be helpful to have a "not like" function when matching strings using the pma Search feature.
+
+
+title= database structure diagram
+want=It would be very useful to automatically generate a structure diagram of the database in pdf or html (tables)
+

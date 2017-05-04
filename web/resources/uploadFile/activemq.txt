@@ -1,0 +1,289 @@
+﻿title=JDBC support for Firebird database
+painpoint=Support does not exist for the Firebird database.
+reference=Information can be found at "web-page-link" and the JDBC mailing list is at "Email-address"
+solution=It shouldn't be difficult, Firebird is an open enterprise level database, so it should have all the features you require.
+
+title=Add Postgres Support
+want=The JDBC Message Store should support Postgresql
+
+title=Allow JDBC persistence adapter to use custom prefixes
+want=It would be nice to support configurable prefix for these tables, so that multiple standalone brokers can use a single database.
+explanation=Currently table names are hardcoded in Statements.java.
+
+title=create a security plugin using the Acegi framework
+reference="web-page-link"
+
+
+title=Outbound Resource Adapter
+want=Create a JCA Outbound Resource Adapter (RAR)
+
+title=Allow a client to choose if non transacted persistent message should use sync or async send.
+want=I propose that we add a ConnectionFactory property that controls if non-transacted persistent messages use async sends to the broker.
+explanation=ActiveMQ currently sends all messages to the broker using an async send. 
+benefit=This allows the client send() method call to be very fast since it does not have to wait for the message to arrive at the server.
+painpoint=Unfortunately, most folks will assume that the send() method should block when sending a non-transacted persistent message.
+explanation=They will expect the send to work like JDBC operation using auto-commit.
+
+
+
+title=Automatic periodic cleanup of the JDBC database
+want=Add a periodic cleanup of the database.
+explanation= It removes expired messages and messages that been acked by all durable subscribers.
+
+title=Add MessageConsumer stop and start methods.
+want=Allow a message consumer to have a start or stop cycle.
+explanation=When stopped, messages are not delivered to the consumer until the consumer is started.
+example=Similar to how a the connection start or stop methods work except at individual consumer level.
+
+title=suppport jmDNS (Zeroconf for Java) as a way to discover brokers
+want=We should provide a plugin to allow easy location of brokers using jmDNS
+explanation=Zeroconf (Apple Rendezvous) is a standard protocol for discovering services on a network using multicast. 
+
+title=allow JMS send() to be asynchronous and not block the client
+want=In very high throughput scenarios, like market data, we may wish the JMS send() message to succeed and add the message to an internal RAM channel for dispatching down a socket at a later date, to boost the performance throughput.
+
+
+
+title=Make a custom JNDI Context to allow destinations to be browsed
+want=We can make Destinations available for browsing by tools like Hermes using a simple JNDI Context
+
+title=let producer example sleep between publishing messages
+explanation=You can now provide a -DsleepTime=xxx for the producer.
+explanation=This will cause the producer to sleep xxx ms between publishing messages.
+
+title=provide shell script to run ActiveMQ from the command line from a binary distro
+want=being able to type activemq from the command line, assuming your PATH was correct etc would be cool
+
+title=support for composite Destinations
+explanation=We would also need to watch for this in Queue based dispatching such as how we do wildcard queue dispatching
+want=When subscribing to, say, your stock portfolio on a topic it would be much better to subscribe to a single destination "Code"
+suggestion=Rather than having 3 separate subscriptions
+benefit=From the JMS Providers perspective this is much cheaper too!
+benefit=Also on the publishing side of things, if we publish to a composite queue it could provide fine grained control over different queues as an alternative to durable topics.
+explanation=so folks can explicitly browse the queues, can delete any item in the queue, can have many consumers per queue etc.
+
+title=Pooling JMS ConnectionFactory
+want=Add a pooling JMS ConnectionFactory which will use a single physical JMS Connection under the covers and use a pool of sessions to avoid creating too many physical JMS resources when using the Spring JmsTemplate or EJBs.
+
+title=support advisory messages for start/stop of consumers and producers
+want=We should generate some advisory messages when a consumer/producer start/stop so that JMS clients can monitor & see who's subscribing to what etc.
+
+title=XA support
+want=We need an XA connection implementation
+
+title=Optimise the subscription dispatching, particularly the topic hierarchy
+want=Optimise the subscription dispatching, particularly the topic hierarchy and wildcards
+benefit=Also any selector tuning would be cool
+
+title=Need a remote protocol for embedded brokers
+drawback=However, for brokers that are remote, where multicast discovery is not possible and where outbound connections are the only option, a new type of network connection is required that proivdes full multiplex message transfer from the remote location
+explanation=Typical Network connections for ActiveMQ are uniplexed - fully connectivity being established between brokers by both brokers connecting to one another.
+drawback=For brokers on the same network, this is trivial, as discovery automates the process.
+suggestion=In addition, the protocol should be based on the peer:// protocol, enabling a JMS client to create an embedded broker automatically, that uses remote network connections.
+explanation=This enables the client to publish messages, even if the transport has diconnected.
+
+title=use Derby as our default, integrated, JDBC persistence engine in the release?
+want=Maybe by default we should use Derby as the default JDBC persistence, particularly as it supports full XA.
+explanation=Then our out of the box persistence could be a combination of Derby and the Journal?
+
+title=Support demand based publishing
+want=Create a demand advisor that lets a publisher know when there is demand of the messages it can produce.
+benefit=Useful when creating the messages to be published is an expensive operation.
+
+
+title=Add Sybase support
+want=The JDBC Message Store should support Sybase
+
+
+title=Tool to display the raw message content of messages currently queued
+benefit=The raw content of messages in the queue can give a great deal of information about failing clients. 
+benefit= A tool to actively inspect such things would be very handy - exposed as part of the jmx info would be fine.
+
+title=add option to message groups to configure frequency of forcing a new consumer
+useless=This is a just a suggested feature, 
+ref=see this discussion for more details "web-page-link"
+want=The basic idea was to allow configuring a frequency (either elapsed time or message count) to force a new consumer for a given message group (similar to setting JMSXGroupSeq header to ?)
+benefit=Would help distribute the load across consumers to better protect against slow consumers, etc.
+
+title=GBeans Should allow configuration of store location
+drawback=ActiveMQ is placing its data store in the current directory - given Geronimo can be started from anywhere this is not a good idea.
+want=Instead the user should be able to configure the location of the store and this should be resolved relative to the root directory obtained from ServerInfo That defaults to var/activemq.
+reference=See: "web-page-link"
+
+
+title=Allow to "reschedule" messages
+want=However we need to be able to "reschedule" the message. 
+want=So we would like to be able to remove or change the delay after adding the message to the queue.
+explanation=We use the new delay or scheduling feature which comes with activemq 5.4.0.
+benefit=This is really cool and works out well.
+
+title=Allow ssl context configuration through spring or xbean
+want= It would be better if it was possible to configure via spring or xbean.
+explanation=amq ssl works with the <CODE-java> system properties and can be configured via SslBroker without the system properties as shown in (web-page-link)
+
+title=JMS 2.0 Support
+want=Expand the broker support to include JMS 2.0.
+benefit=The biggest impacts are going to be the client side changes to support the simplified API (It looks like "web-page-link" covers that), and the ability to share subscriptions across multiple clients.
+
+title=Exposing Session Count on the broker
+want=We thought it would be better if we can see the session count on broker in some way where we can expose that in our metrics tool if this property gets exposed as a mbean.
+benefit=Currently , The broker metrics are good to get the connection count and other metrics.
+drawback=Recently , we had an issue with the high number of sessions due to the issue in the client code in connecting to broker.
+
+
+title=Better Fault Tolerance
+example=Other queue technologies provide a manner of fault tolerance missing from AMQ message semantics.
+explanation=That is, messages can be acknowledged at any time by a client.
+drawback=Failing to do so within the messages TTL, should result in the message re-appearing on the queue so another client can re-try it.
+drawback=Reliable messaging with AMQ currently pertains to only message receipt, but in practical systems distributing work via a queue this is unsufficient semantics to ensure tolerance of faults "during" work processing.
+drawback=In that case, clients will only acknowledge a message in the event of successful processing of that message (left to the client to decide).
+drawback=If the client were to suffer a fatality during processing, the work associated with the message is left undone in the current AMQ because it cannot be re-processed.
+drawback= In these extreme (but not uncommon) fault conditions, it is not possible for the client to "re-queue" the message.
+explanation=Combining TTL, re-queue behavior (in the Broker) and INDIVIDUAL_ACKNOWLEDGE (on the client) of messages should achieve the desired increase in fault-tolerance described here.
+
+title=support AIO (or AIO4J)
+suggestion=IBM's implemented AIO4J with is a reference implementation of AIO for true asynchronous IO. 
+want=We should support this ASAP!
+painpoint=So far outbound is working in the modules/aio4j module but we've yet to support inbound.
+explanation=We have done the WireFormat refactorings so it should be pretty easy to implement this now.
+
+
+title=Time out for Durable Subscribers
+want=I propose to have an enhanced version of the createDurableSubscriber method accepting an addtional parameter with a timeout value.
+explanation=This feature comes from practical considerations.
+explanation=Imagine consumers that create durable subscribers on a broker.
+explanation= If those consumers die unexpectedly and are not revived, the durable subscription continues to exist and messages sent to the according topic will be stored persistently.
+explanation=The intended behavior on the broker side is to drop a durable subscription if no active subscriber has been connected within the given timeout value. 
+explanation=By default the feature should be turned off.
+
+title=Allow the timer to be configured (and disabled) for the async clear down of durable topic messages
+explanation=So Retroactive Consumers can receive all messages ever sent on a durable topic
+
+title=Keep-alive for ReliableTransportChannel
+explanation=A thread which periodically checks if the channels are alive by sending a special packet which must be acknowledged within a specified timeframe.
+drawback=If not, the channel will be disconnected and the standard ReliableTransportChannel will reestablish the channel.
+
+title=Add request-id and response-id headers to STOMP connect/connected handshake
+want=For the new activemq-cpp library, we need to extend the STOMP connect/connected handshake so that we get back a response-id for our response correlator.
+suggestion=To do this, we need to send something in the connect request that contains a client-defined request-id.
+suggestion=My first thought was to just reuse the message-id header, but that is typically reserved for cases when a client is expecting to acknowledge a message. 
+want=So rather than risk breaking that paradigm, I propose a new header "request-id" that is just used on the connect message.
+suggestion=When the broker receives a connect request with a request-id header, it creates a connected response with a response-id set to the request-id of the original request.
+explanation=This way the client can treat the handshake as a true request/response.
+
+title=BufferedTransportFilter or similar feature
+want=I'm considering using ActiveMQ for an app that would transfer a large number of messages over the http transport (across firewalls/internet).
+want= I would want to use async messages (i.e. useAsyncSend=true) to boost performance.
+want=Would it make sense to introduce a BufferedTransportFilter to boost performance even further(considering the fact that these messages would be traveling over the internet)ÃÂ£ÃÂ¿
+suggestion=That is, the BufferedTransportFilter would wait a configurable amount of time before "batching together" all the messages it received so far (or after some configurable limit in terms of bytes and/or number of messages) and then pass this on to the next Transport.
+suggestion=Ideally, the Transport API would have to be extended to allow for a onewayBatch(List<Object> messageBatch) method (and the default implementation would just iterate over the list and rely on the existing oneway(Object) method. 
+benefit=HttpClientTransport could then be extended to allow for a single POST to send multiple messages over the internet.
+useless=Is this something that was considered?
+useless= Or that exists in some other form that I missed while going through the sources?
+useless=I would be willing to contribute some time for implementing this if the maintainers think its a worthwhile feature to have.
+useless=Thanks,
+useless=Hernan
+
+title=add tcp keepalive, linger, tcpnodelay/disable nagle support to stomp protocol
+want=Please add TCP_NODELAY, TCP_KEEPCNT, TCP_KEEPIDLE, TCP_KEEPINTVL, and SO_LINGER to the stomp transport.
+suggestion=See "man -s 7 tcp" on linux.
+benefit=These options help ActiveMQ recognize disappeared connections outside of the application layer.
+suggestion=TCP_NODELAY is a performance option for small messages.
+
+
+
+title=Implement JSR 356 based WebSocket transport
+painpoint=The present WS transport boots up an embedded Jetty instance on its own port, which does not make sense when embedding ActiveMQ in a container-hosted application.
+want=Although not that difficult to hack together manually, there should be a supported first-party mechanism to configure a WS Stomp/MQTT endpoint when embedded in a JSR 356 compatible container.
+
+title=Support Time To Live for activemq connection that uses tcp and nio transport
+want=Add a new connection string parameter to support a time to live (expiry time) for activemq connection
+
+title=Support AMQP 0.9.1
+painpoint=ActiveMQ seems to only support AMQP 1.0 which does not have very broad adoption.
+example=For example, it is difficult to find a AMQP 1.0 client library for python.
+
+
+
+title=SpringIDE extension plugin for configuration namespace
+explanation1=This description is based on a response to a post on the Spring forums by cdupuis (see "web-page-link")
+explanation2=Out of the box Spring IDE only knows about NamespaceHandlers that are part of the Spring Portfolio.
+explanation3=Therefore Spring IDE is not able to validate the Bean Reference to a bean that would be generated by a NamespaceHandler at runtime, but not known in Spring IDE's runtime environment. 
+explanation4=This also means that amq namespace elements don't appear in the Spring or Project Explorer.
+explanation5=Because Spring IDE lives in the OSGi environment of your Eclipse instance it can't take any of your project's jar files and look for NamespaceHandlers.
+reference=Spring IDE can "learn" about any namespace by adding suppport for custom namespaces, see "web-page-link"
+
+
+title=Support cometd as a protocol
+want=I'm not sure if cometd maps to JMS well but it would be very interesting to suppport cometd as a protocol along with stomp, xmpp, rest, etc.
+benefit=I know websockets are being worked on for 5.4 and this would be awesome to add.
+benefit=I'm aware of the existing servlet that ships with activemq and with the more recent demo code using jetty that is hosted over at fuse but it would be nicer to see this rolled into the broker as a first class citizen.
+explanation=I'm opening this to see if there is any traction for this and, in the off chance that I have time, I might look into trying my hand at this.
+
+title=Request/Response Option for AJAX interface
+want=In addition to the standard publish/subscribe message handling used by the AJAX client to communicate to ActiveMQ, it would be helpful in some situations to be able to simulate a more typical request/response scenario.
+explanation=Is it performant to do this using the existing API or is there a need to develop new Javascript classes to support it?
+example=For example, one approach may be to create a new topic and message consumer in the JS client.
+explanation=Attach the consumer and send the message.
+explanation=When the response is received, the callback is notified and the consumer is discarded.
+drawback=It seems that this approach may work, but it appears very inefficient due to the number of objects created/disposed.
+
+title=allow topics in particular but also queues to have a 'namespace URI' like WS-Notification
+benefit=This would allow a real clean mapping from WS-N topics and ActiveMQ at the protocol level.
+want=We could use the namespace as a level of indirection to map to a broker, a cluster of brokers or even a particular area of a network etc. 
+solution=The namespace could be a broker's name too.
+
+
+title=Axis/JMS/ActiveMQ demo
+explanation=I have created a self-contained demo of using Axis/JMS/ActiveMQ
+explanation=James suggested that I pass it along for possible inclusion in the examples
+useless=All of the code is in the enclosed ZIP
+useless=Cheers,
+useless=Chris
+
+
+title=message type metadata exposing
+want=users may wish to see what types of messages are sent on what destinations.
+want=Similarly we might wanna capture what XSD types are used on each destination to help folks grok the message model used in an organisation
+example=for example, we may wish to collate together all Message.getMessageType() values are used for each Destination.
+
+title=message type restrictions on destinations
+want=Some users may want to restrict certain types (for example, XSD types) of messages to be sent on certain destinations.
+
+
+
+title=ActiveMQ version 5.7.0 ??
+want=Can you guys release a 5.6.1 since mKahadb has been fixed in trunk i believe.
+given=Given that multi kahadb is broken in version 5.6.0 which was one of the major features in this version, when can we expect ActiveMQ 5.7.0 to be out ??
+reference=Please refer "web-page-link"
+useless=Thanks,
+useless=Bhanu
+
+title=I have post the jms interface with jni ,C dll and Delphi test.
+useless=I have no time to change.
+useless=Some where is chinese.
+explanation=The interface was used jndi ,so can use in any JMS Server (Perhaps,You have to some change the java code.)
+explanation=I am not wirte the linux C lib. 
+useless=You can write the makefile yourself.
+useless=Good Luck.
+useless=Sorry
+
+title=Options to modify message properties when composite destinations are used
+want=What about options to be able to change message properties (persistance and others) when they transfer to others destinations ?
+want=One of our need is to be able to change message properties while we transfer messages through composite destinations. 
+explanation=the same way that with deadLetterStrategy we can add the option processNonPersistent="true" and persist any message
+example=For example, we received messages by MQTT conector, with QoS=0 for performance reasons (no acknowledge, message not persisted).
+
+title=Provide startup option to flush journal to store then exit the broker
+want=This is a wish for a command line argument that will flush the journal to the database and quit.
+suggestion=This makes it possible to: Do some kinds of message administration / emergency fixing in SQL.
+suggestion=Upgrade even if there are incompatible changes by first flushing the journal and then applying the appropriate SQL change script to the database.
+suggestion=Switch the kind of journaling, switch to no journaling, etc.
+useless=Jason
+
+title=Cannot configure the load balancing count when using Message Groups
+explanation=We are seeing ActiveMQ configure the first 10 messages with different JMSXGroupID values to the same consuming node before distributing subsequent messages across the attached consumers.
+want=We need to be able to configure this value down to 1 to allow us to evenly balance the load across the consumers in a round robin fashion.
+painpoint=But we cannot see from the documentation how to configure this property.
+example=For example:
+explanation=This results in an unevenly balanced cluster of consumers when utilising Message Groups.

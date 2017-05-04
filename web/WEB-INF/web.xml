@@ -9,12 +9,12 @@
     </welcome-file-list>
 
     <servlet>
-        <servlet-name>indexServlet</servlet-name>
-        <servlet-class>main.java.servlet.indexServlet</servlet-class>
+        <servlet-name>frServlet</servlet-name>
+        <servlet-class>main.java.servlet.frServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>indexServlet</servlet-name>
-        <url-pattern>/index.html</url-pattern>
+        <servlet-name>frServlet</servlet-name>
+        <url-pattern>/featureRequest.html</url-pattern>
     </servlet-mapping>
 
 <!--    <session-config>

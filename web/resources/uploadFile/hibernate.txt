@@ -1,0 +1,489 @@
+Hiberante new feature  - 231
+title=Add integration test with Spring
+explanation=Users expect to be able to use Spring with OGM but we don't have an integration test at the moment.
+benefit=This is also helpful as demo or example.
+
+title=Add new operations to native CLI in MongoDB
+explanation=Since 3.2 there are some new operations that the user can execute:
+want=It should easy to add them to the currently supported operations 
+explanation=but if it's too complex, we can split this JIRA in subtasks.
+
+title=Associations should be mappable to a different Relationship-Type name
+explanation=For Entities and their properties it is possible to specify a name when the class or property name differs from the label or propery name in the database.
+example=for example <CODE>
+drawback=Unfortunately there seems to be no equivalent for Associations. 
+want=Either add this feature or enhance the documentation if this is already possible, please.
+example=I would expect it to look something like this:<CODE>
+
+
+
+title=Support Neo4j 3 remote datastore through the bolt protocol
+useless=Hi,
+useless=thanks for supporting neo4j remote datastore and working on the integration of Neo4j-3.
+explanation=The current remote protocol consumes the datastore's REST interface. 
+want=Are there any plans supporting the remote protocol "bolt" introduced in Neo4j-3 as an alternative transfer mode?
+example=The java implementation of "bolt" is available at <LINK>.
+example=The might be some performance improvements see <LINK>
+explanation=This is just for the javascript driver version but it might apply for the java implementation as well.
+useless=Thanks
+
+
+title=Make ORM and Search version referenced in documentation a property
+explanation=Currently there is "5.0", "5.5" or even "/stable/" specified several times in the AsciiDoc source. 
+want=It should be build properties.
+
+
+title=Add more verbosity to exception thrown by OgmEntityEntryState#getStateFor()
+explanation=In OgmEntityEntryState method getStateFor, there's an attempt to retrieve the object from the persistence context. 
+explanation=If the object is not found in the persistence context, then an exception is throw stating " 'entityEntry' must not be null ". 
+example=This is not very descriptive and could easily be improved by passing something like "entityEntry: " + object as the "name" parameter to <CODE>. 
+benefit=In this way the object's toString method will be called and appended to the exception output, allowing for easy identification of the object which is not in the persistence context.
+
+title=Support Neo4j 3.0
+example=See <LINK>
+explanation=Need to investigate what's new and how OGM is affected. 
+want=Can we support 2.x and 3.0 with a single dialect, or should there two separate ones?
+
+title=Support nested embedded collections for MongoDB
+want=Ideally, we should support this for document stores in general.
+explanation=Sometimes users need to map this kind of document:<CODE>
+explanation=Basically, it's the mapping of collection of embeddables with another collection of embeddables.
+want=The problem is that this mapping is not supported by JPA or Hibernate, we need to find an alternative.
+explanation=Maybe a user could use entities instead of embeddables with some additional OGM specific annotation or properties.
+
+title=Map IDENTITY id generation strategy to inline uuid() call in Cassandra
+example=Similar to the mapping of ObjectId in the MongoDB backend
+want=it should be possible to map the IDENTITY strategy to uuid() calls within the INSERT statement.
+
+title=It's not possible to set a SocketFactory for the MongoClient
+want=We should provide the user a way to set properties that are not primitives to the MongoDBClient.
+want=An example in the documentation would be nice.
+
+title=Allow to configure partition and clustering key for Cassandra-mapped entities
+explanation=When using a composite primary key for a Cassandra-mapped entity, it should be possible to define which column(s) should form the partition key and the order of columns in the partition and clustering key.
+example=Maybe something like this:<CODE>
+explanation=The primary key created in Cassandra would be (orderno, serialno) (the first column given is the partition key).
+explanation=Or with a compound partition key:<CODE>
+explanation=The primary key created in Cassandra would be ((customerno, orderno), serialno) (the columns in the first brackets form the partition key).
+explanation=Similarly for @ClusteringKey(order=123) if there is more than one clustering key column.
+example=Some useful resources:<LINK>
+
+
+title=Implement PostLoad annotation support
+want=Implement support in OGM for the PostLoad annotation which is currently supported in ORM. 
+explanation=The annotation allows for entity methods to be automatically called following an instance's initialization from the underlying datasource and thus provides the ability to carry out post-processing on the object.
+explanation=Some discussion on this feature:<LINK>
+
+title=Map time ordered series of events in Neo4j
+want=The idea is to map a series of events as nodes connected by NEXT and/or PREVIOUS relationships.
+benefit=This allows for very rapid traversal of events in time.
+explanation=More details in "Graph Database 2nd Edition" (Chapter 4, Time)
+
+title=Add versioninig of Nodes and Relationships
+want=Graph can be versioned adding a timestamp to Node and Relationships, making it possible to retrieve the state of a graph in a particular point in time.
+explanation=Can this work with enverse?
+drawback=The drawback of this approach is that it complicates even the simplest query
+
+title=Map Timeline trees for Neo4j
+explanation=One node for year, month, day and then the actual event node with a specific relationship. 
+explanation=That creates a tree of timeline where the leaves are the events.
+benefit=It makes it easy to find events for a given period.
+explanation=More details in "Graph Databases 2nd Edition" (Chapter 4, Time)
+
+title=Errors during JavaDoc generation when running full build
+explanation=Apparently only on OS X (JDK 1.8.51) there are some errors reported, but the build itself succeeds and the JavaDoc is generated:<CODE>
+explanation=Also it seems the JavaDoc are generated twice (may be wrong on that, though).
+
+title=Store simple id in case of non-composite ids on associated side
+want=Similar to what we do for other dialects, we should save the simple id values for associations whose target type uses a non-composite key. 
+explanation=Only where a composite key type is referenced, a JSON structure should be used.
+
+title=Enable alternative map representation also for single non-String key columns
+want=Follow-up to OGM-555: For maps with a single key of another type than String we still could do the nicer representation when converting the key column value into a String. 
+explanation=That'd require a conversion through the grid type.
+
+title=OrientDB Integration
+explanation=Recently I've googled, digged around for good open source graph database. 
+explanation=read some forum, stackoverflow. 
+explanation=Then I've found OrientDB. 
+explanation=Some people recommending it. 
+benefit=It looks good. 
+want=I think If ogm-orientdb module appear, I'll use it.
+example=Some links:<LINK>
+
+title=Support projection of embedded associations with LEFT JOIN in Neo4j
+drawback=At the moment we only support INNER JOIN but for Neo4j it is possible to execute left join as well.
+explanation=The renderer already keep track of left join or inner join via <CODE>
+want=but we need a way to figure out if we are dealing with an INNER or LEFT join. 
+explanation=Check <CODE> for more details.
+
+title=Add google analytics to the HTML documentation
+explanation=Optaplanner uses a version of pressgang that allows to add the google analytics snippet in the HTML generated. 
+benefit=That would be super handy 
+want=let's just look at Optaplanner's trick.
+explanation=Geoffrey De Smet<LINK> if you have some quick pointers for us, ship them in.
+benefit=PS: they have the script nicely degrading when no internet is present and all that jazz.
+
+title=Investigate alternative association mappings for Cassandra
+want=Instead of mapping associations via dedicated association tables, we may leverage the list/set/map data types Cassandra provides for storing the ids of associated elements. 
+benefit=That be beneficial wrt to consistency (an entity and the associated ids can be written in one round-trip to the datastore).
+
+title=Support queries on referenced entity if stored on current side of association
+want=It should be possible to support queries such as <CODE>
+explanation=Also without join capabilities if the associated id is stored on "this" side of the association.
+
+title=Multi-tenancy support for Hibernate OGM
+explanation=Hibernate Search now supporting a proper integration with the Hibernate ORM tenant-id system
+want=Hibernate OGM has to at least comply with the SPI of Hibernate Search.
+explanation=It's possible that fully supporting multi-tenancy in OGM isn't far out of reach at this point, 
+explanation=but would need at least some tests and probably some design brainstorming.
+explanation=Queries might already be generating the correct results, although I'd need to double check that the execution of queries isn't bypassing the filters enforced by Search.
+
+title=Remove CassandraDatastoreProvider#metaDataCache
+want=I think we can get rid of the CassandraDatastoreProvider#metaDataCache field. 
+explanation=It only is used for testing (get number of entities), 
+explanation=and there we can get the table names by iterating over the entity persisters accessible through the session factory.
+explanation=If that data actually is needed, it would have to be a thread-safe map as DatastoreProvider is accessed concurrently.
+
+
+title=Explore mapping Calendar as Strings in Cassandra
+explanation=As of<ISSUE-LINK> , 'Calendar' properties are mapped as a timestamp, loosing any time zone information. 
+example=For example, upon read-back we don't know the TZ to convert to. 
+want=Instead we may provide an option to persist such properties as formatted Strings.
+want=If we decide to wait for a future native Cassandra datatype with TZ support, we should log a warning or add a note to the docs about the loss of information in the current approach.
+
+title=Use MongoDB driver codec feature to avoid unnecessary object creation
+example=<LINK>
+benefit=I have not investigated but if it could avoid the extra object creations we are seeing during the JSON / BSON parsing, 
+benefit=that would be a nice performance boost for Hibernate OGM.
+
+title=Add support for joined inheritance (natural mapping for EAV stores)
+want=As an OGM implementor, I would like to be able to map individual classes via joined inheritance. 
+benefit=Acknowledging that most NoSQL datastores do not support joins, this is a very useful strategy for at least Datomic and presumably any EAV datastore.
+explanation=Given that entities in EAV stores are represented as: <CODE>
+example=a natural mapping between JPA entities and EAV entities would be as follows:<CODE>
+explanation=Would map to<LIST> as attributes in the EAV store and eliminate unnecessary duplication of attributes.
+explanation=This should be relatively easy to implement, requiring a new EntityPersister, EntityDiscriminator, and the registration of the Persister with the OgmPersisterClassResolver
+
+title=Expose native type metadata in GridType
+drawback=Nowhere do we expose the native type expected out of a GridType. 
+explanation=This is needed for strongly typed schemas like Cassandra to generate the right type.
+explanation=This kind of info is present via Type.sqlTypes() in the ORM side. 
+want=We need to offer something similar.
+explanation=Proposal:<LIST>
+
+title=Make authentication compatible with MongoDB 3.0
+explanation=MongoDB 3 brings a new authentication support SCRAM-SHA-1 and deprecated MONGODB-CR.
+explanation=The support came with Java's driver 2.13 but requires some migrations
+example=<LINK>
+explanation=That should do the trick.
+explanation=The workaround according to Dean is to do <CODE>
+
+title=Investigate usage of MongoDB's GridFS for storing large binary data
+explanation=With GridFS MongoDB provides a way for storing arbitrary binary files. 
+want=We might use it to store "overflows" of large entities, 
+example=for example it'd likely be a good fit for byte arrays:<CODE>
+
+title=Introduce RETRY error handling strategy
+drawback=Currently error handlers can only decide to abort or continue the current flush cycle in case of a failure. 
+explanation=Another means of dealing with failures is to retry the failed operation.
+explanation=One could make the retry strategy to use configurable:<LIST>
+explanation=<CODE> would return RETRY, letting the configured retry strategy take over.
+explanation=As per the use cases from OGM-465:<LIST>
+
+title=Allow grid dialects to map custom exceptions into a set of standardized exception types
+explanation=With the error handling API established with <ISSUE-LINK>,  users can decide whether to continue or abort the current flush cycle upon a failed operation based on the type of the occurred exception.
+want=In order to allow handlers being implemented in a more datastore-agnostic way, there should be means for translating dialect-specific exceptions into more generic OGM-defined exceptions. 
+example=for example, a MongoTimeoutException or a HTTP connection timeout exception in the case of CouchDB would be translated into a NoSqlTimeoutException. 
+benefit=The error handler would receive that translated exception (with the original one as a cause) so it can do its decision in a more portable fashion.
+explanation=Grid dialects would need the ability to contribute their implementation of an exception translator contract which would be invoked prior to passing on any exception raised by the dialect implementation.
+
+title=Offer option to decide how aggressively removing a nested element
+explanation=Today after   <LINK>, a nested element with no property left is fully nullified. 
+explanation=This is a natural approach in most case except if the document is shared between several application and if unknown properties (to OGM) are involved. 
+want=We could envision offering a option overridable per entity and maybe even per property to up the standard and be extra conservative.
+explanation=Depending on how MongoDB projection works (today filtered by selectable columns), we could:
+explanation=This is probably only useful for MongoDB (I think Neo4J already does that as we load the whole node already).
+
+title=Support loading entities in batch
+want=The goal is to avoid n+1 loads from the datastore, in particular when an entity A points to a collection of entities B.
+explanation=Loading elements of a *-to-many association. 
+explanation=Currently we go to the store for each element. 
+explanation=IMO it's actionable on our side; 
+want=as you say we'd need to adapt the loaders in OGM
+example=Batch fetching of *-to-one / *-to-many associations,for example when iterating over a result set of an entity with a lazy *-to-one assocation to another entity, load these referenced entities in @BatchSize-sized chunks; 
+explanation=I'm not sure what'd have to be done for that
+explanation=Loading entities of HS query results; 
+explanation=Currently we do FIND_BY_ID look-ups as we don't implement the Criteria API. 
+want=If HSEARCH allowed for plugging in custom retrieval strategies, we could implement a more efficient one based on the proposed method (currently one can only choose between FIND_BY_ID and QUERY; So this requires some action in HSEARCH first)
+
+title=[Neo4J] How to map the traversal API
+explanation=Neo4J has the notion of traversal API which is mapped to Cypher.
+explanation=That being said, you have callbacks to implement rules on the traversal.
+want=Explore how to map that in the JPA world OGM exposes. 
+explanation=Native query and some hints?
+explanation=I don't know enough of the feature yet to tell how precisely.  
+
+title=Add support for Fongo to MongoDB backend
+explanation=Fongo is an in-memory fake implementation of MongoDB. 
+explanation=It's an interesting alternative backend for testing an OGM application targetting MongoDB.
+explanation=The required changes should be minimal; 
+want=The MongoDBDialect should work as is (provided Fongo does implement everything we need), only a new provider class would be needed (or the existing one to be updated to support both backend types).
+example=Forum reference: <link>
+
+
+title=[Neo4J] Provide alternatives ways to map collections
+explanation=Currently, we map a list as nodes connected to the owner node.
+want=We should provide an option via annotations or a global configuration to map list as linked nodes.
+example=Using Cypher, it would look something like:<CODE>
+explanation=Note that the two options don't have to be mutually exclusive, you could actually use both at the same time.
+benefit=Mapping list as linked nodes seems a more Graph like solution and it seems that Neo4j is quite good at querying this kind of structure.
+explanation=Something similar might be needed for maps.
+
+
+title=Make sure RESOURCE_LOCAL persistence unit do not require a transaction manager
+explanation=When working with a non-transactional stores and TX type "RESOURCE_LOCAL" one still needs to provide a JTA implementation atm. 
+want=We should explore a custom "OGM local" Transaction implementation to be used in such cases.
+example=Mailing list: <LINK>
+
+title=MongoDBTupleSnapshot#getColumnNames() does not work correctly for embeddable types
+drawback=Working on  <LINK>  , I noticed that <CODE> only is implemented correctly for "simple" columns, by just returning the keys of the underlying DBObject.
+want=For embedded objects we'd have to flatten the affected columns, though. 
+example=for example, we'd have to return column names such as "address.city", "address.street" etc (currently we'd only return "address").
+explanation=Also for the id we'd return "_id" (as that's what always is used in MongoDB) 
+explanation=but it likely should be the name from the "physical" JPA model for consistency reasons.
+drawback=I'm wondering though whether getColumnNames() really is needed at all. 
+explanation=It is used at some places, but maybe we can circumvent the need for it by always driving the accessal of tuple columns from the "inbound" side, 
+example=for example, based on the model, selected query columns or similar.
+explanation=Note that I didn't find an actual problem caused by the current implementation, it seems to be a consistency issue atm. 
+drawback=There may be an issue when using an embeddable type as optimitic locking version as we access the column names in this case (also see the TODO at <CODE>.
+
+title=Support queries on embedded elements and collections
+want=We should support queries on embedded elements and collections.
+explanation=The former may be done already, that needs to be checked (not sure about all backends). 
+explanation=The latter will require some more general ground works: <List>
+
+title=Explore the integration with Hibernate Spatial or spatial4j
+want=With Hibernate ORM coming, we should look at options to support the Hibernate Spatial and maybe have the JP-QL indexing functions mapped as native functions.
+explanation=IT's split into:
+drawback=On the query side, MongoDB does support geolocation but it's very verbose.
+
+title=Offer an NoSQL alternative to Session.doWork / doReturningWork
+want=The use case is to be able to execute native code based on the connection to the underlying NoSQL datastore in an isolated fashion.
+want=We should be able to support a NoSQL specific version of these methods
+
+title=Add support for @OrderBy
+drawback=We do not yet support ordered collections via @OrderBy.
+benefit=I initially thought that'd be handled by ORM internally so we'd benefit from it, but actually the specified order columns are appended to the WHERE clause of the collection fetch statement.
+explanation=We could do the following:
+useless=Thoughts?
+
+title=Support natural id look-ups
+want=There should be support for <CODE>. 
+explanation=Currently this causes JDBC-related code to be executed. 
+explanation=It would be an optional operation depending on the given store's capabilities
+
+title=Provide Bill-of-Materials POM with matching versions of OGM dependencies and components
+want=We should provide a Bill-of-Materials POM which defines the versions of our components and dependencies. 
+explanation=Users can refer to that BOM POM using the import scope in their dependency management configuration, thus giving them matching versions of all the artifacts listed in the BOM.
+
+title=Add properties to a relationship when mapping an intermediate table in Neo4j
+drawback=There is not a way in JPA to recognize an entity created to map additional properties to an intermediate table.
+want=In Neo4j, we could map this entities as relationships with properties (instead of nodes).
+explanation=This requires a discussion about the way a user could map this configuration.
+
+title=Apply type conversion to scalar values loaded from native queries
+example=CustomLoader has a concept of ResultRowProcessor/ResultColumnProcessor which for example is used to handle constructor results or type conversions for scalar values. 
+drawback=As BackendCustomLoader overrides CustomLoader at a very high level, we don't benefit from this (these contracts are JDBC-dependent anyways). 
+want=We should resemble this pattern to for example correctly load scalar values in a first step.
+
+title=Add support for ObjectId in MongoDB
+explanation=MongoDB by default uses a 12-byte BSON type with a special structure as document ids:<CODE>
+explanation=This id is assigned during insert by the driver and comprises parts for timestamp, machine etc. 
+want=We should support this as a) it is the "natural" way to represent ids in MongoDB and b) in order to facilitate integration with other applications relying on document ids being object ids.
+want=It should be possible to represent such id in entities as String, ObjectId and probably Long BigInteger.
+
+title=Map joins to associations in Neo4j
+explanation=Joins may be leveraged to access associations when loading data from Neo4j. 
+want=To begin with, we could support NoSQLQuery#addJoin() to map associations navigated in native queries. 
+want=In a next step, we might try to map joins from JP-QL queries or even JPA 2.1 fetch graphs.
+
+title=Provide API for creating native queries in store-specific representation
+want=We should have an API which takes native queries in the store-specific representation instead of Strings. 
+example=That way one could for example pass a DBObject based query in the case of MongoDB to Hibernate OGM.
+example= for example like so: <CODE>
+
+
+title=Add support for exposing unmapped attributes in a generic manner
+want=When working with OGM an existing database, it would be very useful to allow to propagate any unmapped attributes of a record/document in a generic container.
+example=Taking a web shop with a Product entity as example, you typically don't need to (or even can) "know" all the attributes of such a product entity but still want to be able to display all the attributes in a generic fashion for example on a web page. 
+explanation=Only a few attributes actually need to be known/mapped in the application itself, namely those fields to which specific handling/logic applies.
+explanation=To facilitate such a scenario, one could designate a Map property of an entity to hold any unmapped attribute.
+example=Considering for example the following MongoDB document:<CODE>
+explanation=While the attributes common to every product document are explicitly mapped as properties, all unmapped properties are exposed via the additionalProperties map which is designated for that purpose using a new annotation, for example named @AdditionalProperties. 
+explanation=The application can perform logic on the common known attributes and still forward all unmapped attributes to a generic web view etc.The types of the map values would be those returned from the underlying store.
+benefit=Such a facility would also help with prototype development, where one starts with most attributes not being explicitly mapped and then creates specific members iteratively as application requirements demand.
+benefit=Also the CouchDB dialect would benefit from this, because it doesn't support partial updates at the moment, meaning one currently must map all attributes or an update (which always writes back a complete document) may discard any unmapped attributes.
+
+title=Expose more configuration options for MongoDB
+drawback=Currently, only the connection timeout and global write concern are configurable for the MongoDB dialect. 
+benefit=But there are some more useful options available, in particular the size of the connection pool to be used.
+
+title=Reorganize OGM packages into proper APIs, SPIs and impls
+explanation=As I just learned, Emmanuel's definition of APIs and SPIs is this:<LIST>
+explanation=Whereas to me, an API is something which is used by others (think library), 
+explanation=whereas an SPI is something which is implemented by others (think framework hooks). 
+want=I like to make this distinction apparent in the packaging, as different rules apply for the evolvements of these things.
+
+title=Offer API for Map / Reduce
+explanation=Apache Gora has an interesting feature. 
+explanation=It offers a Map / Reduce API where the Map interface accepts a specific entity type.
+benefit=It makes for a rather nice and more type-safe API.
+want=Not all the backends we have in mind support Map Reduce but it could be interesting to explore how we would map such API to the backends we have and see if there is an interest.
+
+
+title=Support entity embedded mode for associations with CouchDB backend
+want=Similar to MongoDB, it should be configurable how to store associations in CouchDB, 
+want=either embedded in the entity or in a separate document.
+
+
+title=Add Google Datastore as datastore backend
+explanation=Google App Engine uses Google Datastore underneath. 
+want=Google Datastore as recently exposed some direct APIs we could bind as dialect
+example=<LINK>
+
+title=Implement precedence of configuration options given on different levels
+explanation=With  <LINK>  and    <LINK> , it's possible now to define store-specific options on the global, entity and property level. 
+want=It should be configurable per option type how to proceed if one option is given on more than one level.
+benefit=There are cases where a precedence of property over entity over global is useful, but there may be other cases as well. 
+explanation=Maybe this should be configured via an annotion on the option type definition?
+
+
+title=Support polymorphic queries on MongoDB
+want=A query targetting a supertype should return matching subtype entities. 
+drawback=At least for MongoDB this does not work at the moment when using the table-per-class strategy as only the collection of the addressed entity type is queried.
+
+
+title=Make MongoDB write concern configurable per entity and property
+want=With  <LINK>  in place, we can make use of the new configuration facility and see how it works out in practice.
+explanation=A good candidate might be the write concern setting for which we already have the required option class and annotation.
+want=The MongoDB dialect should take the setting into account when executing writes. 
+explanation=Given on the property level, the setting only makes sense for properties representing associations, which are stored in a separate association document.
+
+
+title=Explore use of B+Tree structure for association information
+benefit=Via the cloud-tm project, Fenix has made use of B+Tree structures to improve efficiencies of collections / multiple cardinality associations. 
+want=The same technique could be applied by OGM.
+
+title=Explore co-location of keys to minimize node involved in transactions and data transfert
+explanation=This is of particular relevance for Infinispan.
+benefit=Via the cloud-tm project, the Fenix framework explored the use of key/data locality to improve the overall performance of the application. 
+want=Let's look at their work and see what they have done that can be applied to OGM most likely driven by the options framework currently developed.
+
+
+title=Support formula in OGM
+want=We could support the notion of formula by doing the following approach. 
+explanation=Create an interface that takes a Tuple and return the value of the virtual column.
+
+
+title=Offer ability to load all entities of a given table from GridDialec
+benefit=This is useful for the Hibernate Search mass indexer.
+explanation=This also means that we need a loader to build an entity based on a (list of) tuple.
+
+
+title=Consider a option to use same replica reads after writes
+explanation=Today, we might read stuff after writes and return inconsistent results. 
+want=We should add an option to force the dialect to use requestStart / requestDone
+example=See <LINK>
+
+
+
+title=Should we raise an exception on rollback if the backend does not support transactions?
+want=To warn the user we could raise a transaction if rollback is called. 
+want=But we need to make sure this does not have any side effect first.
+
+
+
+
+title=Create facility for OGM core and Dialects to receive custom metadata (annotation, programmatic) associated to entities, properties or associations
+want=Typically we should be able to transfer the following metadata to the MongoDB driver<CODE>
+want=The facility should be extensible to make sure a driver can add any necessary custom metadata.
+benefit=A programmatic mapping API would be useful too.
+
+
+title=Make MongoDB's association storage strategy available per association
+want=Using the new option mechanism, the association storage strategy should be configurable for the MongoDB dialect on a per entity/property base, via annotations and API.
+example=ML reference <LINK>
+
+title=Consider reading/writing directly from BSON stream to Tuple to limit unnecessary object creation (like HashMap) by the MongoDB driver
+explanation=GC can slow down reads esp for collections. 
+explanation=Many HashMap are created and we suspec the MongoDB driver for Java is the creator (DBObject is a subclass of LinkedHashMap).
+want=We could imagine not create these BObject but directly talk to the BSON stream. 
+drawback=That would of course be a lot of work to do that right and the MongoDB driver needs to expose BSON without parsing it first.
+useless=It more a prospective idea.
+
+title=Add support for the SafeMode
+explanation=Use the org.hibernate.ogm.safemode 
+want=Should we provide more options to support Majority and Fsync_safe modes as well ?
+explanation=Here is there a description of each mode 
+
+title=Expose in AssociationKey means to embed collections (of embeddable)
+explanation=I am thinking owning entity (or owning EntityKey rather) as well as role. 
+explanation=Even though role is defined at the property level and not at the column name level.
+want=Ideally add support beyond @elementCollection to be able to denormalize later even true collections. 
+explanation=But retrieving the EntityKey and the role might be tricky
+
+title=Log reasons for performed CRUD / Query operations
+want=s a follow up to to  <LINK>  , it would be nice to provide as well the comments provided by Hibernate when enabling the option
+example=<CODE>
+
+title=Provide OGM specific statistics
+explanation=See and document which of Hibernate Core own statistics make sense
+want=Make sure that our persisters and loaders properly populate these statistics (if their JDBC version do it)
+explanation=If needed add Hibernate OGM specific statistics (new class, subclassing Hibernate Core one?)
+explanation=Unit test them
+
+title=Migrate logging to JBoss Logging
+want=Today we use SLF4J but we should migrate to JBoss Logging like code does and use the type-safe approach.
+explanation=The idea is to do it in two steps:
+benefit=If someone in the community could at least do the first step, that would be awesome
+
+title=Think about data migration features
+explanation=You can migrate data in two ways:
+want=The idea is to provide annotations, metadata or callback to migrate data on the fly while OGM loads tuples. 
+explanation=Objectify has this concept <LINK>
+useless=Morphia too (@AfterLoad)
+useless=Thanks for Scott Hernandez for pointing that out.
+
+
+title=Support pure Infinispan client mode for Hibernate OGM
+explanation=There are several levels at play:
+explanation=The latest is not fleshed out though and will require refinement.
+
+
+title=Provide a full implementation of the Getting Started
+drawback=The information provided in the Getting Started is good enough for reading, but one has problems when trying to actually transform that into code. 
+want=So, it would be nice to provide a full implementation, containing all the configuration files and all sources, to be used as a reference for readers trying to implement the Getting Started.
+
+
+title=Make OGM work on explicit Hibernate Transaction demarcation
+want=Delegate to a JTA Transaction Manager underneath to get Infinispan behave transactionally. 
+explanation=Use DummyTransactionManager initially as JBoss Tx would require another dependency for the user.
+
+title=Make it possible to grab an existing Infinispan CacheManager via JNDI
+want=Make it possible to grab an existing Infinispan CacheManager via JNDI, 
+explanation=so that multiple applications deployed in the same server can share the same CacheManager, and/or reuse the one being started and configured by the container (Like JBossAS6 provides one).
+
+title=Support more GridTypes
+drawback=Today we only support basic numeric and string types
+want=We should support other types like URL, BigDecimal etc
+
+title=Implement support for denormalization of associations
+want=We can keep the association value on the main entity atomic map, that will reduce the amount of roundtrip necessary to load a graph.
+explanation=The Loader and Persister will need to be adapted in consequence.
+drawback=Likewise we could do it for Collections but that's more work and would require nested atomicmaps at the ISPN level.
+
+title=Support JPA Criteria query
+want=That's going to be a biggie but we will need to think about how to support JPA 2 criteria.
+explanation=One approach could be to implement in Hibernate Core or outside a Criteria to JP-QL query translator and then go from here.
+explanation=This is not for the initial deadline

@@ -1,0 +1,255 @@
+title=[Gtk 3.14] Improve Gtk theme override mechanism for 3.14 too
+painpoint= Follow on great idea in <link-bug> , but why on GTK <no less then> < NUM-VERSION > only?
+explanation = We've just moving from GTK < NUM-VERSION > to < NUM-VERSION > (RHEL < NUM-VERSION >) and I can finally try out to use GTK3 for the IDE.
+Painpoint = but I can't see that huge buttons anymore
+want=so I would like to override the css
+painpoint=but I can't because the <CODE-METHOD> only allows to override for if <CODE>.
+want=I would like to relax this. 
+useless=Any objections? 
+useless=Patch is underway.
+
+
+title=Tooltips not shown for disabled toolbar items on GTK
+explanation=Disabled toolbar items don't show tooltips when hovered on Linux-GTK.
+example=For example, hover over the Save button on the main toolbar of Eclipse when it is not enabled.
+explanation= I'm running Ubuntu Fiesty Fawn (< NUM-VERSION >), GTK < NUM-VERSION >.
+
+
+title=Allow to run tests with Maven, without OSGi
+want= It would help to be able to run SWT tests from Maven, with the same command-line as other platform modules (<CODE-command>).
+drawback=However, those tests are currently failing because Tycho starts an Eclipse RCP application to host those tests, and that's not what expected/required for SWT test suite.
+want = pom file should be configured to have SWT tests running as plain Java tests
+useless = null
+
+
+title=Add readme for swt.examples
+want= It would be helpful to add a readme that tells people which classes to run to start the examples.
+
+title=[api] Create functional interface to use Lambda expressions for selection events based on SelectionListener
+painpoint= Unfortunately the addSelectionListener method in Button uses a non-functional interface.
+want= To use lambdas with SWT Button as event handler for Button I suggest to add a new method to Button called addOnClickListener similar to the following
+example= <CODE> 
+example = Some links for more information:<LINK-HTML><LINK-HTML>
+
+
+
+title=[GTK] Add script to check which dynamic functions are deprecated
+want= I'm planning to add a script to SWT Tools which, when run, will output a list of deprecated functions based on the contents of <CODE>.
+explanation = Dynamic GTK functions aren't run through the compiler, so no deprecation warning is emitted.
+
+title=SWT Tools: Split Sleak and Spy into separate plugins
+want= It would be great if it was possible to use the Sleak and Spy tools independently from the rest of the tools plugin.
+example=For example , we could add those tools in our target definitions and use them in the runtime Eclipse.
+explanation = Right now, depending on <CODE> means depending on JDT which our project does not use.
+suggestion = So my suggesting is splitting the <CODE> plugin this way:
+explanation = More things could be split off from <FILE> later as necessary. 
+useless=I have a patch underway for this. 
+useless=Let me know if you have any other suggestions or concern.
+
+title=Mark typed SWTEventListener @FunctionalInterface if they are functional interfaces
+
+title=Add a property for the current GTK theme being used
+want= it would be useful to know which GTK theme is used during an Eclipse session for troubleshooting purposes.
+explanation = when running tests remotely or when helping someone who doesn't know which theme is used, etc.
+example = This could be similar to <CODE>. 
+explanation=I suggest <CODE>. 
+explanation=I think all the native hooks are there already because I can see the name of the theme being retrieved in <CODE>.
+useless=Let me know if you think that's a acceptable idea  
+useless=and if so, I'll start working on a patch!
+
+title=Add color tab to ControlExample
+want= Add a tab for system and named colors.
+
+title=Add test class for Spinner widget
+want=Add class <CODE>.
+explanation = Spinner has no test cases.
+
+
+title=Add support for styling hyperlinks in the Link widget
+explanation= I'm currently trying to style Eclipse with a Dark theme (by that I mean I want a dark theme for everything).
+drawback = Screenshot with showing hyperlinks I'm unable to style with css.
+explanation=I'm adding a screenshot to show what I mean by that if it didn't become clear. 
+explanation=This is on Eclipse 4.3m5 (Build id: I20130204-1400)
+
+title=Load TrueType fonts directly from a file.
+explanation = In AWT a TrueType font file can be loaded directly into a Font object <CODE>
+explanation=This functionality is important with applications that display financial documents because security fonts or MICR fonts are rarely installed on an end-user systems.
+want=The ability to load a TrueType font file into a <CODE> object, or convert a AWT to a SWT is the feature request.
+
+title=Add a requestLayout method to Control
+want= Please add a new requestLayout() method to Control, which does essentially the same thing as <CODE> but without the performance problems mentioned by <LINK>
+want=We should be marking the dirty widgets so that SWT does not need to perform an inefficient exhaustive search through the widget hierarchy.
+want=Further, we should add javadoc for all other mechanisms which trigger layouts to direct callers to use this new method.
+benefit=The snippet, above, is currently the most efficient and reliable method of triggering layouts in SWT, but most developers are unaware of this. 
+explanation=Doing a search through the Eclipse code base, I see that most callers are still trying to guess the root widget affected by their change and invoke <CODE>, which is the worst-possible implementation.
+benefit=By making the most-efficient implementation also the easiest to use and documenting it better, it should make it easier to clean this up.
+
+
+title=[Widgets] Add API for multi-touch events and gestures
+explanation= Windows 7 and Snow Leopard <VERSION> have API now for multi-touch events. 
+want=We should come up with some kind of SWT API to receive these events.
+
+
+title=[GTK3] Port to GTK+ 3
+want= it would be good to move to GTK+ 3.x where possible.
+explanation=Ideally one could build and run with an entirely GTK+ <VERSION> stack. 
+explanation= This may also allow removal of some of the GNOME dependencies that SWT has at present.
+
+title= [API] Disable the move of a shell
+explanation=Currently, there's no direct way in SWT for disabling the move of a shell, other than using the NO_TRIM style hint, that also removes the titlebar and other other trim styles.
+explanation=However, this can be achieved in gtk (we tested this with gtk2, in CentOs running Metacity) and win32 (with Windows8.1).
+explanation=For gtk, one would have to call the gdk_window_set_functions [1] without the GDK_FUNC_MOVE hint[2], while for Windows one would have to disable the SC_MOVE menu item from the window's menu.
+want=We were thinking about adding a new style hint to the SWT class and name it NO_MOVE or NOT_MOVABLE.
+useless=What are your thoughts on this? 
+useless=Would you be interested in a contribution?
+useless=Best wishes,
+useless=Alexandra
+
+
+title= [Browser] implement XULRunner 31 support
+want= As with previous ESRs, support for XULRunner 31 should be added once version 31 gets released.
+
+title=Replace new Boolean with Boolean.valueOf
+example=There are some examples where new Boolean() is used in SWT. 
+explanation=The static accessor <CODE> was added in Java 1.4 to provide access to a flyweight object where a unique identity is not required, and which can in-line in the JIT (object construction only in-lines when it can be proven that the object doesn't escape).
+
+title=Double icon in the dock on OSX
+explanation=When eclipse starts up it shows a double icon in the dock.  
+explanation=In addition, there are time when the second icon does not disappear even after eclipse is fully started.
+
+title=ControlExample: should be able to set text for Shell
+want= The 'Shell' tab of the ControlExample should allow me to set a text for the Shell.
+
+title=[build] Support building libswt-awt-XXXX.so on Solaris/Motif
+want= If possible, this should be included in the builds.
+explanation=Currently, it seems that the libswt-awt-XXXX.
+explanation=so library is not being built for Solaris/Motif.
+
+title=The Control.setBackground doesn't support gradients
+explanation=Currently we are not able to set gradient as the background for the Controls. 
+drawback=The gradients are supported by the CTabFolder class only.
+drawback=Therefore we have to create complex workarounds in the code, 
+example= for example, support the gradients via images that is sometimes quite problematic.
+
+title=Add support for 'transparent' colors
+want= Setting the 'null' as the color value for the Control.setBackground method should be considered as the transparent color and it shouldn't be replaced with any system default color
+
+title=Make it easier to identify GTK version used by SWT (2/3)
+drawback=I don't know of a good way to find out whether SWT uses GTK2 or GTK3 in a running instance of Eclipse.
+want= Could SWT set a Java property, so that this can be seen in Help then Installation Details? 
+example= For example, <CODE>
+
+title=Image performance optimizations on OS X
+want= I would like to show an image preview panel, for instance, and there are specific methods in ImageIO that allow me to load very large images and thumbnail them to a target size REALLY fast and with very low memory usage
+explanation=with ImageIO i can thumbnail an image in about 1/4 of a second vs using <CODE> in SWT takes as much as 5+ seconds
+drawback=I was looking into Image loading, and it appears that the heavy lifting is currently done in ImageData in SWT common.  
+explanation=This means there isn't an obvious way to take advantage of native optimizations like ImageIO (Apple's not Sun's) on OS X.
+
+title=Workbench is automatically brought to front in focus follows mouse mode
+explanation=It is not common for people to use "focus follows mouse" in windows, but I do.  
+explanation=When I happen to move my mouse over any eclipse window, it is popped to the front of other windows.
+example=To turn on sloppy focus in WinNT, set the following registry var: <CODE>
+explanation=If it doesn't exist, create it as a DWORD
+explanation=Then to test, start eclipse and any other window together.  
+explanation=Make sure the windows overlap, but you can see parts of both windows.  
+explanation=Now click on the non-eclipse window. 
+explanation=It'll come to the top.  
+explanation=Now just move the mouse over the eclipse window, and it will be brought to the front without clicking.  
+explanation=Why???  
+want=Please disable this.  
+explanation=It should only come to front when clicked on, like all other apps.
+
+
+
+
+title= Provide ability to handle reopen-events (user clicks dock icon for running application)
+explanation=On OS X, applications may not show windows while still running. 
+explanation=Usually, there are two options to open a new application window: using the menu bar or clicking the dock icon. 
+explanation=The first one is already supported by SWT 3.7, but not the second one (at least I did not found a possibility). 
+want=Please add support for these reopen events. 
+explanation=When clicking on the dock icon and the application shows at least one window, bring it to front. 
+want=For the case where no application window is visible, we need API to be notified about the dock icon click, so we can show a new window.
+
+
+
+title=Support links in StyledText
+want=StyledText should allow hyperlinks to be specified.
+wnat=The links must become active (cursor changes, underlined, colour change) when the mouse is over the link or when the user tabs to the link.  
+want=Links must be traversable by tabbing.
+explanation==There needs to be an event when the link is selected and when the link is activated 
+example= for example, in IE the status bar shows detailed info about the link when the user hovers over it.
+
+title=Spinner should support negative values
+want=Spinner should allow negative values.
+
+title=[ScrolledComposite] ScrolledComposite page increment should default to size of client area
+want=ScrolledComposite page increment should default to size of client area
+drawback=Currently when you try to page increment on a ScrolledComposite, it defaults to a value much smaller than the size of the client area.
+
+
+
+title=Support SWT.TOOL style for shells on the Mac
+want=Add support for the "SWT.TOOL" style for shells on the Mac.
+explanation=Currently, TOOL shells look like ordinary shells.
+want=Would be nice if they could look like for example the font picker.
+
+title=MouseEvent#button, SWT#BUTTON*, and SWT#MOD* should spell out usual mapping
+want=MouseEvent#button, SWT#BUTTON*, and SWT#MOD* should spell out the commonly used physical mapping of these buttons/keys.
+
+
+title=[10.7] Let Eclipse use the new full-screen support in Lion
+want=It would be great if Eclipse could count with this new feature in Mac OS X <VERSION>.
+
+
+
+title=Right and center alignment of Text widgets
+drawback= The styles <CODE> and <CODE> are not handled in the <CODE> method of Text widgets (<CODE>).
+want= Please add the following code: <CODE>.
+
+title=DCR - alignment in a text widget
+want= I am looking for a way to set the string in a text widget right aligned (for example for numbers).
+explanation= For a <CODE> there exists a function <CODE> There should be something similar for <CODE> to set left / right / center alignment.
+
+title=DCR - Tree.getTopItem/setTopItem
+want= To better restore the last UI state we would like to have a <CODE> API that works just like the Table API. 
+example= for example based on the current visible items return/set the index of the topmost visible item.
+
+title=StyledText - Cursor should stop blinking when moving
+explanation= If I hold the "down" button inside a java file, the cursor blinks while moving downward.
+want= It should only blink when still.
+
+title=Release SWT sources & javadoc in future builds
+want= Please release SWT sources as a <FILE_TYPE> that we can attach as source in future builds. 
+explanation= It used to be available before.
+drawback= SWT source is not available in <OPERATING_SYSTEM> / <OPERATING_SYSTEM>.
+
+title=Accessible resizing of Views should move/change the Display's Cursor
+explanation= See windows behavior.
+explanation= Go to system menu and choose "Size", then use the arrow keys.
+benefit= The Cursor moves, and better yet it changes to indicate the interaction.
+
+title=Moving shell above other shells does not work.
+want= Help browser on Windows needs to move above all shells, when called to display some help URL.
+explanation= When the browser window is open it appears on the top, 
+explanation=but when it is subsequently called to display URLs and move above, it sometimes stays behind other windows The browser window runs in a separate process from Eclipse.
+
+title=Create project does not allow creation of folder in its project selection.
+explanation=To Reproduce:Select File->New Project->Simple
+painpoint= Notice that the user cannot create a folder within this dialog.
+benefit= It would be quite useful not to have to use the file system to go and create a subfolder.
+explanation= The fact that eclipse will NOT let you overlap projects exacerbates this problem 
+explanation= If you want to have one folder to store all your projects, you have to create subfolders within this folder to house the projects 
+explanation= It is this use case which makes would justify the browser having the create folder like many other applications which bring up a directory chooser.
+
+
+
+title=OleControlSite is not powerful enough
+painpoint=OleControlSite class has no functionality to attach events to any COM interface (IUknown) needed.
+want= It would be great to create in it OleEventSink objects with IUknown of it and GUID of it's event sink and to add API for adding listeners to these sinks.
+drawback= Now OleEventSink constructor doen't take such parameters, what is more - it  doesn't have a public constructor at all - it restricts developer.
+benefit= It is rather easy to do with C++, and with Java wrappers for COM (I used comjni from <URL>), and it is powerful feature to create applications with callbacks.
+
+title=StyledText - remove hardcoded margin
+want= I would like to see the option to remove the (hardcoded) margin of 2 pixels 
+want=I need this as I'm rendering a <CODE> over another <CODE>.
+explanation= A simple <CODE> would do it for me.
