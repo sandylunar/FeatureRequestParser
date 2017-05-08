@@ -31,6 +31,15 @@
     <!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
     <!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
     <script type="text/javascript" charset="utf-8" src="/resources/lang/en/en.js"></script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?a20f9aa055af98f694fc83a3930c167a";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
 </head>
 <%--Chrome垂直居中--%>
 <body style="display: flex;flex-direction: column;justify-content: center;">
@@ -56,8 +65,9 @@
                     <!-- 加载编辑器的容器 -->
                     <script id="container" name="content" type="text/plain"></script>
                 </div>
-                <div style="margin: 0 auto;width: 60px">
-                    <button class="btn btn-info" type="button" onclick="confirm()">Submit</button>
+                <div style="float: right">
+                    <a href="#sample" onclick="showSample()" style="margin-right: 15px;font-size: 17px">Sample Feature Request</a>
+                    <button class="btn btn-info" type="button" onclick="confirm()" style="font-size: 17px">Submit</button>
                 </div>
             </form>
         </div>
@@ -88,8 +98,12 @@
         $('ul').html("");
         var name = $('#name').val();
         var title = $('#FRTitle').val();
+        if (title == null || title == undefined || title == '')
+        {alert("Please input FR Title!");return;}
         //获取html内容，返回: <p>hello</p>
         var html = ue.getContent();
+        if (html == null || html == undefined || html == '')
+        {alert("Please input FR Description!");return;}
         //获取纯文本内容，返回: hello
         var txt = ue.getContentTxt();
         //alert(html);
@@ -123,6 +137,18 @@
                 alert("some errors...");
             }
         });
+    }
+
+    function showSample(){
+        $('#name').val('Phpmyadmin');
+        $('#FRTitle').val('option to disable JS-Windows for errors');
+        ue.setContent('Please add an option to redisplay the "old" error-div if something failed.<br>\
+If you have a long (text) sql-query failing, you get an totally undersized js-error dialog which is hard to read and closes on an accidential click.<br>\
+I suggest: add an div on top of the page, containing the error, have the query-section (with inline) under it.<br>\
+Having this, you can see the error on full monitor width, second you can change the query to make it work and maybe you can put a structured output above it.<br>\
+Sometimes only a quote or brace is missing, which you must find.<br>\
+Best Regards,<br>\
+Thanks!');
     }
 </script>
 
