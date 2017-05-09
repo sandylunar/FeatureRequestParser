@@ -401,10 +401,9 @@ public class frServlet extends HttpServlet {
         if (dataType.equalsIgnoreCase("json")){
             output = root.toJson().toString();
             System.out.println(output);
-            jsonObject = new JSONObject(output);
             response.setHeader("Access-Control-Allow-Origin","*");
-            response.setContentType("application/json");
-            response.getWriter().write(jsonObject.toString());
+            response.setContentType("text/html;charset=utf-8");
+            response.getWriter().write(output);
         }else{
             output = root.toString();
             System.out.println(output);
