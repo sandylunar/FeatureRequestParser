@@ -97,6 +97,7 @@
 
     function confirm() {
         $('ul').html("");
+        var dataType = $('#dataType').val();
         var name = $('#name').val();
         var title = $('#FRTitle').val();
         if (title == null || title == undefined || title == '')
@@ -121,7 +122,7 @@
         $.ajax({
             url: 'featureRequest.html',
             type: "POST",
-            data: {name: name, FRTitle: title, FRDes: html},
+            data: {name: name, FRTitle: title, FRDes: html, dataType: dataType},
             //timeout: 30000,
             dataType: "json",
             success: function (data) {
