@@ -50,6 +50,7 @@
         <div class="col-md-6">
             <h1>Input</h1>
             <form>
+                <input type="hidden" name="dataType" id="dataType" value="tree">
                 <div class="form-group">
                     <label for="name">What’s your system’s name and alias:</label>
                     <input type="text" class="form-control" id="name" name="name">
