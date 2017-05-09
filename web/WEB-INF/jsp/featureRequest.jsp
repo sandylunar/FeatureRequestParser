@@ -136,7 +136,7 @@
                 //alert(XMLHttpRequest.status);
                 //alert(XMLHttpRequest.readyState);
                 //alert(textStatus);
-                alert("some errors...");
+                //alert("some errors...");
             }
         });
     }
@@ -144,13 +144,13 @@
     function showSample(){
         $('#name').val('Phpmyadmin');
         $('#FRTitle').val('option to disable JS-Windows for errors');
-        ue.setContent('Please add an option to redisplay the "old" error-div if something failed.<br>\
-If you have a long (text) sql-query failing, you get an totally undersized js-error dialog which is hard to read and closes on an accidential click.<br>\
-I suggest: add an div on top of the page, containing the error, have the query-section (with inline) under it.<br>\
-Having this, you can see the error on full monitor width, second you can change the query to make it work and maybe you can put a structured output above it.<br>\
-Sometimes only a quote or brace is missing, which you must find.<br>\
-Best Regards,<br>\
-Thanks!');
+        ue.setContent('<p>Please add an option to redisplay the "old" error-div if something failed.</p>\
+<p>If you have a long (text) sql-query failing, you get an totally undersized js-error dialog which is hard to read and closes on an accidential click.</p>\
+<p>I suggest: add an div on top of the page, containing the error, have the query-section (with inline) under it.</p>\
+<p>Having this, you can see the error on full monitor width, second you can change the query to make it work and maybe you can put a structured output above it.</p>\
+<p>Sometimes only a quote or brace is missing, which you must find.</p>\
+<p>Best Regards,</p>\
+<p>Thanks!</p>');
     }
 </script>
 
