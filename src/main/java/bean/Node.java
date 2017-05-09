@@ -1,5 +1,8 @@
 package main.java.bean;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.util.ArrayList;
@@ -109,5 +112,31 @@ public class Node {
         return result;
     }
 
+    ObjectMapper mapper = new ObjectMapper();
 
+    public ObjectNode toJson() {
+        ObjectNode node = mapper.createObjectNode();
+        ObjectNode child = mapper.createObjectNode();
+        tag = tag.replaceAll("\\s+", " ");
+        sentence = sentence.replaceAll("\\s+", " ");
+        if (sentence.equals("") && hasChildren()){
+            ArrayNode arrayNode = mapper.createArrayNode();
+            for (Node node1 : children){
+                arrayNode.add(node1.sentence.replaceAll("\\s+", " "));
+            }
+            node.put(tag, arrayNode);
+            return node;
+        }
+        child.put("content", sentence);
+        node.put(tag, child);
+        if (hasChildren()){
+            ArrayNode arrayNode = mapper.createArrayNode();
+            for (Node node1 : children){
+                ObjectNode nodes = node1.toJson();
+                arrayNode.add(nodes);
+            }
+            node.put("attributes", arrayNode);
+        }
+        return node;
+    }
 }

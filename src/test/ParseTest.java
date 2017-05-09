@@ -12,6 +12,7 @@ import edu.stanford.nlp.simple.Sentence;
 import main.java.bean.FeatureRequestOL;
 import main.java.bean.Node;
 import main.java.parse.Parser;
+import net.sf.json.JSONObject;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -209,7 +210,7 @@ public class ParseTest {
             want.addChildren(example);
             root.addChildren(want);
         }
-        System.out.println(root.toString());
+        System.out.println(root.toJson().toString());
 
     }
 

@@ -124,7 +124,7 @@
             //timeout: 30000,
             dataType: "json",
             success: function (data) {
-                alert("Block数目：" + data.bNum + "\n\nSentence数目：" + data.sNum);
+                //alert("Block数目：" + data.bNum + "\n\nSentence数目：" + data.sNum);
                 $('ul').html(data.output);
                 $("#tree").treeview({
                     collapsed: data.collapsed

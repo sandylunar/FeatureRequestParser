@@ -52,6 +52,7 @@ public class frServlet extends HttpServlet {
         String name = request.getParameter("name");
         String FRTitle = request.getParameter("FRTitle");
         String FRDes = request.getParameter("FRDes");
+        String dataType = request.getParameter("dataType");
 
         Parser parser = new Parser();
         System.out.println(name + "\n\n" +
@@ -393,18 +394,28 @@ public class frServlet extends HttpServlet {
             }
         }
 
-        String output = root.toString();
-        System.out.println(output);
-        String json = "{\"sNum\":" + sNum + ",\"bNum\":" + bNum + ",\"output\":\"" + output + "\"}";
+        String output = "";
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("sNum", sNum);
-        jsonObject.put("bNum", bNum);
-        jsonObject.put("output", output);
-        jsonObject.put("collapsed", countWant > 3);
-        System.out.println(json);
-        response.setContentType("application/json");
-        //response.setContentType("text/html;charset=utf-8");
-        response.getWriter().write(jsonObject.toString());
+
+        if (dataType.equalsIgnoreCase("json")){
+            output = root.toJson().toString();
+            jsonObject = new JSONObject(output);
+            response.setHeader("Access-Control-Allow-Origin","*");
+            response.setContentType("application/json");
+            response.getWriter().write(jsonObject.toString());
+        }else{
+            output = root.toString();
+            System.out.println(output);
+            String json = "{\"sNum\":" + sNum + ",\"bNum\":" + bNum + ",\"output\":\"" + output + "\"}";
+            jsonObject.put("sNum", sNum);
+            jsonObject.put("bNum", bNum);
+            jsonObject.put("output", output);
+            jsonObject.put("collapsed", countWant > 3);
+            System.out.println(json);
+            response.setContentType("application/json");
+            //response.setContentType("text/html;charset=utf-8");
+            response.getWriter().write(jsonObject.toString());
+        }
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
