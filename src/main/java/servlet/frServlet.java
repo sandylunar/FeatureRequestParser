@@ -52,8 +52,8 @@ public class frServlet extends HttpServlet {
         String name = request.getParameter("name");
         String FRTitle = request.getParameter("FRTitle");
         String FRDes = request.getParameter("FRDes");
-        String dataType = request.getParameter("dataType");
-        System.out.println("DataType---->"+dataType);
+        String srcUrl = request.getHeader("Referer");
+        System.out.println("srcURL--->"+srcUrl);
 
         Parser parser = new Parser();
         System.out.println(name + "\n\n" +
@@ -398,7 +398,7 @@ public class frServlet extends HttpServlet {
         String output = "";
         JSONObject jsonObject = new JSONObject();
 
-        if (dataType.equalsIgnoreCase("json")){
+        if (null == srcUrl){
             output = root.toJson().toString();
             System.out.println(output);
             response.setHeader("Access-Control-Allow-Origin","*");

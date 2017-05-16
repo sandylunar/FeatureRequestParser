@@ -12,8 +12,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <link rel="stylesheet" href="http://task.ac.cn:80/ai/style/amazeui.css" />
+    <link rel="stylesheet" href="http://task.ac.cn:80/ai/style/amaze.css" />
+    <link rel="stylesheet" href="http://task.ac.cn:80/ai/style/font-awesome.min.css" />
+
     <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/resources/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/resources/css/prism.css">
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
@@ -39,6 +44,7 @@
                     <%--<li role="presentation"><a href="#People">People</a></li>--%>
                     <li role="presentation" style="font-size: 20px"><a href="#Subjects">Subjects</a></li>
                     <li role="presentation" style="font-size: 20px"><a href="#Feature Request Analyzer Tool">Feature Request Analyzer Tool</a></li>
+                    <li role="presentation" style="font-size: 20px"><a href="#API">API</a></li>
                     <li role="presentation" style="font-size: 20px"><a href="#Evaluation">Evaluation</a></li>
                     <li role="presentation" style="font-size: 20px"><a href="#Download">Download</a></li>
                 </ul>
@@ -211,6 +217,133 @@
             </p>
             <img src=/resources/picturces/FRAT.png>
 
+            <h2 style="margin-top: 30px"><a name="API">API</a></h2>
+            <p style="font-size: 20px;font-weight: 500">
+            <p style="font-size: 20px;font-weight: 500">
+                XXXXXX:
+            </p>
+            <table class="table table-bordered">
+                <tr>
+                    <th style="text-align: center">API</th><td style="text-align: center">http://research.task.ac.cn/featureRequest.html</td>
+                </tr>
+                <tr>
+                    <th style="text-align: center">Http Method</th><td style="text-align: center">POST</td>
+                </tr>
+            </table>
+            <p style="font-size: 20px;font-weight: 500">
+                XXXXXX:
+            </p>
+            <table class="table table-bordered" style="text-align: center">
+                <thead>
+                <tr>
+                    <th style="text-align: center">Attribute</th>
+                    <th style="text-align: center">Type</th>
+                    <th style="text-align: center">Required</th>
+                    <th style="text-align: center">Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>name</td>
+                    <td>String</td>
+                    <td>yes</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>FRTitle</td>
+                    <td>String</td>
+                    <td>yes</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>FRDes</td>
+                    <td>String</td>
+                    <td>yes</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>dataType</td>
+                    <td>String</td>
+                    <td>yes</td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+            </p>
+            <p style="font-size: 20px;font-weight: 500">
+                API Usage Example in PHP:
+            </p>
+<pre>
+    <code class="language-php">
+//params
+$post_data = array(
+	'name' 		=> 'Phpmyadmin',
+	'FRTitle' 	=> 'option to disable JS-Windows for errors',
+	'FRDes' 	=> '&lt;p>Please add an option to redisplay the "old" error-div if something failed.&lt;br/>If you have a long (text) sql-query failing, you get an totally undersized js-error dialog which is hard to read and closes on an accidential click.&lt;br/>I suggest: add an div on top of the page, containing the error, have the query-section (with inline) under it.&lt;br/>Having this, you can see the error on full monitor width, second you can change the query to make it work and maybe you can put a structured output above it.&lt;br/>Sometimes only a quote or brace is missing, which you must find.&lt;br/>Best Regards,&lt;br/>Thanks!&lt;/p>',
+	'dataType' => 'json'
+	);
+$postdata = http_build_query($post_data);
+$options = array(
+	'http' => array(
+		'method' 	=> 'POST',
+		'header' 	=> 'Content-type:application/x-www-form-urlencoded',
+		'content' 	=> http_build_query($post_data),
+		'timeout' 	=> 15 * 60)
+	);
+$context = stream_context_create($options);
+//send http POST request
+$ret = file_get_contents('http://research.task.ac.cn/featureRequest.html', false, $context);
+echo $ret;
+    </code>
+</pre>
+            <p style="font-size: 20px;font-weight: 500">Run the sample php file, it will output the parsing result in JSON format:</p>
+ <pre>
+     <code class="language-json">
+{
+    "title": {
+        "content": "option to disable JS-Windows for errors"
+    },
+    "attributes": [
+        {
+            "intent": {
+                "content": "Please add an option to redisplay the &quot;old&quot; error-div if something failed"
+            },
+            "attributes": [
+                {
+                    "drawback": {
+                        "content": "If you have a long (text) sql-query failing, you get an totally undersized js-error dialog which is hard to read and closes on an accidential click"
+                    }
+                }
+            ]
+        },
+        {
+            "intent": {
+                "content": "I suggest: add an div on top of the page, containing the error, have the query-section (with inline) under it"
+            },
+            "attributes": [
+                {
+                    "benefit": {
+                        "content": "Having this, you can see the error on full monitor width, second you can change the query to make it work and maybe you can put a structured output above it"
+                    }
+                },
+                {
+                    "drawback": {
+                        "content": "Sometimes only a quote or brace is missing, which you must find"
+                    }
+                },
+                {
+                    "trivia": {
+                        "content": "Best Regards,Thanks"
+                    }
+                }
+            ]
+        }
+    ]
+}
+     </code>
+</pre>
+
+
             <h2 style="margin-top: 30px"><a name="Evaluation">Evaluation</a></h2>
             <img src=/resources/picturces/Eva1.png width="600px">
             <img src=/resources/picturces/Eva2.png width="1000px" height="792px">
@@ -342,4 +475,5 @@
     }
 </script>
 </body>
+<script src="/resources/js/prism.js"></script>
 </html>

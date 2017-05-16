@@ -50,7 +50,6 @@
         <div class="col-md-6">
             <h1>Input</h1>
             <form>
-                <input type="hidden" name="dataType" id="dataType" value="tree">
                 <div class="form-group">
                     <label for="name">What’s your system’s name and alias:</label>
                     <input type="text" class="form-control" id="name" name="name">
@@ -97,7 +96,6 @@
 
     function confirm() {
         $('ul').html("");
-        var dataType = $('#dataType').val();
         var name = $('#name').val();
         var title = $('#FRTitle').val();
         if (title == null || title == undefined || title == '')
@@ -122,7 +120,7 @@
         $.ajax({
             url: 'featureRequest.html',
             type: "POST",
-            data: {name: name, FRTitle: title, FRDes: html, dataType: dataType},
+            data: {name: name, FRTitle: title, FRDes: html},
             //timeout: 30000,
             dataType: "json",
             success: function (data) {
